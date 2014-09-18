@@ -106,12 +106,17 @@ else() #linux
     find_library(XRANDR_LIBRARY Xrandr REQUIRED)
 	find_library(XI_LIBRARY Xi REQUIRED)
 
+	find_library(XXF86_LIBRARY Xxf86vm REQUIRED)
+	find_library(PTHREAD_LIBRARY pthread REQUIRED)
+
 	set(LIBS
 		${SGCT_LIBS}
 		${OPENGL_LIBRARY}
 		${X11_LIBRARY}
 		${XRANDR_LIBRARY}
 		${XI_LIBRARY}
+		${XXF86_LIBRARY}
+		${PTHREAD_LIBRARY}
 	)
 endif()
 
