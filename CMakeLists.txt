@@ -22,6 +22,7 @@ set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/includes)
 set(PROJECT_LIBS_DIR ${PROJECT_SOURCE_DIR}/libs)
+set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
 set(PROJECT_SHADERS_DIR ${PROJECT_SOURCE_DIR}/shaders)
 
 
@@ -31,6 +32,7 @@ file(GLOB PROJECT_LIBS_FILES ${PROJECT_LIBS_DIR}/*.cpp)
 add_library(INT_LIBS
   ${PROJECT_LIBS_FILES}
 )
+
 add_definitions(-DSHADER_PATH=${PROJECT_SHADERS_DIR})
 
 add_executable(${APP_NAME}
@@ -40,6 +42,14 @@ set_target_properties(${APP_NAME} PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${EXECUTABLE_OUTPUT_PATH}/debug
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${EXECUTABLE_OUTPUT_PATH}/release
 )
+
+# Include external project
+set(LWS_WITH_SSL OFF CACHE BOOL "")
+set(LWS_WITHOUT_TESTAPPS ON CACHE BOOL "")
+add_subdirectory(${PROJECT_EXTERNAL_DIR}/libwebsockets)
+set(LIBWEBSOCKETS_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/libwebsockets/lib)
+include_directories(${LIBWEBSOCKETS_INCLUDE_DIR})
+
 
 if( APPLE  )
 	option(SGCT_CPP11 "Use c++11" OFF)
@@ -169,4 +179,8 @@ endif()
 
 set(LIBS ${LIBS} INT_LIBS)
 
-target_link_libraries(${APP_NAME} ${LIBS})
+add_dependencies(${APP_NAME} ${LIBWEBSOCKETS_LIBRARIES_STATIC})
+
+#Libwebsockets exports the wrong library...
+set(LIBWEBSOCKETS_LIBRARIES_STATIC "${LIBWEBSOCKETS_LIBRARIES_STATIC}s")
+target_link_libraries(${APP_NAME} ${LIBS} )
