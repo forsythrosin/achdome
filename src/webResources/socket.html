@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta name="viewport" content="width=512" initial-scale="1.0" maximum-scale="1.0">
+		<style>
+			body
+			{
+				font-family:helvetica;
+				color:white;
+				font-size:10px;
+				background-color:#000000;
+			}
+
+			canvas
+			{
+				border:0px solid #000000;
+				/*background-image:url('dome.jpg');*/
+				background-color:#000000;
+			}
+
+			div
+			{
+				font-family:helvetica;
+				color:white;
+				font-size:10px;
+			}
+		</style>
+		<script type="text/javascript">
+    var socket_di, connected;
+    function get_appropriate_ws_url()
+		{
+			var pcol;
+			var u = document.URL;
+
+			/*
+			 * We open the websocket encrypted if this page came on an
+			 * https:// url itself, otherwise unencrypted
+			 */
+
+			if (u.substring(0, 5) == "https") {
+				pcol = "wss://";
+				u = u.substr(8);
+			} else {
+				pcol = "ws://";
+				if (u.substring(0, 4) == "http")
+					u = u.substr(7);
+			}
+
+			u = u.split('/');
+
+			/* + "/xxx" bit is for IE10 workaround */
+
+			return pcol + u[0] + "/xxx";
+		}
+		function connect()
+		{
+			if (typeof MozWebSocket != "undefined")
+			{
+				socket_di = new MozWebSocket(get_appropriate_ws_url(), "sgct");
+			}
+			else
+			{
+				socket_di = new WebSocket(get_appropriate_ws_url(), "sgct");
+			}
+
+			try
+			{
+				socket_di.onopen = function()
+				{
+					document.getElementById("conn_status").innerHTML= "Connected!";
+					connected = 1;
+          socket_di.send("Achdome connection successful");
+				}
+
+				socket_di.onclose = function()
+				{
+					document.getElementById("conn_status").innerHTML= "Disconnected!";
+					connected = 0;
+
+					setTimeout(function ()
+					{
+					    // Connection has closed so try to reconnect every 1 second.
+					    connect();
+					},  1000);
+				}
+
+				socket_di.onmessage =function got_packet(msg)
+				{
+					var div = document.getElementById('messages');
+
+					var splitArr = msg.data.split("\n");
+					if(splitArr.length > 0)
+					{
+						clientID = Number(splitArr[0]);
+						div.innerHTML = "Client id: " + clientID;
+					}
+				}
+			}
+			catch(exception)
+			{
+				document.getElementById("conn_status").innerHTML = "Error : " + exception;
+			}
+		}
+
+		/*function send_message()
+		{
+			socket_di.send( document.getElementById("textbox_id").value );
+			document.getElementById("textbox_id").value = "";
+		}*/
+
+		//connect to server
+		connect();
+        </script>
+        </head>
+    <body onLoad="">
+		<div id="conn_status"></div>
+        <canvas width="500" height="600" id="touch_canvas">
+			Canvas tag not supported!
+		</canvas>
+		<div id="touch_info"></div>
+		<div id="messages"></div>
+	</body>
+</html>

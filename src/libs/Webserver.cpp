@@ -8,6 +8,7 @@ All rights reserved.
 #include <stdio.h>
 #include <stdlib.h>
 #include <libwebsockets.h> // websocket lib
+#include <webUtils.h>
 
 #define SendBufferLength 32
 
@@ -86,7 +87,7 @@ static int nullHttp(
 			else /* default file to serve */
 			{
 				//strcat(buf, "D:/Projects/ixel_tools/websocket_test/bin/");
-				strcat(buf, "socket.html");
+				strcat(buf, webUtils::absolutePathToResource("socket.html").c_str());
 			}
 			buf[sizeof(buf)-1] = '\0';
 

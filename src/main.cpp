@@ -97,13 +97,14 @@ int main( int argc, char* argv[] )
 	sgct::SharedData::instance()->setEncodeFunction( myEncodeFun );
 	sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
 
+	if(gEngine->isMaster()){
+				webserver.setCallback(webDecoder);
+				//webserver.start(9000);
+				webserver.start(8000);
+	}
+
 	// Main loop
 	gEngine->render();
-  if(gEngine->isMaster()){
-        webserver.setCallback(webDecoder);
-        //webserver.start(9000);
-        webserver.start(8000);
-  }
 	// Clean up
 	delete gEngine;
 
@@ -112,7 +113,7 @@ int main( int argc, char* argv[] )
 }
 
 void webDecoder(const char *msg, size_t len){
-	std::cout << "Decoded message: " << msg << std::endl;
+	std::cout << "Decoded message from client: " << msg << std::endl;
 }
 
 void myInitOGLFun()
