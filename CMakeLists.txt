@@ -177,10 +177,11 @@ if( CMAKE_COMPILER_IS_GNUCXX )
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -s")
 endif()
 
-set(LIBS ${LIBS} INT_LIBS)
+#Libwebsockets exports the wrong library...
+set(LIBWEBSOCKETS_LIBRARIES_STATIC "${LIBWEBSOCKETS_LIBRARIES_STATIC}s")
 
 add_dependencies(${APP_NAME} ${LIBWEBSOCKETS_LIBRARIES_STATIC})
 
-#Libwebsockets exports the wrong library...
-set(LIBWEBSOCKETS_LIBRARIES_STATIC "${LIBWEBSOCKETS_LIBRARIES_STATIC}s")
+set(LIBS ${LIBS} INT_LIBS ${LIBWEBSOCKETS_LIBRARIES_STATIC})
+
 target_link_libraries(${APP_NAME} ${LIBS} )

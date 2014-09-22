@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <shaderUtils.h>
-#include <libwebsockets.h>
+#include <Webserver.h>
 sgct::Engine * gEngine;
 
 void myDrawFun();
@@ -13,6 +13,7 @@ void myInitOGLFun();
 void myEncodeFun();
 void myDecodeFun();
 void myCleanUpFun();
+void webDecoder(const char *, size_t);
 //input callbacks
 void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
@@ -62,6 +63,8 @@ GLint alpha_Loc = -1;
 GLint time_loc = -1;
 int numberOfVerts[2] = { 0, 0 };
 
+Webserver webserver;
+
 class Vertex
 {
 public:
@@ -96,12 +99,20 @@ int main( int argc, char* argv[] )
 
 	// Main loop
 	gEngine->render();
-
+  if(gEngine->isMaster()){
+        webserver.setCallback(webDecoder);
+        //webserver.start(9000);
+        webserver.start(8000);
+  }
 	// Clean up
 	delete gEngine;
 
 	// Exit program
 	exit( EXIT_SUCCESS );
+}
+
+void webDecoder(const char *msg, size_t len){
+	std::cout << "Decoded message: " << msg << std::endl;
 }
 
 void myInitOGLFun()
