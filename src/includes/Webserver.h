@@ -8,6 +8,7 @@ All rights reserved.
 #define _WEB_SERVER_
 
 #include "external/tinythread.h"
+#include <vector>
 
 class Webserver
 {
@@ -26,7 +27,13 @@ public:
     unsigned int generateSessionIndex();
 
 	WebMessageCallbackFn mWebMessageCallbackFn;
-	
+
+    bool hasWaitingBroadcasts();
+
+    std::string getNextBroadcast();
+
+    void addBroadcast(std::string broadcast);
+
 private:
 	static Webserver * mInstance;
 
@@ -36,6 +43,7 @@ private:
     unsigned int mSessionIndex;
 	tthread::mutex mMutex;
 	tthread::thread * mMainThreadPtr;
+    std::vector<std::string> waitingBroadcasts;
 };
 
 #endif

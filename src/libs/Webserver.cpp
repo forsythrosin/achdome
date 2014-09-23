@@ -9,14 +9,36 @@ All rights reserved.
 #include <stdlib.h>
 #include <libwebsockets.h> // websocket lib
 #include <webUtils.h>
+#include <iostream>
 
 #define SendBufferLength 32
+
+struct libwebsocket_context;
 
 Webserver * Webserver::mInstance = NULL;
 tthread::mutex gSendMutex;
 char gSendBuffer[SendBufferLength];
 
 void mainLoop(void * arg);
+static int nullHttp(struct libwebsocket_context * context, struct libwebsocket *wsi, enum libwebsocket_callback_reasons reason,  void *user, void *in, size_t len);
+static int echoCallback(struct libwebsocket_context * context, struct libwebsocket *wsi, enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
+// protocol types for websockets
+static struct libwebsocket_protocols protocols[] =
+        {
+                {
+                        "http-only",
+                        nullHttp,
+                        0
+                },
+                {
+                        "sgct",
+                        echoCallback,
+                        0
+                },
+                {
+                        NULL, NULL, 0
+                }
+        };
 
 const char * get_mimetype(const char *file)
 {
@@ -82,6 +104,7 @@ static int nullHttp(
             //fprintf(stderr, "data: %s\n", data);
 			if (strcmp(data, "/"))
 			{
+
 				strncat(buf, data+1, sizeof(buf) - strlen(buf) - 2);
 			}
 			else /* default file to serve */
@@ -121,10 +144,19 @@ static int echoCallback(
 	// reason for callback
 	switch (reason)
 	{
+    case LWS_CALLBACK_SERVER_WRITEABLE:
+        if(Webserver::instance()->hasWaitingBroadcasts()){
+            std::string message = Webserver::instance()->getNextBroadcast();
+            int n = sprintf(gSendBuffer, "%s\n", message.c_str());
+            std::cout << "Trying to send: " << message << std::endl;
+            libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
+        };
 	case LWS_CALLBACK_ESTABLISHED:
         {
 			gSendMutex.lock();
-            int n = sprintf(gSendBuffer, "%u\n", Webserver::instance()->generateSessionIndex());
+            int sessionId = Webserver::instance()->generateSessionIndex();
+            std::cout << "sessionId:" << sessionId << std::endl;
+            int n = sprintf(gSendBuffer, "%u\n", sessionId);
 			libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
 			gSendMutex.unlock();
 
@@ -141,30 +173,20 @@ static int echoCallback(
 
 			if (Webserver::instance()->mWebMessageCallbackFn)
 				Webserver::instance()->mWebMessageCallbackFn(reinterpret_cast<const char *>(in), len);
+
+
+            Webserver::instance()->addBroadcast(reinterpret_cast<const char *>(in));
 		}
 		break;
 	}
+    if(Webserver::instance()->hasWaitingBroadcasts()){
+        libwebsocket_callback_on_writable_all_protocol(protocols+1);
+    }
 
-	return 0;
+    return 0;
 }
 
-// protocol types for websockets
-static struct libwebsocket_protocols protocols[] =
-{
-	{
-		"http-only",
-		nullHttp,
-		0
-	},
-	{
-		"sgct",
-		echoCallback,
-		0
-	},
-	{
-		NULL, NULL, 0
-	}
-};
+
 
 Webserver::Webserver()
 {
@@ -288,4 +310,18 @@ void mainLoop(void * arg)
 
 	libwebsocket_context_destroy(context);
 	return;
+}
+
+bool Webserver::hasWaitingBroadcasts() {
+    return this->waitingBroadcasts.size() > 0;
+}
+
+std::string Webserver::getNextBroadcast() {
+    auto message = this->waitingBroadcasts.back();
+    this->waitingBroadcasts.pop_back();
+    return message;
+}
+
+void Webserver::addBroadcast(std::string broadcast) {
+    this->waitingBroadcasts.push_back(broadcast);
 }
