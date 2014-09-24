@@ -20,8 +20,15 @@ tthread::mutex gSendMutex;
 char gSendBuffer[SendBufferLength];
 
 void mainLoop(void * arg);
-static int nullHttp(struct libwebsocket_context * context, struct libwebsocket *wsi, enum libwebsocket_callback_reasons reason,  void *user, void *in, size_t len);
-static int echoCallback(struct libwebsocket_context * context, struct libwebsocket *wsi, enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
+static int nullHttp(struct libwebsocket_context * context, struct libwebsocket *wsi,
+                    enum libwebsocket_callback_reasons reason,  void *user, void *in, size_t len);
+static int echoCallback(struct libwebsocket_context * context, struct libwebsocket *wsi,
+                        enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
+
+struct SessionInfo{
+    int sessionId;
+};
+
 // protocol types for websockets
 static struct libwebsocket_protocols protocols[] =
         {
@@ -33,7 +40,7 @@ static struct libwebsocket_protocols protocols[] =
                 {
                         "sgct",
                         echoCallback,
-                        0
+                        sizeof(SessionInfo)
                 },
                 {
                         NULL, NULL, 0
@@ -135,53 +142,50 @@ static int nullHttp(
 	return 0;
 }
 
-static int echoCallback(
-	struct libwebsocket_context * context,
-	struct libwebsocket *wsi,
-	enum libwebsocket_callback_reasons reason,
-	void *user, void *in, size_t len)
-{
+static int echoCallback(struct libwebsocket_context * context,struct libwebsocket *wsi,
+	                    enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
 	// reason for callback
-	switch (reason)
-	{
-    case LWS_CALLBACK_SERVER_WRITEABLE:
-        if(Webserver::instance()->hasWaitingBroadcasts()){
-            std::string message = Webserver::instance()->getNextBroadcast();
-            int n = sprintf(gSendBuffer, "%s\n", message.c_str());
-            std::cout << "Trying to send: " << message << std::endl;
-            libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
-        };
-	case LWS_CALLBACK_ESTABLISHED:
-        {
-			gSendMutex.lock();
-            int sessionId = Webserver::instance()->generateSessionIndex();
-            std::cout << "sessionId:" << sessionId << std::endl;
-            int n = sprintf(gSendBuffer, "%u\n", sessionId);
-			libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
-			gSendMutex.unlock();
-
-            printf("connection established\n");
+	switch (reason){
+        case LWS_CALLBACK_SERVER_WRITEABLE: {
+            if (Webserver::instance()->hasWaitingBroadcasts()) {
+                gSendMutex.lock();
+                std::string message = Webserver::instance()->getNextBroadcast();
+                int n = sprintf(gSendBuffer, "%s\n", message.c_str());
+                libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
+                gSendMutex.unlock();
+            };
         }
-		break;
+        break;
+        case LWS_CALLBACK_ESTABLISHED:{
+            gSendMutex.lock();
+            int sessionId = Webserver::instance()->generateSessionIndex();
+            std::cout << "New session connected with id: " <<sessionId << std::endl;
+            reinterpret_cast<SessionInfo*>(user)->sessionId = sessionId;
+            Webserver::instance()->addClient(sessionId);
+            gSendMutex.unlock();
+        }
+        break;
+        case LWS_CALLBACK_CLOSED:{
+            gSendMutex.lock();
+            SessionInfo *sessionInfo = reinterpret_cast<SessionInfo*>(user);
+            std::cout << "Closed session with id: " << sessionInfo->sessionId << std::endl;
+            gSendMutex.unlock();
+        }
+        break;
+        case LWS_CALLBACK_RECEIVE:{
+            //libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(in), len, LWS_WRITE_TEXT);
 
-	case LWS_CALLBACK_RECEIVE:
-		{
-			//libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(in), len, LWS_WRITE_TEXT);
+            // log what we recieved and what we're going to send as a response.
+            //printf("received data: %s\n", (char *)in);
 
-			// log what we recieved and what we're going to send as a response.
-			//printf("received data: %s\n", (char *)in);
-
-			if (Webserver::instance()->mWebMessageCallbackFn)
-				Webserver::instance()->mWebMessageCallbackFn(reinterpret_cast<const char *>(in), len);
+            if (Webserver::instance()->mWebMessageCallbackFn)
+                Webserver::instance()->mWebMessageCallbackFn(reinterpret_cast<const char *>(in), len);
 
 
             Webserver::instance()->addBroadcast(reinterpret_cast<const char *>(in));
-		}
-		break;
+        }
+        break;
 	}
-    if(Webserver::instance()->hasWaitingBroadcasts()){
-        libwebsocket_callback_on_writable_all_protocol(protocols+1);
-    }
 
     return 0;
 }
@@ -306,6 +310,9 @@ void mainLoop(void * arg)
 	while (parent->isRunning())
 	{
 		libwebsocket_service(context, parent->getTimeout()); //5 ms -> 200 samples / s
+        if(Webserver::instance()->hasWaitingBroadcasts()){
+            libwebsocket_callback_on_writable_all_protocol(&protocols[1]);
+        }
 	}
 
 	libwebsocket_context_destroy(context);
@@ -324,4 +331,12 @@ std::string Webserver::getNextBroadcast() {
 
 void Webserver::addBroadcast(std::string broadcast) {
     this->waitingBroadcasts.push_back(broadcast);
+}
+
+void Webserver::addClient(int sessionId) {
+    this->clients.insert({sessionId, "bla"});
+}
+
+bool Webserver::removeClient(int sessionId){
+    this->clients.erase(sessionId);
 }

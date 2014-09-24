@@ -86,15 +86,8 @@
 
 				socket_di.onmessage =function got_packet(msg)
 				{
-					var div = document.getElementById('messages');
 
-					var splitArr = msg.data.split("\n");
                     console.log(msg.data);
-					if(splitArr.length > 0)
-					{
-						clientID = Number(splitArr[0]);
-						div.innerHTML = "Client id: " + clientID;
-					}
 				}
 			}
 			catch(exception)

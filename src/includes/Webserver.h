@@ -9,6 +9,7 @@ All rights reserved.
 
 #include "external/tinythread.h"
 #include <vector>
+#include <map>
 
 class Webserver
 {
@@ -34,6 +35,9 @@ public:
 
     void addBroadcast(std::string broadcast);
 
+    void addClient(int sessionId);
+    bool removeClient(int sessionId);
+
 private:
 	static Webserver * mInstance;
 
@@ -44,6 +48,7 @@ private:
 	tthread::mutex mMutex;
 	tthread::thread * mMainThreadPtr;
     std::vector<std::string> waitingBroadcasts;
+    std::map<int, std::string> clients;
 };
 
 #endif
