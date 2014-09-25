@@ -13,8 +13,6 @@ All rights reserved.
 
 #define SendBufferLength 32
 
-struct libwebsocket_context;
-
 Webserver * Webserver::mInstance = NULL;
 tthread::mutex gSendMutex;
 char gSendBuffer[SendBufferLength];
@@ -25,9 +23,7 @@ static int nullHttp(struct libwebsocket_context * context, struct libwebsocket *
 static int echoCallback(struct libwebsocket_context * context, struct libwebsocket *wsi,
                         enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
 
-struct SessionInfo{
-    int sessionId;
-};
+
 
 // protocol types for websockets
 static struct libwebsocket_protocols protocols[] =
@@ -145,30 +141,33 @@ static int nullHttp(
 static int echoCallback(struct libwebsocket_context * context,struct libwebsocket *wsi,
 	                    enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
 	// reason for callback
-	switch (reason){
+    SessionInfo *sessionInfo = reinterpret_cast<SessionInfo*>(user);
+    switch (reason){
         case LWS_CALLBACK_SERVER_WRITEABLE: {
-            if (Webserver::instance()->hasWaitingBroadcasts()) {
-                gSendMutex.lock();
-                std::string message = Webserver::instance()->getNextBroadcast();
+            gSendMutex.lock();
+            if(!sessionInfo->messages->empty()){
+                std::string message = sessionInfo->messages->front();
+                sessionInfo->messages->pop();
                 int n = sprintf(gSendBuffer, "%s\n", message.c_str());
                 libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
-                gSendMutex.unlock();
-            };
+            }
+            gSendMutex.unlock();
         }
         break;
         case LWS_CALLBACK_ESTABLISHED:{
             gSendMutex.lock();
             int sessionId = Webserver::instance()->generateSessionIndex();
-            std::cout << "New session connected with id: " <<sessionId << std::endl;
-            reinterpret_cast<SessionInfo*>(user)->sessionId = sessionId;
-            Webserver::instance()->addClient(sessionId);
+            sessionInfo->messages = new std::queue<std::string>();
+            sessionInfo->sessionId = sessionId;
+            sessionInfo->wsi = wsi;
+            Webserver::instance()->addSession(sessionId, sessionInfo);
             gSendMutex.unlock();
         }
         break;
         case LWS_CALLBACK_CLOSED:{
             gSendMutex.lock();
-            SessionInfo *sessionInfo = reinterpret_cast<SessionInfo*>(user);
-            std::cout << "Closed session with id: " << sessionInfo->sessionId << std::endl;
+            Webserver::instance()->removeSession(sessionInfo->sessionId);
+            delete sessionInfo->messages;
             gSendMutex.unlock();
         }
         break;
@@ -186,7 +185,12 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
         }
         break;
 	}
-
+    std::queue<libwebsocket *> sessions = Webserver::instance()->getSessionsWaitingForWrite();
+    while(sessions.size() > 0){
+        auto session = sessions.front();
+        sessions.pop();
+        libwebsocket_callback_on_writable(context, session);
+    }
     return 0;
 }
 
@@ -310,33 +314,23 @@ void mainLoop(void * arg)
 	while (parent->isRunning())
 	{
 		libwebsocket_service(context, parent->getTimeout()); //5 ms -> 200 samples / s
-        if(Webserver::instance()->hasWaitingBroadcasts()){
-            libwebsocket_callback_on_writable_all_protocol(&protocols[1]);
-        }
 	}
 
 	libwebsocket_context_destroy(context);
 	return;
 }
 
-bool Webserver::hasWaitingBroadcasts() {
-    return this->waitingBroadcasts.size() > 0;
-}
-
-std::string Webserver::getNextBroadcast() {
-    auto message = this->waitingBroadcasts.back();
-    this->waitingBroadcasts.pop_back();
-    return message;
-}
-
 void Webserver::addBroadcast(std::string broadcast) {
-    this->waitingBroadcasts.push_back(broadcast);
+    for(auto session : sessions){
+        session.second->messages->push(broadcast);
+        this->sessionsWaitingForWrite.push(session.second->wsi);
+    }
 }
 
-void Webserver::addClient(int sessionId) {
-    this->clients.insert({sessionId, "bla"});
+void Webserver::addSession(int sessionId, SessionInfo *session) {
+    this->sessions.insert({sessionId, session});
 }
 
-bool Webserver::removeClient(int sessionId){
-    this->clients.erase(sessionId);
+bool Webserver::removeSession(int sessionId){
+    this->sessions.erase(sessionId);
 }

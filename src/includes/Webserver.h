@@ -8,11 +8,20 @@ All rights reserved.
 #define _WEB_SERVER_
 
 #include "external/tinythread.h"
+
 #include <vector>
+#include <queue>
 #include <map>
 
-class Webserver
-{
+struct libwebsocket;
+
+struct SessionInfo{
+    int sessionId;
+    std::queue<std::string> *messages;
+    libwebsocket *wsi;
+};
+
+class Webserver {
 public:
 	typedef void(*WebMessageCallbackFn)(const char *, size_t);
 
@@ -29,15 +38,10 @@ public:
 
 	WebMessageCallbackFn mWebMessageCallbackFn;
 
-    bool hasWaitingBroadcasts();
-
-    std::string getNextBroadcast();
-
     void addBroadcast(std::string broadcast);
-
-    void addClient(int sessionId);
-    bool removeClient(int sessionId);
-
+    void addSession(int sessionId, SessionInfo *session);
+    bool removeSession(int sessionId);
+    std::queue<libwebsocket*> getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
 private:
 	static Webserver * mInstance;
 
@@ -47,8 +51,9 @@ private:
     unsigned int mSessionIndex;
 	tthread::mutex mMutex;
 	tthread::thread * mMainThreadPtr;
-    std::vector<std::string> waitingBroadcasts;
-    std::map<int, std::string> clients;
+    std::map<int, SessionInfo*> sessions;
+
+    std::queue<libwebsocket*> sessionsWaitingForWrite;
 };
 
 #endif
