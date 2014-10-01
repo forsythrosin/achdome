@@ -10,6 +10,7 @@ All rights reserved.
 #include "external/tinythread.h"
 
 #include <vector>
+#include <deque>
 #include <queue>
 #include <map>
 
@@ -41,7 +42,8 @@ public:
     void addBroadcast(std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
-    std::queue<libwebsocket*> getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
+    std::deque<int> getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
+    SessionInfo *getSession(int sessionId);
 private:
 	static Webserver * mInstance;
 
@@ -53,7 +55,8 @@ private:
 	tthread::thread * mMainThreadPtr;
     std::map<int, SessionInfo*> sessions;
 
-    std::queue<libwebsocket*> sessionsWaitingForWrite;
+    std::deque<int> sessionsWaitingForWrite;
+
 };
 
 #endif

@@ -104,11 +104,10 @@ static int nullHttp(
 				return 0;
 
 			/* if not, send a file the easy way */
-            //fprintf(stderr, "data: %s\n", data);
 			if (strcmp(data, "/"))
 			{
-
-				strncat(buf, data+1, sizeof(buf) - strlen(buf) - 2);
+                auto pathToFile = webUtils::absolutePathToResource(data+1);
+				strcat(buf, pathToFile.c_str());
 			}
 			else /* default file to serve */
 			{
@@ -185,12 +184,6 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
         }
         break;
 	}
-    std::queue<libwebsocket *> sessions = Webserver::instance()->getSessionsWaitingForWrite();
-    while(sessions.size() > 0){
-        auto session = sessions.front();
-        sessions.pop();
-        libwebsocket_callback_on_writable(context, session);
-    }
     return 0;
 }
 
@@ -266,6 +259,45 @@ unsigned int Webserver::generateSessionIndex()
     return tmpUi;
 }
 
+
+void Webserver::addBroadcast(std::string broadcast) {
+    mMutex.lock();
+    for(auto session : sessions){
+        session.second->messages->push(broadcast);
+        this->sessionsWaitingForWrite.push_front(session.second->sessionId);
+    }
+    mMutex.unlock();
+}
+
+void Webserver::addSession(int sessionId, SessionInfo *session) {
+    mMutex.lock();
+    this->sessions.insert({sessionId, session});
+    mMutex.unlock();
+}
+
+bool Webserver::removeSession(int sessionId){
+    mMutex.lock();
+    this->sessions.erase(sessionId);
+    this->sessionsWaitingForWrite.erase(
+            std::find(this->sessionsWaitingForWrite.begin(),
+                    this->sessionsWaitingForWrite.end(),
+                    sessionId)
+    );
+    mMutex.unlock();
+    return true;
+}
+
+SessionInfo* Webserver::getSession(int sessionId){
+    mMutex.lock();
+    auto sessionIt = sessions.find(sessionId);
+    SessionInfo* result = NULL;
+    if(sessionIt != this->sessions.end()){
+        result = sessionIt->second;
+    }
+    mMutex.unlock();
+    return result;
+}
+
 void mainLoop(void * arg)
 {
 	Webserver * parent = reinterpret_cast<Webserver*>(arg);
@@ -313,24 +345,18 @@ void mainLoop(void * arg)
 	// infinite loop, to end this server send SIGTERM. (CTRL+C)
 	while (parent->isRunning())
 	{
+        auto sessions = Webserver::instance()->getSessionsWaitingForWrite();
+        while(sessions.size() > 0){
+            auto sessionId = sessions.front();
+            sessions.pop_front();
+            auto sessionInfo = Webserver::instance()->getSession(sessionId);
+            if(sessionInfo){
+                libwebsocket_callback_on_writable(context, sessionInfo->wsi);
+            }
+        }
 		libwebsocket_service(context, parent->getTimeout()); //5 ms -> 200 samples / s
 	}
 
 	libwebsocket_context_destroy(context);
 	return;
-}
-
-void Webserver::addBroadcast(std::string broadcast) {
-    for(auto session : sessions){
-        session.second->messages->push(broadcast);
-        this->sessionsWaitingForWrite.push(session.second->wsi);
-    }
-}
-
-void Webserver::addSession(int sessionId, SessionInfo *session) {
-    this->sessions.insert({sessionId, session});
-}
-
-bool Webserver::removeSession(int sessionId){
-    this->sessions.erase(sessionId);
 }
