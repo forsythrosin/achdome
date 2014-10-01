@@ -10,6 +10,7 @@ All rights reserved.
 #include <libwebsockets.h> // websocket lib
 #include <webUtils.h>
 #include <iostream>
+#include <cstring>
 
 #define SendBufferLength 32
 
