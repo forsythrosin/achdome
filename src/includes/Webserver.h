@@ -13,6 +13,7 @@ All rights reserved.
 #include <deque>
 #include <queue>
 #include <map>
+#include <picojson/picojson.h>
 
 struct libwebsocket;
 

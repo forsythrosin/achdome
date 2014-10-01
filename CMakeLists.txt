@@ -51,6 +51,7 @@ set(LWS_WITHOUT_TESTAPPS ON CACHE BOOL "")
 add_subdirectory(${PROJECT_EXTERNAL_DIR}/libwebsockets)
 set(LIBWEBSOCKETS_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/libwebsockets/lib)
 include_directories(${LIBWEBSOCKETS_INCLUDE_DIR})
+include_directories(${PROJECT_EXTERNAL_DIR}/picojson)
 
 
 if( APPLE  )

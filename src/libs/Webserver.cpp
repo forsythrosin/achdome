@@ -179,9 +179,6 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
 
             if (Webserver::instance()->mWebMessageCallbackFn)
                 Webserver::instance()->mWebMessageCallbackFn(reinterpret_cast<const char *>(in), len);
-
-
-            Webserver::instance()->addBroadcast(reinterpret_cast<const char *>(in));
         }
         break;
 	}
