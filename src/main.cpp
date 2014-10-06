@@ -5,9 +5,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <shaderUtils.h>
 #include <wormHead.h>
+#include <websocketBufferQueue.h>
 
-#include <Webserver.h>
+#include "Webserver.h"
 sgct::Engine * gEngine;
+Webserver webserver;
+WebsocketBufferQueue bufferQueue(&webserver);
 
 void myDrawFun();
 void myPreSyncFun();
@@ -22,8 +25,6 @@ void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
 
 int main( int argc, char* argv[] ) {
-  
-  Webserver webserver;
   gEngine = new sgct::Engine( argc, argv );
   
   gEngine->setInitOGLFunction( myInitOGLFun );
@@ -42,10 +43,8 @@ int main( int argc, char* argv[] ) {
   }
   
   if(gEngine->isMaster()){
-    webserver.setCallback(webDecoder);
     webserver.start(8000);
   }
-
   // Main loop
   gEngine->render();
 
@@ -67,6 +66,9 @@ void myInitOGLFun() {
 }
 
 void myPreSyncFun() {
+    while(!bufferQueue.empty()){
+        std::cout << bufferQueue.pop() << std::endl;
+    }
 }
 
 void myDrawFun() {

@@ -23,22 +23,24 @@ struct SessionInfo{
     libwebsocket *wsi;
 };
 
+
 class Webserver {
 public:
-	typedef void(*WebMessageCallbackFn)(const char *, size_t);
+    typedef std::function<void(const char*, size_t)> WebsocketCallback;
 
-	Webserver();
+
+    Webserver();
 	~Webserver();
 	void start(int port, int timeout_ms = 5);
 	bool isRunning();
 	void setRunning(bool state);
-	void setCallback(WebMessageCallbackFn cb);
+	void setCallback(WebsocketCallback cb);
 	static Webserver * instance() { return mInstance; }
     inline int getPort() { return mPort; }
     inline int getTimeout() { return mTimeout; }
     unsigned int generateSessionIndex();
 
-	WebMessageCallbackFn mWebMessageCallbackFn;
+    WebsocketCallback mWebsocketCallback;
 
     void addBroadcast(std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);

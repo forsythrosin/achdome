@@ -14,7 +14,7 @@ All rights reserved.
 
 #define SendBufferLength 32
 
-Webserver * Webserver::mInstance = NULL;
+Webserver *Webserver::mInstance = NULL;
 tthread::mutex gSendMutex;
 char gSendBuffer[SendBufferLength];
 
@@ -23,7 +23,6 @@ static int nullHttp(struct libwebsocket_context * context, struct libwebsocket *
                     enum libwebsocket_callback_reasons reason,  void *user, void *in, size_t len);
 static int echoCallback(struct libwebsocket_context * context, struct libwebsocket *wsi,
                         enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
-
 
 
 // protocol types for websockets
@@ -169,8 +168,8 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
             // log what we recieved and what we're going to send as a response.
             //printf("received data: %s\n", (char *)in);
 
-            if (Webserver::instance()->mWebMessageCallbackFn)
-                Webserver::instance()->mWebMessageCallbackFn(reinterpret_cast<const char *>(in), len);
+            if (Webserver::instance()->mWebsocketCallback)
+                Webserver::instance()->mWebsocketCallback(reinterpret_cast<const char *>(in), len);
         }
         break;
 	}
@@ -183,7 +182,7 @@ Webserver::Webserver()
 {
 	mInstance = this;
 	mMainThreadPtr = NULL;
-	mWebMessageCallbackFn = NULL;
+	mWebsocketCallback = NULL;
 	mRunning = false;
     mSessionIndex = 0;
 }
@@ -192,7 +191,7 @@ Webserver::~Webserver()
 {
 	mMutex.lock();
 		mRunning = false;
-		mWebMessageCallbackFn = NULL;
+		mWebsocketCallback = NULL;
 	mMutex.unlock();
 
 	if (mMainThreadPtr && mMainThreadPtr->joinable())
@@ -230,10 +229,10 @@ void Webserver::setRunning(bool state)
 	mMutex.unlock();
 }
 
-void Webserver::setCallback(Webserver::WebMessageCallbackFn cb)
+void Webserver::setCallback(Webserver::WebsocketCallback cb)
 {
 	mMutex.lock();
-	mWebMessageCallbackFn = cb;
+	mWebsocketCallback = cb;
 	mMutex.unlock();
 }
 
@@ -268,11 +267,6 @@ void Webserver::addSession(int sessionId, SessionInfo *session) {
 bool Webserver::removeSession(int sessionId){
     mMutex.lock();
     this->sessions.erase(sessionId);
-    this->sessionsWaitingForWrite.erase(
-            std::find(this->sessionsWaitingForWrite.begin(),
-                    this->sessionsWaitingForWrite.end(),
-                    sessionId)
-    );
     mMutex.unlock();
     return true;
 }
@@ -290,7 +284,7 @@ SessionInfo* Webserver::getSession(int sessionId){
 
 void mainLoop(void * arg)
 {
-	Webserver * parent = reinterpret_cast<Webserver*>(arg);
+	Webserver * parent = reinterpret_cast<Webserver *>(arg);
 
 	// server url will be ws://localhost:9000
 	const char *interface = NULL;

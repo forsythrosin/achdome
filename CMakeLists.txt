@@ -2,14 +2,13 @@
 # SGCT Project Authors see Authors.txt
 
 cmake_minimum_required(VERSION 2.8.8)
-include(CheckCXXCompilerFlag)
-
 SET(APP_NAME Achdome)
+include(CheckCXXCompilerFlag)
+project(${APP_NAME} CXX)
 #SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "add a postfix, usually d on windows")
 #SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
 
-
-PROJECT(${APP_NAME})
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 
 if (NOT CMAKE_BUILD_TYPE)
 	message(STATUS "No build type selected, default to Release")
@@ -54,11 +53,14 @@ add_subdirectory(${PROJECT_EXTERNAL_DIR}/libwebsockets)
 set(LIBWEBSOCKETS_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/libwebsockets/lib)
 include_directories(${LIBWEBSOCKETS_INCLUDE_DIR})
 include_directories(${PROJECT_EXTERNAL_DIR}/picojson)
+include_directories(${PROJECT_EXTERNAL_DIR}/readerwriterqueue)
 
+if(${COMPILER_SUPPORTS_CXX11})
+    set(SGCT_CPP11 ON)
+endif()
 
 if( APPLE  )
-	option(SGCT_CPP11 "Use c++11" OFF)
-	mark_as_advanced(SGCT_CPP11)
+	option(SGCT_CPP11 "Use c++11" ON)
 	set(CMAKE_OSX_ARCHITECTURES "x86_64")
 	if(CMAKE_GENERATOR STREQUAL Xcode)
 		set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8")
@@ -177,8 +179,7 @@ if( WIN32 OR CYGWIN)
 elseif( APPLE  )
 	add_definitions(-D__APPLE__)
 	if( SGCT_CPP11 )
-    	set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
-		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+    	set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 		add_definitions(-D__SGCT_CPP11__)
 	else()
 		set(CMAKE_CXX_FLAGS "-std=c++0x -stdlib=libstdc++ ${CMAKE_CXX_FLAGS}")
@@ -194,7 +195,7 @@ else()
 endif()
 
 if( CMAKE_COMPILER_IS_GNUCXX )
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -s")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
 endif()
 
 #Libwebsockets exports the wrong library...
