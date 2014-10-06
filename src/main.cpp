@@ -141,10 +141,12 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
-  // if(vertexPositionBuffer)
-  //   glDeleteBuffers(1, &vertexPositionBuffer);
-  // if(vertexArray)
-  //   glDeleteVertexArrays(1, &vertexArray);
+  if (VBO)
+    glDeleteBuffers(1, &VBO);
+  if (IBO)
+    glDeleteBuffers(1, &IBO);
+  if (vertexArray)
+    glDeleteVertexArrays(1, &vertexArray);
 }
 
  void webDecoder(const char *msg, size_t len){
