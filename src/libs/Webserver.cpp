@@ -52,8 +52,8 @@ const char * get_mimetype(const char *file)
 	if (n < 5)
 		return NULL;
 
-	/*if (!strcmp(&file[n - 4], ".ico"))
-		return "image/x-icon";*/
+	if (!strcmp(&file[n - 4], ".ico"))
+		return "image/x-icon";
 
 	if (!strcmp(&file[n - 4], ".png"))
 		return "image/png";
@@ -177,15 +177,16 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
             // log what we recieved and what we're going to send as a response.
             //printf("received data: %s\n", (char *)in);
 
-            if (Webserver::instance()->mWebsocketCallback)
-                Webserver::instance()->mWebsocketCallback(reinterpret_cast<const char *>(in));
+			Webserver *webserver = Webserver::instance();
+			if (webserver->mWebsocketCallback) {
+				const char *msg = reinterpret_cast<const char *>(in);
+				webserver->mWebsocketCallback(msg);
+			}
         }
         break;
 	}
     return 0;
 }
-
-
 
 Webserver::Webserver()
 {
@@ -265,6 +266,15 @@ void Webserver::addBroadcast(std::string broadcast) {
         this->sessionsWaitingForWrite.push_front(session.second->sessionId);
     }
     mMutex.unlock();
+}
+
+void Webserver::addMessage(int sessionId, std::string message) {
+	mMutex.lock();
+	auto sessionIt = sessions.find(sessionId);
+	if (sessionIt != this->sessions.end()){
+		sessionIt->second->messages->push(message);
+	}
+	mMutex.unlock();
 }
 
 void Webserver::addSession(int sessionId, SessionInfo *session) {

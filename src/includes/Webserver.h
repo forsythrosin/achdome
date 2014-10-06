@@ -43,7 +43,8 @@ public:
 
     WebsocketCallback mWebsocketCallback;
 
-    void addBroadcast(std::string broadcast);
+	void addBroadcast(std::string broadcast);
+	void addMessage(int sessionId, std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
     std::deque<int> getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
