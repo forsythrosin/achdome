@@ -1,3 +1,6 @@
 [submodule "src/external/libwebsockets"]
 	path = src/external/libwebsockets
 	url = git://git.libwebsockets.org/libwebsockets
+[submodule "src/external/picojson/picojson"]
+	path = src/external/picojson/picojson
+	url = https://github.com/kazuho/picojson

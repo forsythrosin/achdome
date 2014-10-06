@@ -148,5 +148,6 @@ void myCleanUpFun() {
 }
 
  void webDecoder(const char *msg, size_t len){
-   std::cout << "Decoded message from client: " << msg << std::endl;
+     Webserver::instance()->addBroadcast(msg);
+     std::cout << "Decoded message from client: " << msg << std::endl;
  }

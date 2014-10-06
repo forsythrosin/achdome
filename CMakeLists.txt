@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 2.8.8)
 include(CheckCXXCompilerFlag)
 
 SET(APP_NAME Achdome)
-SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "add a postfix, usually d on windows")
-SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
+#SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "add a postfix, usually d on windows")
+#SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
 
 
 PROJECT(${APP_NAME})
@@ -46,11 +46,14 @@ set_target_properties(${APP_NAME} PROPERTIES
 )
 
 # Include external project
-set(LWS_WITH_SSL OFF CACHE BOOL "")
-set(LWS_WITHOUT_TESTAPPS ON CACHE BOOL "")
+set(LWS_WITH_SSL OFF CACHE BOOL "" FORCE)
+set(LWS_WITHOUT_TESTAPPS ON CACHE BOOL "" FORCE)
+set(LWS_WITHOUT_EXTENSIONS ON CACHE BOOL "" FORCE)
+set(LWS_WITHOUT_DEBUG ON CACHE BOOL "" FORCE)
 add_subdirectory(${PROJECT_EXTERNAL_DIR}/libwebsockets)
 set(LIBWEBSOCKETS_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/libwebsockets/lib)
 include_directories(${LIBWEBSOCKETS_INCLUDE_DIR})
+include_directories(${PROJECT_EXTERNAL_DIR}/picojson)
 
 
 if( APPLE  )
@@ -67,7 +70,7 @@ find_library(SGCT_RELEASE_LIBRARY
 find_library(SGCT_DEBUG_LIBRARY
 	NAMES sgctd libsgctd libsgct_cpp11d REQUIRED)
 
-if( WIN32 )
+if( WIN32 OR CYGWIN )
 	find_path(SGCT_INCLUDE_DIRECTORY
 		NAMES sgct
 		PATHS $ENV{SGCT_ROOT_DIR}/include NO_DEFAULT_PATH
@@ -95,7 +98,7 @@ if( MSVC )
 		${OPENGL_LIBRARY}
 		ws2_32
 	)
-elseif( WIN32 ) #MINGW or similar
+elseif( WIN32 OR CYGWIN ) #MINGW or similar
 	set(LIBS
 		${SGCT_LIBS}
 		${OPENGL_LIBRARY}
@@ -160,8 +163,17 @@ if(MSVC AND NOT "${MSVC_VERSION}" LESS 1400)
 	add_definitions( "/MP" )
 endif()
 
-if( WIN32 )
+if( WIN32 OR CYGWIN)
 	add_definitions(-D__WIN32__)
+    add_definitions(-D_WIN32)
+    add_definitions(-DWIN32)
+
+	if( SGCT_CPP11 )
+		set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+		add_definitions(-D__SGCT_CPP11__)
+	else()
+		set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+	endif()
 elseif( APPLE  )
 	add_definitions(-D__APPLE__)
 	if( SGCT_CPP11 )
@@ -188,8 +200,6 @@ endif()
 #Libwebsockets exports the wrong library...
 set(LIBWEBSOCKETS_LIBRARIES_STATIC "${LIBWEBSOCKETS_LIBRARIES_STATIC}s")
 
-add_dependencies(${APP_NAME} ${LIBWEBSOCKETS_LIBRARIES_STATIC})
-
-set(LIBS ${LIBS} INT_LIBS ${LIBWEBSOCKETS_LIBRARIES_STATIC})
-
+set(LIBS ${LIBS} INT_LIBS)
+target_link_libraries(INT_LIBS ${LIBWEBSOCKETS_LIBRARIES_STATIC})
 target_link_libraries(${APP_NAME} ${LIBS} )
