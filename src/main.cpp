@@ -5,6 +5,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <shaderUtils.h>
 #include <wormHead.h>
+#include <fisheyeCollisionSpace.h>
+#include <clusterRenderSpace.h>
+#include <wormTracker.h>
 
 #include <Webserver.h>
 sgct::Engine * gEngine;
@@ -57,12 +60,17 @@ int main( int argc, char* argv[] ) {
 }
 
 void myInitOGLFun() {
-  WormHead wh(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.1, 0.0));
+
+  FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
+  ClusterRenderSpace *renderSpace = new ClusterRenderSpace();
+
+
+  WormTracker wt(fisheyeSpace, renderSpace);
   
-  std::cout << "Just testing some quaternions" << std::endl;
+  wt.createWormHead(0, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.1, 0.0));
+
   for (int i = 0; i < 10; i++) {
-    std::cout << wh.toString() << std::endl; 
-    wh.move();
+    wt.tick();
   }
 }
 

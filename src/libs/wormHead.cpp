@@ -14,7 +14,7 @@ WormHead::WormHead(glm::vec3 pos, glm::vec3 vel) {
 /**
  * Move worm head forward
  */
-void WormHead::move() {
+void WormHead::tick() {
   positionQuat = positionQuat * velocityQuat;
 }
 
@@ -55,15 +55,16 @@ glm::vec3 WormHead::getVelocity() {
   return glm::mat3_cast(velocityQuat) * glm::vec3(1.0, 0.0, 0.0);
 }
 
-/**
- * Set position from Eulerian rotation (XYZ)
+
+
+/** * Set position from Euler angles (XYZ)
  */
 void WormHead::setEulerPosition(glm::vec3 pos) {
   positionQuat = glm::quat(pos);
 }
 
 /**
- * Set velocity from Eulerian rotation (XYZ)
+ * Set velocity from Euler angles (XYZ)
  */
 void WormHead::setEulerVelocity(glm::vec3 vel) {
   velocityQuat = glm::quat(vel);
@@ -71,3 +72,16 @@ void WormHead::setEulerVelocity(glm::vec3 vel) {
 
 
 
+/**
+ * Get position in quaternions
+ */
+glm::quat WormHead::getQuaternionPosition() {
+  return positionQuat;
+}
+
+/**
+ * Get velocity in quaternions
+ */
+glm::quat WormHead::getQuaternionVelocity() {
+  return velocityQuat;
+}
