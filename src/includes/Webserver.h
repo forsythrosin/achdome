@@ -13,6 +13,7 @@ All rights reserved.
 #include <deque>
 #include <queue>
 #include <map>
+#include <functional>
 #include <picojson/picojson.h>
 
 struct libwebsocket;
@@ -26,7 +27,7 @@ struct SessionInfo{
 
 class Webserver {
 public:
-    typedef std::function<void(const char*, size_t)> WebsocketCallback;
+    typedef std::function<void(std::string)> WebsocketCallback;
 
 
     Webserver();

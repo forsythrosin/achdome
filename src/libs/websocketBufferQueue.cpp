@@ -4,8 +4,9 @@
 #include <mutex>
 
 WebsocketBufferQueue::WebsocketBufferQueue(Webserver *server){
-    auto func = Webserver::WebsocketCallback([&](const char* str, size_t size){
-        this->pushElement(std::string(str));
+
+    auto func = Webserver::WebsocketCallback([&](std::string str){
+        this->pushElement(str);
     });
     server->setCallback(func);
 }

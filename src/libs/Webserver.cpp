@@ -178,7 +178,7 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
             //printf("received data: %s\n", (char *)in);
 
             if (Webserver::instance()->mWebsocketCallback)
-                Webserver::instance()->mWebsocketCallback(reinterpret_cast<const char *>(in), len);
+                Webserver::instance()->mWebsocketCallback(reinterpret_cast<const char *>(in));
         }
         break;
 	}
@@ -191,7 +191,7 @@ Webserver::Webserver()
 {
 	mInstance = this;
 	mMainThreadPtr = NULL;
-	mWebsocketCallback = NULL;
+	mWebsocketCallback = nullptr;
 	mRunning = false;
     mSessionIndex = 0;
 }
@@ -200,7 +200,7 @@ Webserver::~Webserver()
 {
 	mMutex.lock();
 		mRunning = false;
-		mWebsocketCallback = NULL;
+		mWebsocketCallback = nullptr;
 	mMutex.unlock();
 
 	if (mMainThreadPtr && mMainThreadPtr->joinable())
