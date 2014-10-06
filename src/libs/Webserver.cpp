@@ -65,6 +65,15 @@ const char * get_mimetype(const char *file)
 	if (!strcmp(&file[n - 5], ".html"))
 		return "text/html";
 
+	if (!strcmp(&file[n - 4], ".css"))
+		return "text/css";
+
+	if (!strcmp(&file[n - 5], ".less"))
+		return "text/css";
+
+	if (!strcmp(&file[n - 3], ".js"))
+		return "text/javascript";
+
 	return NULL;
 }
 
