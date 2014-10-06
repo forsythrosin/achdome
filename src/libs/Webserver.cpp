@@ -92,14 +92,6 @@ static int nullHttp(
 
 			const char * data = reinterpret_cast<const char *>(in);
 
-			/* this server has no concept of directories */
-			if (strchr(data + 1, '/'))
-			{
-				libwebsockets_return_http_status(context, wsi,
-					HTTP_STATUS_FORBIDDEN, NULL);
-				return -1;
-			}
-
 			/* if a legal POST URL, let it continue and accept data */
 			if (lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI))
 				return 0;
@@ -113,7 +105,7 @@ static int nullHttp(
 			else /* default file to serve */
 			{
 				//strcat(buf, "D:/Projects/ixel_tools/websocket_test/bin/");
-				strcat(buf, webUtils::absolutePathToResource("socket.html").c_str());
+				strcat(buf, webUtils::absolutePathToResource("index.html").c_str());
 			}
 			buf[sizeof(buf)-1] = '\0';
 
