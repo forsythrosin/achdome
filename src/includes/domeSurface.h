@@ -5,6 +5,7 @@
 class DomeSurface {
 public:
   DomeSurface(int azmSegs, int inclSegs);
+  ~DomeSurface();
   const int getAzmSegs() const;
   const int getInclSegs() const;
   const int getRadius() const;

@@ -15,6 +15,12 @@ DomeSurface::DomeSurface(int as, int is) {
   createTriangles();
 };
 
+DomeSurface::~DomeSurface() {
+  delete [] sphericalVertexData;
+  delete [] cartesianVertexData;
+  delete [] triangleData;
+};
+
 /**
  * Vertex placement
  */
