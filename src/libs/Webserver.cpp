@@ -10,6 +10,7 @@ All rights reserved.
 #include <libwebsockets.h> // websocket lib
 #include <webUtils.h>
 #include <iostream>
+#include <cstring>
 
 #define SendBufferLength 32
 
@@ -64,6 +65,15 @@ const char * get_mimetype(const char *file)
 	if (!strcmp(&file[n - 5], ".html"))
 		return "text/html";
 
+	if (!strcmp(&file[n - 4], ".css"))
+		return "text/css";
+
+	if (!strcmp(&file[n - 5], ".less"))
+		return "text/css";
+
+	if (!strcmp(&file[n - 3], ".js"))
+		return "text/javascript";
+
 	return NULL;
 }
 
@@ -91,29 +101,20 @@ static int nullHttp(
 
 			const char * data = reinterpret_cast<const char *>(in);
 
-			/* this server has no concept of directories */
-			if (strchr(data + 1, '/'))
-			{
-				libwebsockets_return_http_status(context, wsi,
-					HTTP_STATUS_FORBIDDEN, NULL);
-				return -1;
-			}
-
 			/* if a legal POST URL, let it continue and accept data */
 			if (lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI))
 				return 0;
 
 			/* if not, send a file the easy way */
-            //fprintf(stderr, "data: %s\n", data);
 			if (strcmp(data, "/"))
 			{
-
-				strncat(buf, data+1, sizeof(buf) - strlen(buf) - 2);
+                auto pathToFile = webUtils::absolutePathToResource(data+1);
+				strcat(buf, pathToFile.c_str());
 			}
 			else /* default file to serve */
 			{
 				//strcat(buf, "D:/Projects/ixel_tools/websocket_test/bin/");
-				strcat(buf, webUtils::absolutePathToResource("socket.html").c_str());
+				strcat(buf, webUtils::absolutePathToResource("index.html").c_str());
 			}
 			buf[sizeof(buf)-1] = '\0';
 
@@ -179,18 +180,9 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
 
             if (Webserver::instance()->mWebMessageCallbackFn)
                 Webserver::instance()->mWebMessageCallbackFn(reinterpret_cast<const char *>(in), len);
-
-
-            Webserver::instance()->addBroadcast(reinterpret_cast<const char *>(in));
         }
         break;
 	}
-    std::queue<libwebsocket *> sessions = Webserver::instance()->getSessionsWaitingForWrite();
-    while(sessions.size() > 0){
-        auto session = sessions.front();
-        sessions.pop();
-        libwebsocket_callback_on_writable(context, session);
-    }
     return 0;
 }
 
@@ -266,6 +258,45 @@ unsigned int Webserver::generateSessionIndex()
     return tmpUi;
 }
 
+
+void Webserver::addBroadcast(std::string broadcast) {
+    mMutex.lock();
+    for(auto session : sessions){
+        session.second->messages->push(broadcast);
+        this->sessionsWaitingForWrite.push_front(session.second->sessionId);
+    }
+    mMutex.unlock();
+}
+
+void Webserver::addSession(int sessionId, SessionInfo *session) {
+    mMutex.lock();
+    this->sessions.insert({sessionId, session});
+    mMutex.unlock();
+}
+
+bool Webserver::removeSession(int sessionId){
+    mMutex.lock();
+    this->sessions.erase(sessionId);
+    this->sessionsWaitingForWrite.erase(
+            std::find(this->sessionsWaitingForWrite.begin(),
+                    this->sessionsWaitingForWrite.end(),
+                    sessionId)
+    );
+    mMutex.unlock();
+    return true;
+}
+
+SessionInfo* Webserver::getSession(int sessionId){
+    mMutex.lock();
+    auto sessionIt = sessions.find(sessionId);
+    SessionInfo* result = NULL;
+    if(sessionIt != this->sessions.end()){
+        result = sessionIt->second;
+    }
+    mMutex.unlock();
+    return result;
+}
+
 void mainLoop(void * arg)
 {
 	Webserver * parent = reinterpret_cast<Webserver*>(arg);
@@ -313,24 +344,18 @@ void mainLoop(void * arg)
 	// infinite loop, to end this server send SIGTERM. (CTRL+C)
 	while (parent->isRunning())
 	{
+        auto sessions = Webserver::instance()->getSessionsWaitingForWrite();
+        while(sessions.size() > 0){
+            auto sessionId = sessions.front();
+            sessions.pop_front();
+            auto sessionInfo = Webserver::instance()->getSession(sessionId);
+            if(sessionInfo){
+                libwebsocket_callback_on_writable(context, sessionInfo->wsi);
+            }
+        }
 		libwebsocket_service(context, parent->getTimeout()); //5 ms -> 200 samples / s
 	}
 
 	libwebsocket_context_destroy(context);
 	return;
-}
-
-void Webserver::addBroadcast(std::string broadcast) {
-    for(auto session : sessions){
-        session.second->messages->push(broadcast);
-        this->sessionsWaitingForWrite.push(session.second->wsi);
-    }
-}
-
-void Webserver::addSession(int sessionId, SessionInfo *session) {
-    this->sessions.insert({sessionId, session});
-}
-
-bool Webserver::removeSession(int sessionId){
-    this->sessions.erase(sessionId);
 }
