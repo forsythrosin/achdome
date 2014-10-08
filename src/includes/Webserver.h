@@ -11,9 +11,11 @@ All rights reserved.
 
 #include <vector>
 #include <deque>
+#include <mutex>
 #include <queue>
 #include <map>
 #include <functional>
+#include <readerwriterqueue/readwriterqueue.h>
 #include <picojson/picojson.h>
 
 struct libwebsocket;
@@ -21,6 +23,7 @@ struct libwebsocket;
 struct SessionInfo{
     int sessionId;
     std::queue<std::string> *messages;
+    std::mutex mtx;
     libwebsocket *wsi;
 };
 
@@ -47,7 +50,7 @@ public:
 	void addMessage(int sessionId, std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
-    std::deque<int> getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
+    moodycamel::ReaderWriterQueue<int>* getSessionsWaitingForWrite(){return &sessionsWaitingForWrite;};
     SessionInfo *getSession(int sessionId);
 private:
 	static Webserver * mInstance;
@@ -56,11 +59,11 @@ private:
     int mPort;
     int mTimeout; //in ms
     unsigned int mSessionIndex;
-	tthread::mutex mMutex;
 	tthread::thread * mMainThreadPtr;
     std::map<int, SessionInfo*> sessions;
-
-    std::deque<int> sessionsWaitingForWrite;
+    std::mutex serverLock;
+    std::mutex sendLock;
+    moodycamel::ReaderWriterQueue<int> sessionsWaitingForWrite;
 
 };
 

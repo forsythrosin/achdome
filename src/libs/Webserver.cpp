@@ -15,7 +15,6 @@ All rights reserved.
 #define SendBufferLength 32
 
 Webserver *Webserver::mInstance = NULL;
-tthread::mutex gSendMutex;
 char gSendBuffer[SendBufferLength];
 
 void mainLoop(void * arg);
@@ -144,31 +143,25 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
     SessionInfo *sessionInfo = reinterpret_cast<SessionInfo*>(user);
     switch (reason){
         case LWS_CALLBACK_SERVER_WRITEABLE: {
-            gSendMutex.lock();
             if(!sessionInfo->messages->empty()){
                 std::string message = sessionInfo->messages->front();
                 sessionInfo->messages->pop();
                 int n = sprintf(gSendBuffer, "%s\n", message.c_str());
                 libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
             }
-            gSendMutex.unlock();
         }
         break;
         case LWS_CALLBACK_ESTABLISHED:{
-            gSendMutex.lock();
             int sessionId = Webserver::instance()->generateSessionIndex();
             sessionInfo->messages = new std::queue<std::string>();
             sessionInfo->sessionId = sessionId;
             sessionInfo->wsi = wsi;
             Webserver::instance()->addSession(sessionId, sessionInfo);
-            gSendMutex.unlock();
         }
         break;
         case LWS_CALLBACK_CLOSED:{
-            gSendMutex.lock();
             Webserver::instance()->removeSession(sessionInfo->sessionId);
             delete sessionInfo->messages;
-            gSendMutex.unlock();
         }
         break;
         case LWS_CALLBACK_RECEIVE:{
@@ -199,10 +192,9 @@ Webserver::Webserver()
 
 Webserver::~Webserver()
 {
-	mMutex.lock();
-		mRunning = false;
-		mWebsocketCallback = nullptr;
-	mMutex.unlock();
+    mRunning = false;
+    std::lock_guard<std::mutex> lock(serverLock);
+    mWebsocketCallback = nullptr;
 
 	if (mMainThreadPtr && mMainThreadPtr->joinable())
 	{
@@ -216,7 +208,8 @@ Webserver::~Webserver()
 
 void Webserver::start(int port, int timeout_ms)
 {
-	mRunning = true;
+    std::lock_guard<std::mutex> lock(serverLock);
+    mRunning = true;
     mPort = port;
     mTimeout = timeout_ms;
 	mMainThreadPtr = new (std::nothrow) tthread::thread(mainLoop, this);
@@ -225,25 +218,21 @@ void Webserver::start(int port, int timeout_ms)
 
 bool Webserver::isRunning()
 {
-	bool tmpBool;
-	mMutex.lock();
+    std::lock_guard<std::mutex> lock(serverLock);
+    bool tmpBool;
 	tmpBool = mRunning;
-	mMutex.unlock();
 	return tmpBool;
 }
 
 void Webserver::setRunning(bool state)
 {
-	mMutex.lock();
-	mRunning = state;
-	mMutex.unlock();
+    std::lock_guard<std::mutex> lock(serverLock);
+    mRunning = state;
 }
 
 void Webserver::setCallback(Webserver::WebsocketCallback cb)
 {
-	mMutex.lock();
 	mWebsocketCallback = cb;
-	mMutex.unlock();
 }
 
 unsigned int Webserver::generateSessionIndex()
@@ -251,53 +240,52 @@ unsigned int Webserver::generateSessionIndex()
     //session index 0 is invalid all clients having an index > 0 is ok
 
     unsigned int tmpUi;
-    mMutex.lock();
+    std::lock_guard<std::mutex> lock(serverLock);
     mSessionIndex++;
 	tmpUi = mSessionIndex;
-	mMutex.unlock();
     return tmpUi;
 }
 
 
 void Webserver::addBroadcast(std::string broadcast) {
-    mMutex.lock();
+    std::lock_guard<std::mutex> lock(serverLock);
     for(auto session : sessions){
         session.second->messages->push(broadcast);
-        this->sessionsWaitingForWrite.push_front(session.second->sessionId);
+        this->sessionsWaitingForWrite.enqueue(session.second->sessionId);
     }
-    mMutex.unlock();
 }
 
 void Webserver::addMessage(int sessionId, std::string message) {
-	mMutex.lock();
-	auto sessionIt = sessions.find(sessionId);
+    std::lock_guard<std::mutex> lock(serverLock);
+    auto sessionIt = sessions.find(sessionId);
 	if (sessionIt != this->sessions.end()){
 		sessionIt->second->messages->push(message);
+        this->sessionsWaitingForWrite.enqueue(sessionIt->second->sessionId);
 	}
-	mMutex.unlock();
 }
 
 void Webserver::addSession(int sessionId, SessionInfo *session) {
-    mMutex.lock();
+    std::lock_guard<std::mutex> lock(serverLock);
     this->sessions.insert({sessionId, session});
-    mMutex.unlock();
 }
 
 bool Webserver::removeSession(int sessionId){
-    mMutex.lock();
+    std::lock_guard<std::mutex> lock(serverLock);
+    auto sessionIt = sessions.find(sessionId);
+    if(sessionIt == this->sessions.end()){
+        return false;
+    }
     this->sessions.erase(sessionId);
-    mMutex.unlock();
     return true;
 }
 
 SessionInfo* Webserver::getSession(int sessionId){
-    mMutex.lock();
+    std::lock_guard<std::mutex> lock(serverLock);
     auto sessionIt = sessions.find(sessionId);
     SessionInfo* result = NULL;
     if(sessionIt != this->sessions.end()){
         result = sessionIt->second;
     }
-    mMutex.unlock();
     return result;
 }
 
@@ -349,9 +337,8 @@ void mainLoop(void * arg)
 	while (parent->isRunning())
 	{
         auto sessions = Webserver::instance()->getSessionsWaitingForWrite();
-        while(sessions.size() > 0){
-            auto sessionId = sessions.front();
-            sessions.pop_front();
+        int sessionId;
+        while(sessions->try_dequeue(sessionId)){
             auto sessionInfo = Webserver::instance()->getSession(sessionId);
             if(sessionInfo){
                 libwebsocket_callback_on_writable(context, sessionInfo->wsi);
