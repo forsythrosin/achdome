@@ -117,7 +117,9 @@ void myInitOGLFun() {
 
 void myPreSyncFun() {
     while(!bufferQueue.empty()){
-        std::cout << bufferQueue.pop() << std::endl;
+        std::string str = bufferQueue.pop();
+        Webserver::instance()->addBroadcast(str);
+        std::cout << str << std::endl;
     }
 }
 
@@ -161,8 +163,3 @@ void myCleanUpFun() {
   if (vertexArray)
     glDeleteVertexArrays(1, &vertexArray);
 }
-
- void webDecoder(const char *msg, size_t len){
-     Webserver::instance()->addBroadcast(msg);
-     std::cout << "Decoded message from client: " << msg << std::endl;
- }
