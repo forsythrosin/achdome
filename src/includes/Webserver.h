@@ -11,19 +11,18 @@ All rights reserved.
 
 #include <vector>
 #include <deque>
-#include <mutex>
 #include <queue>
 #include <map>
 #include <functional>
-#include <readerwriterqueue/readwriterqueue.h>
 #include <picojson/picojson.h>
-
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/lockfree/queue.hpp>
 struct libwebsocket;
 
 struct SessionInfo{
     int sessionId;
-    std::queue<std::string> *messages;
-    std::mutex mtx;
+    boost::lockfree::queue<std::string*> *messages;
+    boost::shared_mutex *mtx;
     libwebsocket *wsi;
 };
 
@@ -50,7 +49,7 @@ public:
 	void addMessage(int sessionId, std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
-    moodycamel::ReaderWriterQueue<int>* getSessionsWaitingForWrite(){return &sessionsWaitingForWrite;};
+    boost::lockfree::queue<int>* getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
     SessionInfo *getSession(int sessionId);
 private:
 	static Webserver * mInstance;
@@ -61,9 +60,8 @@ private:
     unsigned int mSessionIndex;
 	tthread::thread * mMainThreadPtr;
     std::map<int, SessionInfo*> sessions;
-    std::mutex serverLock;
-    std::mutex sendLock;
-    moodycamel::ReaderWriterQueue<int> sessionsWaitingForWrite;
+    boost::shared_mutex serverMutex;
+    boost::lockfree::queue<int> *sessionsWaitingForWrite;
 
 };
 

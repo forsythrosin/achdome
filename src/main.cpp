@@ -74,7 +74,7 @@ void myInitOGLFun() {
 
 
   WormTracker wt(fisheyeSpace, renderSpace);
-  
+
   wt.createWormHead(0, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.1, 0.0));
 
   for (int i = 0; i < 10; i++) {
@@ -117,9 +117,10 @@ void myInitOGLFun() {
 
 void myPreSyncFun() {
     while(!bufferQueue.empty()){
-        std::string str = bufferQueue.pop();
-        Webserver::instance()->addBroadcast(str);
-        std::cout << str << std::endl;
+        std::string *str = bufferQueue.pop();
+        Webserver::instance()->addBroadcast(*str);
+        std::cout << *str << std::endl;
+        delete str;
     }
 }
 

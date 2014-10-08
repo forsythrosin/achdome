@@ -55,6 +55,13 @@ include_directories(${LIBWEBSOCKETS_INCLUDE_DIR})
 include_directories(${PROJECT_EXTERNAL_DIR}/picojson)
 include_directories(${PROJECT_EXTERNAL_DIR}/readerwriterqueue)
 
+
+# Include boost
+add_definitions( -DBOOST_ALL_NO_LIB )
+add_definitions( -DBOOST_ALL_DYN_LINK )
+find_package(Boost COMPONENTS thread system REQUIRED)
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+
 if(${COMPILER_SUPPORTS_CXX11})
     set(SGCT_CPP11 ON)
 endif()
@@ -203,4 +210,5 @@ set(LIBWEBSOCKETS_LIBRARIES_STATIC "${LIBWEBSOCKETS_LIBRARIES_STATIC}s")
 
 set(LIBS ${LIBS} INT_LIBS)
 target_link_libraries(INT_LIBS ${LIBWEBSOCKETS_LIBRARIES_STATIC})
+target_link_libraries(INT_LIBS ${Boost_LIBRARIES} )
 target_link_libraries(${APP_NAME} ${LIBS} )

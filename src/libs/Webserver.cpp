@@ -143,25 +143,31 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
     SessionInfo *sessionInfo = reinterpret_cast<SessionInfo*>(user);
     switch (reason){
         case LWS_CALLBACK_SERVER_WRITEABLE: {
-            if(!sessionInfo->messages->empty()){
-                std::string message = sessionInfo->messages->front();
-                sessionInfo->messages->pop();
-                int n = sprintf(gSendBuffer, "%s\n", message.c_str());
+            std::string *message;
+            boost::shared_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
+            if(sessionInfo->messages->pop(message)){
+                int n = sprintf(gSendBuffer, "%s\n", message->c_str());
                 libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
+                delete message;
             }
         }
         break;
         case LWS_CALLBACK_ESTABLISHED:{
             int sessionId = Webserver::instance()->generateSessionIndex();
-            sessionInfo->messages = new std::queue<std::string>();
+            sessionInfo->messages = new boost::lockfree::queue<std::string*>(5);
             sessionInfo->sessionId = sessionId;
             sessionInfo->wsi = wsi;
+            sessionInfo->mtx = new boost::shared_mutex();
             Webserver::instance()->addSession(sessionId, sessionInfo);
         }
         break;
         case LWS_CALLBACK_CLOSED:{
+          {
+            boost::unique_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
             Webserver::instance()->removeSession(sessionInfo->sessionId);
             delete sessionInfo->messages;
+          }
+          delete sessionInfo->mtx;
         }
         break;
         case LWS_CALLBACK_RECEIVE:{
@@ -170,11 +176,11 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
             // log what we recieved and what we're going to send as a response.
             //printf("received data: %s\n", (char *)in);
 
-			Webserver *webserver = Webserver::instance();
-			if (webserver->mWebsocketCallback) {
-				const char *msg = reinterpret_cast<const char *>(in);
-				webserver->mWebsocketCallback(msg);
-			}
+      			Webserver *webserver = Webserver::instance();
+      			if (webserver->mWebsocketCallback) {
+      				const char *msg = reinterpret_cast<const char *>(in);
+      				webserver->mWebsocketCallback(msg);
+      			}
         }
         break;
 	}
@@ -183,19 +189,20 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
 
 Webserver::Webserver()
 {
+  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
 	mInstance = this;
 	mMainThreadPtr = NULL;
 	mWebsocketCallback = nullptr;
 	mRunning = false;
     mSessionIndex = 0;
+    sessionsWaitingForWrite = new boost::lockfree::queue<int>(100);
 }
 
 Webserver::~Webserver()
 {
     mRunning = false;
-    std::lock_guard<std::mutex> lock(serverLock);
     mWebsocketCallback = nullptr;
-
+  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
 	if (mMainThreadPtr && mMainThreadPtr->joinable())
 	{
 		fprintf(stderr, "Waiting for websocket thread to finish...\n");
@@ -208,25 +215,23 @@ Webserver::~Webserver()
 
 void Webserver::start(int port, int timeout_ms)
 {
-    std::lock_guard<std::mutex> lock(serverLock);
+    boost::unique_lock< boost::shared_mutex > lock(serverMutex);
     mRunning = true;
     mPort = port;
     mTimeout = timeout_ms;
-	mMainThreadPtr = new (std::nothrow) tthread::thread(mainLoop, this);
-	memset(gSendBuffer, 0, SendBufferLength);
+  	mMainThreadPtr = new (std::nothrow) tthread::thread(mainLoop, this);
+  	memset(gSendBuffer, 0, SendBufferLength);
 }
 
 bool Webserver::isRunning()
 {
-    std::lock_guard<std::mutex> lock(serverLock);
-    bool tmpBool;
+  bool tmpBool;
 	tmpBool = mRunning;
 	return tmpBool;
 }
 
 void Webserver::setRunning(bool state)
 {
-    std::lock_guard<std::mutex> lock(serverLock);
     mRunning = state;
 }
 
@@ -240,37 +245,37 @@ unsigned int Webserver::generateSessionIndex()
     //session index 0 is invalid all clients having an index > 0 is ok
 
     unsigned int tmpUi;
-    std::lock_guard<std::mutex> lock(serverLock);
+    boost::unique_lock< boost::shared_mutex > lock(serverMutex);
     mSessionIndex++;
-	tmpUi = mSessionIndex;
+	   tmpUi = mSessionIndex;
     return tmpUi;
 }
 
 
 void Webserver::addBroadcast(std::string broadcast) {
-    std::lock_guard<std::mutex> lock(serverLock);
+    boost::shared_lock< boost::shared_mutex > lock(serverMutex);
     for(auto session : sessions){
-        session.second->messages->push(broadcast);
-        this->sessionsWaitingForWrite.enqueue(session.second->sessionId);
+        session.second->messages->push(new std::string(broadcast));
+        this->sessionsWaitingForWrite->push(session.second->sessionId);
     }
 }
 
 void Webserver::addMessage(int sessionId, std::string message) {
-    std::lock_guard<std::mutex> lock(serverLock);
-    auto sessionIt = sessions.find(sessionId);
+  boost::shared_lock< boost::shared_mutex > lock(serverMutex);
+  auto sessionIt = sessions.find(sessionId);
 	if (sessionIt != this->sessions.end()){
-		sessionIt->second->messages->push(message);
-        this->sessionsWaitingForWrite.enqueue(sessionIt->second->sessionId);
+	   sessionIt->second->messages->push(new std::string(message));
+     this->sessionsWaitingForWrite->push(sessionIt->second->sessionId);
 	}
 }
 
 void Webserver::addSession(int sessionId, SessionInfo *session) {
-    std::lock_guard<std::mutex> lock(serverLock);
+    boost::unique_lock< boost::shared_mutex > lock(serverMutex);
     this->sessions.insert({sessionId, session});
 }
 
 bool Webserver::removeSession(int sessionId){
-    std::lock_guard<std::mutex> lock(serverLock);
+    boost::unique_lock< boost::shared_mutex > lock(serverMutex);
     auto sessionIt = sessions.find(sessionId);
     if(sessionIt == this->sessions.end()){
         return false;
@@ -280,7 +285,6 @@ bool Webserver::removeSession(int sessionId){
 }
 
 SessionInfo* Webserver::getSession(int sessionId){
-    std::lock_guard<std::mutex> lock(serverLock);
     auto sessionIt = sessions.find(sessionId);
     SessionInfo* result = NULL;
     if(sessionIt != this->sessions.end()){
@@ -338,7 +342,7 @@ void mainLoop(void * arg)
 	{
         auto sessions = Webserver::instance()->getSessionsWaitingForWrite();
         int sessionId;
-        while(sessions->try_dequeue(sessionId)){
+        while(sessions->pop(sessionId)){
             auto sessionInfo = Webserver::instance()->getSession(sessionId);
             if(sessionInfo){
                 libwebsocket_callback_on_writable(context, sessionInfo->wsi);
