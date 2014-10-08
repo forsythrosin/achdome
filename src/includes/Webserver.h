@@ -17,6 +17,8 @@ All rights reserved.
 #include <picojson/picojson.h>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/lockfree/queue.hpp>
+#include <boost/thread/locks.hpp>
+
 struct libwebsocket;
 
 struct SessionInfo{

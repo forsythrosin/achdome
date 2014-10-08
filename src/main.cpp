@@ -82,7 +82,7 @@ void myInitOGLFun() {
 
   }
 
-  domeSurface = new DomeSurface(100, 30);
+  domeSurface = new DomeSurface(50, 20);
   // const GLfloat* domeVertexData = domeSurface->getCartesianVertexData();
   const GLfloat* domeVertexData = domeSurface->getSphericalVertexData();
   const GLuint* domeTriangleData = domeSurface->getTriangleData();
@@ -136,7 +136,7 @@ void myDrawFun() {
   glEnableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-  glDrawElements(GL_LINES, domeSurface->getTriangleCount()*3, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_LINE_LOOP, domeSurface->getTriangleCount()*3, GL_UNSIGNED_INT, 0);
   glDisableVertexAttribArray(0);
 
   //unbind

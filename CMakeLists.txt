@@ -48,7 +48,8 @@ set_target_properties(${APP_NAME} PROPERTIES
 set(LWS_WITH_SSL OFF CACHE BOOL "" FORCE)
 set(LWS_WITHOUT_TESTAPPS ON CACHE BOOL "" FORCE)
 set(LWS_WITHOUT_EXTENSIONS ON CACHE BOOL "" FORCE)
-set(LWS_WITHOUT_DEBUG ON CACHE BOOL "" FORCE)
+set(LWS_WITHOUT_EXTENSIONS ON CACHE BOOL "" FORCE)
+set(LWS_USE_CYASSL OFF CACHE BOOL "" FORCE)
 add_subdirectory(${PROJECT_EXTERNAL_DIR}/libwebsockets)
 set(LIBWEBSOCKETS_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/libwebsockets/lib)
 include_directories(${LIBWEBSOCKETS_INCLUDE_DIR})
@@ -57,8 +58,11 @@ include_directories(${PROJECT_EXTERNAL_DIR}/readerwriterqueue)
 
 
 # Include boost
-add_definitions( -DBOOST_ALL_NO_LIB )
-add_definitions( -DBOOST_ALL_DYN_LINK )
+if(MSVC)
+	add_definitions(/Gr)
+endif()
+set(Boost_USE_STATIC_LIBS ON)
+add_definitions(-DBOOST_ALL_NO_LIB)
 find_package(Boost COMPONENTS thread system REQUIRED)
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
