@@ -8,5 +8,4 @@ class WormArc {
   int wormId;
   glm::quat firstPoint;
   glm::quat secondPoint;
-
 };
