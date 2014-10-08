@@ -57,8 +57,8 @@ void DomeSurface::createTriangles() {
     // vertices
     int self = i;
     int straightDown = i + azmSegs;
-    int prev = rowIndex ? i - 1 : i + azmSegs;
-    int nextDown = i + (rowIndex == (azmSegs - 1) ? 1 : azmSegs + 1);
+    int prev = rowIndex ? i - 1 : i + azmSegs - 1;
+    int nextDown = rowIndex == (azmSegs - 1) ? i + 1 : i + azmSegs + 1;
 
     // left triangle
     triangleData[idx] = self;
