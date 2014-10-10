@@ -6,19 +6,19 @@
 #include "clientStates.h"
 #include "Webserver.h"
 #include <functional>
-#include <readerwriterqueue/readwriterqueue.h>
+#include <boost/lockfree/queue.hpp>
 
 typedef std::string QueueElement;
 
 class WebsocketBufferQueue {
 public:
     WebsocketBufferQueue(Webserver *server);
+    ~WebsocketBufferQueue();
     void pushElement(QueueElement);
-    QueueElement pop();
+    QueueElement* pop();
     bool empty();
 private:
-    moodycamel::ReaderWriterQueue<QueueElement> queue;
-
+    boost::lockfree::queue<QueueElement*> *queue;
 };
 
 #endif

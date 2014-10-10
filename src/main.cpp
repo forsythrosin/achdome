@@ -117,9 +117,10 @@ void myInitOGLFun() {
 
 void myPreSyncFun() {
     while(!bufferQueue.empty()){
-        std::string str = bufferQueue.pop();
-        Webserver::instance()->addBroadcast(str);
-        std::cout << str << std::endl;
+        std::string *str = bufferQueue.pop();
+        Webserver::instance()->addBroadcast(*str);
+        std::cout << *str << std::endl;
+        delete str;
     }
 }
 

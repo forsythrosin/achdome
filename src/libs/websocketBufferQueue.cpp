@@ -9,20 +9,26 @@ WebsocketBufferQueue::WebsocketBufferQueue(Webserver *server){
         this->pushElement(str);
     });
     server->setCallback(func);
+
+    this->queue = new boost::lockfree::queue<QueueElement*>(100);
+}
+
+WebsocketBufferQueue::~WebsocketBufferQueue(){
+  delete queue;
 }
 
 void WebsocketBufferQueue::pushElement(QueueElement element) {
-    std::mutex mutex;
-    std::lock_guard<std::mutex> lock(mutex);
-    this->queue.enqueue(element);
+    this->queue->push(new QueueElement(element));
 }
 
-QueueElement WebsocketBufferQueue::pop() {
-    QueueElement elem;
-    queue.try_dequeue(elem);
-    return elem;
+QueueElement* WebsocketBufferQueue::pop() {
+    QueueElement *elem;
+    if(queue->pop(elem)){
+      return elem;
+    }
+    return nullptr;
 }
 
 bool WebsocketBufferQueue::empty(){
-    return this->queue.peek() == NULL;
+    return this->queue->empty();
 }
