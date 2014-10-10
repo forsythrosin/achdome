@@ -3,15 +3,20 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <shaderUtils.h>
+#include <glm/gtx/constants.hpp>
+
+// #include <shaderUtils.h>
 #include <wormHead.h>
 #include <websocketBufferQueue.h>
 #include <Webserver.h>
 #include <fisheyeCollisionSpace.h>
 #include <clusterRenderSpace.h>
 #include <wormTracker.h>
-#include <domeSurface.h>
+#include <renderableDome.h>
+#include <renderableWormGroup.h>
 #include <Webserver.h>
+#include <wormArc.h>
+#include <renderer.h>
 
 sgct::Engine * gEngine;
 Webserver webserver;
@@ -30,11 +35,19 @@ void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
 
 // DomeSurface buffers
-GLuint VBO = GL_FALSE;
-GLuint IBO = GL_FALSE;
-GLint Matrix_Loc = -1;
-GLuint vertexArray;
-DomeSurface *domeSurface;
+// GLuint VBO = GL_FALSE;
+// GLuint IBO = GL_FALSE;
+// GLint Matrix_Loc = -1;
+// GLuint vertexArray;
+
+// float domeRot = -117.0f;
+
+// float rot = 0.0f;
+
+Renderer *renderer;
+
+RenderableDome *domeSurface;
+RenderableWormGroup *renderableWorms;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -82,37 +95,24 @@ void myInitOGLFun() {
 
   }
 
-  domeSurface = new DomeSurface(50, 20);
-  // const GLfloat* domeVertexData = domeSurface->getCartesianVertexData();
-  const GLfloat* domeVertexData = domeSurface->getSphericalVertexData();
-  const GLuint* domeTriangleData = domeSurface->getTriangleData();
+  // quat interpolation tests
+  glm::quat first(glm::vec3(0.0, 0.0, 0.1));
+  glm::quat second(glm::vec3(0.0, 0.1, 0.0));
+  WormArc wa(0, first, second);
+  glm::vec3 res = wa.getCartesianLerp(0.5);
+  std::cout << "(" << res.x << ", " << res.y << ", " << res.z << ")" << std::endl;
 
-  glGenVertexArrays(1, &vertexArray);
-  glBindVertexArray(vertexArray);
+  std::vector<WormArc> wormArcs;
+  wormArcs.push_back(wa);
 
-  // vertex buffer
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, domeSurface->getVertexCount()*sizeof(GLfloat)*2, domeVertexData, GL_STATIC_DRAW);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  renderer = new Renderer(gEngine);
 
-  // index buffer
-  glGenBuffers(1, &IBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, domeSurface->getTriangleCount()*sizeof(GLuint)*3, domeTriangleData, GL_STATIC_DRAW);
+  domeSurface = new RenderableDome(50, 20);
+  renderer->addRenderable(domeSurface, GL_LINES, "domeShader.vert", "domeShader.frag", true);
 
-  glBindVertexArray(0); //unbind
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-  std::string vertShader = shaderUtils::absolutePathToShader("domeShader.vert");
-  std::string fragShader = shaderUtils::absolutePathToShader("domeShader.frag");
-  sgct::ShaderManager::instance()->addShaderProgram( "xform", vertShader, fragShader );
-  sgct::ShaderManager::instance()->bindShaderProgram( "xform" );
-  Matrix_Loc = sgct::ShaderManager::instance()->getShaderProgram( "xform" ).getUniformLocation( "MVP" );
-
-  sgct::ShaderManager::instance()->unBindShaderProgram();
+  renderableWorms = new RenderableWormGroup(1, 3);
+  renderableWorms->setWormArcs(wormArcs);
+  // renderer->addRenderable(domeSurface, GL_LINES, "wormShader.vert", "wormShader.frag", true);
 }
 
 void myPreSyncFun() {
@@ -124,23 +124,7 @@ void myPreSyncFun() {
 }
 
 void myDrawFun() {
-  glm::mat4 scene_mat = glm::rotate( glm::mat4(1.0f), -117.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-  glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix() * scene_mat;
-
-  sgct::ShaderManager::instance()->bindShaderProgram( "xform" );
-
-  glUniformMatrix4fv(Matrix_Loc, 1, GL_FALSE, &MVP[0][0]);
-
-  glBindVertexArray(vertexArray);
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-  glDrawElements(GL_LINE_LOOP, domeSurface->getTriangleCount()*3, GL_UNSIGNED_INT, 0);
-  glDisableVertexAttribArray(0);
-
-  //unbind
-  glBindVertexArray(0);
-  sgct::ShaderManager::instance()->unBindShaderProgram();
+  renderer->renderAll();
 }
 
 void myEncodeFun() {
@@ -156,10 +140,4 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
-  if (VBO)
-    glDeleteBuffers(1, &VBO);
-  if (IBO)
-    glDeleteBuffers(1, &IBO);
-  if (vertexArray)
-    glDeleteVertexArrays(1, &vertexArray);
 }
