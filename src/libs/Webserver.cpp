@@ -145,10 +145,9 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
         case LWS_CALLBACK_SERVER_WRITEABLE: {
             std::string *message;
             boost::shared_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
-            if(sessionInfo->messages->pop(message)){
+			if (sessionInfo->messages->empty() && sessionInfo->messages->pop(message)){
                 int n = sprintf(gSendBuffer, "%s\n", message->c_str());
                 libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
-                delete message;
             }
         }
         break;
@@ -165,9 +164,9 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
           {
             boost::unique_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
             Webserver::instance()->removeSession(sessionInfo->sessionId);
-            delete sessionInfo->messages;
+			delete sessionInfo->messages;
           }
-          delete sessionInfo->mtx;
+		delete sessionInfo->mtx;
         }
         break;
         case LWS_CALLBACK_RECEIVE:{
@@ -189,7 +188,7 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
 
 Webserver::Webserver()
 {
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
+	boost::unique_lock< boost::shared_mutex > lock(serverMutex);
 	mInstance = this;
 	mMainThreadPtr = NULL;
 	mWebsocketCallback = nullptr;
@@ -202,11 +201,11 @@ Webserver::~Webserver()
 {
     mRunning = false;
     mWebsocketCallback = nullptr;
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
+	boost::unique_lock< boost::shared_mutex > lock(serverMutex);
+	delete sessionsWaitingForWrite;
 	if (mMainThreadPtr && mMainThreadPtr->joinable())
 	{
 		fprintf(stderr, "Waiting for websocket thread to finish...\n");
-
 		mMainThreadPtr->join();
 		delete mMainThreadPtr;
 		mMainThreadPtr = NULL;
@@ -264,8 +263,8 @@ void Webserver::addMessage(int sessionId, std::string message) {
   boost::shared_lock< boost::shared_mutex > lock(serverMutex);
   auto sessionIt = sessions.find(sessionId);
 	if (sessionIt != this->sessions.end()){
-	   sessionIt->second->messages->push(new std::string(message));
-     this->sessionsWaitingForWrite->push(sessionIt->second->sessionId);
+		sessionIt->second->messages->push(new std::string(message));
+		sessionsWaitingForWrite->push(sessionIt->second->sessionId);
 	}
 }
 
@@ -291,6 +290,15 @@ SessionInfo* Webserver::getSession(int sessionId){
         result = sessionIt->second;
     }
     return result;
+}
+std::queue<int> Webserver::getSessionsWaitingForWrite(){
+	std::queue<int> writingSessions;
+	while (!sessionsWaitingForWrite->empty()){
+		int sessionId;
+		sessionsWaitingForWrite->pop(sessionId);
+		writingSessions.push(sessionId);
+	}
+	return writingSessions;
 }
 
 void mainLoop(void * arg)
@@ -341,13 +349,16 @@ void mainLoop(void * arg)
 	while (parent->isRunning())
 	{
         auto sessions = Webserver::instance()->getSessionsWaitingForWrite();
-        int sessionId;
-        while(sessions->pop(sessionId)){
-            auto sessionInfo = Webserver::instance()->getSession(sessionId);
-            if(sessionInfo){
-                libwebsocket_callback_on_writable(context, sessionInfo->wsi);
-            }
-        }
+		while (!sessions.empty()){
+			int sessionId = sessions.front();
+			sessions.pop();
+			auto sessionInfo = Webserver::instance()->getSession(sessionId);
+			if (sessionInfo){
+				libwebsocket_callback_on_writable(context, sessionInfo->wsi);
+			}
+		}
+		
+		
 		libwebsocket_service(context, parent->getTimeout()); //5 ms -> 200 samples / s
 	}
 

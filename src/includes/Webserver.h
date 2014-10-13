@@ -51,7 +51,7 @@ public:
 	void addMessage(int sessionId, std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
-    boost::lockfree::queue<int>* getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
+    std::queue<int> getSessionsWaitingForWrite();
     SessionInfo *getSession(int sessionId);
 private:
 	static Webserver * mInstance;
