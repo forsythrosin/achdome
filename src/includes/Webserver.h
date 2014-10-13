@@ -7,8 +7,6 @@ All rights reserved.
 #ifndef _WEB_SERVER_
 #define _WEB_SERVER_
 
-#include "external/tinythread.h"
-
 #include <vector>
 #include <deque>
 #include <queue>
@@ -18,6 +16,7 @@ All rights reserved.
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/lockfree/queue.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/thread.hpp>
 
 struct libwebsocket;
 
@@ -60,7 +59,7 @@ private:
     int mPort;
     int mTimeout; //in ms
     unsigned int mSessionIndex;
-	tthread::thread * mMainThreadPtr;
+	boost::thread * mMainThreadPtr;
     std::map<int, SessionInfo*> sessions;
     boost::shared_mutex serverMutex;
     boost::lockfree::queue<int> *sessionsWaitingForWrite;
