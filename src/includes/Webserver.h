@@ -14,6 +14,7 @@ All rights reserved.
 #include <functional>
 #include <picojson/picojson.h>
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
 #include <boost/lockfree/queue.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread.hpp>
@@ -50,7 +51,7 @@ public:
 	void addMessage(int sessionId, std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
-    std::queue<int> getSessionsWaitingForWrite();
+	boost::lockfree::queue<int>* getSessionsWaitingForWrite();
     SessionInfo *getSession(int sessionId);
 private:
 	static Webserver * mInstance;
