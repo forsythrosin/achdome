@@ -145,9 +145,10 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
         case LWS_CALLBACK_SERVER_WRITEABLE: {
             std::string *message;
             boost::shared_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
-			if (!sessionInfo->messages->empty() && sessionInfo->messages->pop(message)){
+			while (sessionInfo->messages->pop(message)){
                 int n = sprintf(gSendBuffer, "%s\n", message->c_str());
                 libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(gSendBuffer), n, LWS_WRITE_TEXT);
+				delete message;
             }
         }
         break;
