@@ -181,7 +181,7 @@ static int echoCallback(struct libwebsocket_context * context,struct libwebsocke
       			Webserver *webserver = Webserver::instance();
       			if (webserver->mWebsocketCallback) {
       				const char *msg = reinterpret_cast<const char *>(in);
-      				webserver->mWebsocketCallback(msg);
+					webserver->mWebsocketCallback(sessionInfo->sessionId, msg);
       			}
         }
         break;
@@ -252,7 +252,6 @@ unsigned int Webserver::generateSessionIndex()
 	   tmpUi = mSessionIndex;
     return tmpUi;
 }
-
 
 void Webserver::addBroadcast(std::string broadcast) {
     boost::shared_lock< boost::shared_mutex > lock(serverMutex);

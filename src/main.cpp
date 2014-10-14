@@ -11,11 +11,12 @@
 #include <clusterRenderSpace.h>
 #include <wormTracker.h>
 #include <domeSurface.h>
-#include <Webserver.h>
+#include <jsonActionResolver.h>
 
 sgct::Engine * gEngine;
 Webserver webserver;
 WebsocketBufferQueue bufferQueue(&webserver);
+JsonActionResolver *actionResolver;
 
 void myDrawFun();
 void myPreSyncFun();
@@ -38,6 +39,7 @@ DomeSurface *domeSurface;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
+  actionResolver = new JsonActionResolver();
 
   gEngine->setInitOGLFunction( myInitOGLFun );
   gEngine->setDrawFunction( myDrawFun );
@@ -62,6 +64,7 @@ int main( int argc, char* argv[] ) {
 
   // Clean up
   delete gEngine;
+  delete actionResolver;
 
   // Exit program
   exit( EXIT_SUCCESS );
@@ -117,10 +120,26 @@ void myInitOGLFun() {
 
 void myPreSyncFun() {
     while(!bufferQueue.empty()){
-        std::string *str = bufferQueue.pop();
-        Webserver::instance()->addBroadcast(*str);
-        std::cout << *str << std::endl;
-        delete str;
+		std::cout << "Message" << std::endl;
+		QueueElement *qe = bufferQueue.pop();
+		Action action;
+		if (actionResolver->resolve(qe->message, action)) {
+			ActionType at = action.type;
+			std::string atName = at == REGISTER ? "REGISTER" :
+				at == START ? "START" :
+				at == LEFT_UP ? "LEFT_UP" :
+				at == LEFT_DOWN ? "LEFT_DOWN" :
+				at == RIGHT_UP ? "RIGHT_UP" :
+				at == RIGHT_DOWN ? "RIGHT_DOWN" :
+				"UNRECOGNIZED";
+			std::cout << atName << std::endl;
+			for (auto it = action.data.begin(); it != action.data.end(); ++it) {
+				std::cout << it->first << ": " << it->second << std::endl;
+			}
+		}
+		// Webserver::instance()->handleMessage(*qe);
+		// TODO: Move this to a message parser that can return or populate a list of actions.
+        delete qe;
     }
 }
 

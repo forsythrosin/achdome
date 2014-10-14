@@ -8,7 +8,10 @@
 #include <functional>
 #include <boost/lockfree/queue.hpp>
 
-typedef std::string QueueElement;
+struct QueueElement {
+	int sessionId;
+	std::string message;
+};
 
 class WebsocketBufferQueue {
 public:

@@ -12,7 +12,6 @@ All rights reserved.
 #include <queue>
 #include <map>
 #include <functional>
-#include <picojson/picojson.h>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/lockfree/queue.hpp>
@@ -31,7 +30,7 @@ struct SessionInfo{
 
 class Webserver {
 public:
-    typedef std::function<void(std::string)> WebsocketCallback;
+    typedef std::function<void(int,std::string)> WebsocketCallback;
 
 
     Webserver();
@@ -48,7 +47,7 @@ public:
     WebsocketCallback mWebsocketCallback;
 
 	void addBroadcast(std::string broadcast);
-	void addMessage(int sessionId, std::string broadcast);
+	void addMessage(int sessionId, std::string message);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
 	boost::lockfree::queue<int>* getSessionsWaitingForWrite();

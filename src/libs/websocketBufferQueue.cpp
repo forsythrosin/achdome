@@ -5,8 +5,11 @@
 
 WebsocketBufferQueue::WebsocketBufferQueue(Webserver *server){
 
-    auto func = Webserver::WebsocketCallback([&](std::string str){
-        this->pushElement(str);
+    auto func = Webserver::WebsocketCallback([&](int sessionId, std::string message){
+		QueueElement qe;
+		qe.sessionId = sessionId;
+		qe.message = message;
+        this->pushElement(qe);
     });
     server->setCallback(func);
 
