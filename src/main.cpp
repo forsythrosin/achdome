@@ -120,7 +120,6 @@ void myInitOGLFun() {
 
 void myPreSyncFun() {
     while(!bufferQueue.empty()){
-		std::cout << "Message" << std::endl;
 		QueueElement *qe = bufferQueue.pop();
 		Action action;
 		if (actionResolver->resolve(qe->message, action)) {
@@ -132,13 +131,13 @@ void myPreSyncFun() {
 				at == RIGHT_UP ? "RIGHT_UP" :
 				at == RIGHT_DOWN ? "RIGHT_DOWN" :
 				"UNRECOGNIZED";
-			std::cout << atName << std::endl;
+			std::cout << "message: " << atName << std::endl <<
+				"data: {" << std::endl;
 			for (auto it = action.data.begin(); it != action.data.end(); ++it) {
-				std::cout << it->first << ": " << it->second << std::endl;
+				std::cout << "  " << it->first << ": " << it->second << std::endl;
 			}
+			std::cout << "}" << std::endl;
 		}
-		// Webserver::instance()->handleMessage(*qe);
-		// TODO: Move this to a message parser that can return or populate a list of actions.
         delete qe;
     }
 }

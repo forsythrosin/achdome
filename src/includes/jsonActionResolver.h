@@ -8,4 +8,7 @@ public:
 	JsonActionResolver();
 	~JsonActionResolver();
 	bool resolve(std::string json, Action &action);
+private:
+	bool getString(picojson::value, std::string, std::string&);
+	bool getObject(picojson::value, std::string, picojson::value&);
 };
