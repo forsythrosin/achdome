@@ -7,8 +7,6 @@ All rights reserved.
 #ifndef _WEB_SERVER_
 #define _WEB_SERVER_
 
-#include "external/tinythread.h"
-
 #include <vector>
 #include <deque>
 #include <queue>
@@ -16,8 +14,10 @@ All rights reserved.
 #include <functional>
 #include <picojson/picojson.h>
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
 #include <boost/lockfree/queue.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/thread.hpp>
 
 struct libwebsocket;
 
@@ -51,7 +51,7 @@ public:
 	void addMessage(int sessionId, std::string broadcast);
     void addSession(int sessionId, SessionInfo *session);
     bool removeSession(int sessionId);
-    boost::lockfree::queue<int>* getSessionsWaitingForWrite(){return sessionsWaitingForWrite;};
+	boost::lockfree::queue<int>* getSessionsWaitingForWrite();
     SessionInfo *getSession(int sessionId);
 private:
 	static Webserver * mInstance;
@@ -60,7 +60,7 @@ private:
     int mPort;
     int mTimeout; //in ms
     unsigned int mSessionIndex;
-	tthread::thread * mMainThreadPtr;
+	boost::thread * mMainThreadPtr;
     std::map<int, SessionInfo*> sessions;
     boost::shared_mutex serverMutex;
     boost::lockfree::queue<int> *sessionsWaitingForWrite;
