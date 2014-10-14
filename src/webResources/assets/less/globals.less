@@ -1,0 +1,64 @@
+@typeface: 'Open Sans', sans-serif;
+@font-size: 18px;
+@header-typeface: 'Bangers', sans-serif;
+
+@base: #111;
+@diffuse: #999;
+
+@highlight: white;
+@highlight-2: darken(@highlight, 10%);
+@accent: #ffa200;
+
+@positive: #93c760;
+@positive-dark: darken(@positive, 40%);
+@negative: #e67878;
+@negative-dark: darken(@negative, 40%);
+
+.text-shadow (@dist: 5px, @size: 5px, @opac: 50%) {
+  text-shadow: 0 @dist @size rgba(0,0,0,@opac);
+}
+
+.radius(@radius) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  border-radius: @radius;
+}
+
+.text-shadow(@options) {
+  text-shadow: @options;
+  -moz-text-shadow: @options;
+  -webkit-text-shadow: @options;
+}
+
+.text-stroke(@size: 5px, @color: white) {
+  @halfsize: @size/2;
+  .text-shadow(~"@{halfsize} @{halfsize} 0 @{color}, -@{halfsize} @{halfsize} 0 @{color}, @{halfsize} -@{halfsize} 0 @{color}, 0px @{halfsize} 0 @{color}, -@{halfsize} -@{halfsize} 0 @{color}, 0px -@{halfsize} 0 @{color}, -@{halfsize} 0px 0 @{color}, @{halfsize} 0px 0 @{color}, @{size} @{size} 0 @{color}, -@{size} @{size} 0 @{color}, @{size} -@{size} 0 @{color}, -@{size} -@{size} 0 @{color}, 0px @{size} 0 @{color}, 0px -@{size} 0 @{color}, -@{size} 0px 0 @{color}, @{size} 0px 0 @{color}, @{halfsize} @{size} 0 @{color}, -@{halfsize} @{size} 0 @{color}, @{halfsize} -@{size} 0 @{color}, -@{halfsize} -@{size} 0 @{color}, @{size} @{halfsize} 0 @{color}, -@{size} @{halfsize} 0 @{color}, @{size} -@{halfsize} 0 @{color}, -@{size} -@{halfsize} 0 @{color}");
+}
+
+.gradient(@c1, @c2) {
+  background: -webkit-linear-gradient(@c1, @c2); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(@c1, @c2); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(@c1, @c2); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(@c1, @c2); /* Standard syntax */
+}
+
+.transform(@options) {
+  -ms-transform: @options; /* IE 9 */
+  -webkit-transform: @options; /* Chrome, Safari, Opera */
+  transform: @options;
+}
+
+.loop(@keyframes, @duration) {
+  /* Chrome, Safari, Opera */
+  -webkit-animation-name: @keyframes;
+  -webkit-animation-duration: @duration;
+  -webkit-animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-play-state: running;
+  /* Standard syntax */
+  animation-name: @keyframes;
+  animation-duration: @duration;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+}

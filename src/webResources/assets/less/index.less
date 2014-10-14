@@ -1,0 +1,119 @@
+@import "globals";
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: @base;
+  color: @highlight;
+  font-family: @typeface;
+  font-size: @font-size;
+  overflow: hidden;
+}
+
+h1 {
+  text-align: center;
+  font-family: @header-typeface;
+  font-size: 100px;
+  color: white;
+  .text-stroke(5px, @accent);
+}
+
+.bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+input, button {
+  font-family: @typeface;
+  font-size: @font-size;
+  width: 100%;
+  text-align: center;
+  padding: 1em 0;
+  border: 0;
+  border-top: 0.2em solid @base;
+  box-sizing: border-box;
+  background: white;
+  border-radius: 0;
+  outline: 0;
+}
+
+.warning {
+  border-left: 0.4em solid @negative;
+  border-right: 0.4em solid @negative;
+}
+
+button.positive {
+  background: @positive;
+  color: @positive-dark;
+}
+
+.player {
+  overflow: hidden;
+
+  .identifier {
+    float: left;
+    width: 2em;
+    height: 2em;
+    .radius(50%);
+  }
+
+  .name {
+    float: left;
+    padding: 0.35em;
+  }
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes dualRotation {
+  0%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
+  25%   {width:0px;height:50px;margin-left:25px;margin-top:0px;}
+  50%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
+  75%   {width:50px;height:0px;margin-left:0px;margin-top:25px;}
+  100%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
+}
+
+/* Standard syntax */
+@keyframes dualRotation {
+  0%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
+  25%   {width:0px;height:50px;margin-left:25px;margin-top:0px;}
+  50%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
+  75%   {width:50px;height:0px;margin-left:0px;margin-top:25px;}
+  100%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes dualRotation2 {
+  0%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white;}
+  25%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:white;}
+  26%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:@accent;}
+  50%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:@accent}
+  75%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:@accent}
+  76%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:white}
+  100%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white}
+}
+
+/* Standard syntax */
+@keyframes dualRotation2 {
+  0%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white;}
+  25%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:white;}
+  26%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:@accent;}
+  50%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:@accent}
+  75%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:@accent}
+  76%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:white}
+  100%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white}
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  background: #ddd;
+  .radius(5px);
+  .loop(dualRotation2, 1.3s);
+}
+
+@import "portrait";
