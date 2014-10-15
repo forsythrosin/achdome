@@ -21,7 +21,7 @@ struct RenderConfig {
   std::string fragShader;
   bool sphericalCoords;
 
-  std::string shaderId;
+  int id;
 
   GLuint VBO = GL_FALSE;
   GLuint IBO = GL_FALSE;
@@ -33,8 +33,8 @@ class Renderer {
 public:
   Renderer(sgct::Engine *gEngine);
   ~Renderer() = default;
-  void addRenderable(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical);
-  void render(RenderConfig &renderConfig);
+  int addRenderable(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical);
+  void render(int configId);
   void renderAll();
 
 private:

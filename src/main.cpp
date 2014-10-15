@@ -17,6 +17,7 @@
 #include <Webserver.h>
 #include <wormArc.h>
 #include <renderer.h>
+#include <cmath>
 
 sgct::Engine * gEngine;
 Webserver webserver;
@@ -38,6 +39,7 @@ sgct::SharedVector<WormArc> wormArcs(1);
 Renderer *renderer;
 RenderableDome *dome;
 RenderableWormGroup *worms;
+int wormsId;
 float timer = 0.0f;
 
 int main( int argc, char* argv[] ) {
@@ -92,7 +94,7 @@ void myInitOGLFun() {
 
   worms = new RenderableWormGroup(1, 20);
   worms->setWormArcs(wormArcs.getVal());
-  renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
+  wormsId = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
 }
 
 void myPreSyncFun() {
@@ -119,7 +121,7 @@ void myPreSyncFun() {
 
 void myDrawFun() {
   worms->setWormArcs(wormArcs.getVal());
-  renderer->renderAll();
+  renderer->render(wormsId);
 }
 
 void myEncodeFun() {
