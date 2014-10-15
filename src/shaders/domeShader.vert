@@ -3,8 +3,9 @@
 layout(location = 0) in vec2 phiTheta;
 uniform mat4 MVP;
 
-void main()
-{
+out vec2 phiThetaCoords;
+
+void main() {
   // static dome radius: 7.5m
   float r = 7.5;
 
@@ -14,5 +15,7 @@ void main()
     r*sin(phiTheta.y)*sin(phiTheta.x),
     r*cos(phiTheta.y)
   );
-	gl_Position =  MVP * vec4(vertPosition, 1.0);
+
+  phiThetaCoords = phiTheta;
+  gl_Position =  MVP * vec4(vertPosition, 1.0);
 }
