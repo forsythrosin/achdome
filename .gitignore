@@ -1,3 +1,6 @@
 build/
 src/external
 compile*
+
+src/webResources/assets/js/achdome.js
+src/webResources/node_modules

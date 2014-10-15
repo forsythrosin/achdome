@@ -1,11 +1,13 @@
 #include <gameEngine.h>
+#include <iostream>
 
 GameEngine::GameEngine(WormTracker* wt) {
   state = Intro;
+  idCounter = 0;
 }
 
 int GameEngine::connectPlayer() {
-  return 0;
+  return idCounter++;
 }
 
 bool GameEngine::disconnectPlayer(int playerId) {
@@ -13,11 +15,11 @@ bool GameEngine::disconnectPlayer(int playerId) {
 }
 
 void GameEngine::turnLeft(int playerId, bool turn) {
-
+  std::cout << "left turn " << (turn ? "true" : "false") << std::endl;
 }
 
 void GameEngine::turnRight(int playerId, bool turn) {
-
+  std::cout << "right turn " << (turn ? "true" : "false") << std::endl;
 }
 
 bool GameEngine::setName(int playerId, std::string name) {
@@ -33,11 +35,11 @@ void GameEngine::startLobby() {
 }
 
 void GameEngine::startGame() {
-
+  std::cout << "Game started" << std::endl;
 }
 
 void GameEngine::endGame() {
-
+  std::cout << "Game ended" << std::endl;
 }
 
 void GameEngine::showResults() {
