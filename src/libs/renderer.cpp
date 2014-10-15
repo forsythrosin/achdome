@@ -52,8 +52,8 @@ void Renderer::init(RenderConfig &renderConfig) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   // init shaders
-  std::string vertShader = shaderUtils::absolutePathToShader(renderConfig.vertShader);
-  std::string fragShader = shaderUtils::absolutePathToShader(renderConfig.fragShader);
+  std::string vertShader = shaderUtils::pathToShader(renderConfig.vertShader);
+  std::string fragShader = shaderUtils::pathToShader(renderConfig.fragShader);
   sgct::ShaderManager::instance()->addShaderProgram( "xform", vertShader, fragShader );
   sgct::ShaderManager::instance()->bindShaderProgram( "xform" );
   renderConfig.Matrix_Loc = sgct::ShaderManager::instance()->getShaderProgram( "xform" ).getUniformLocation( "MVP" );

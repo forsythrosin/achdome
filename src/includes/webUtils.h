@@ -4,7 +4,7 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 namespace webUtils{
-  std::string absolutePathToResource(std::string filename){
-    return std::string(TOSTRING(WEBRESOURCES_PATH))+"/"+filename;
+  std::string pathToResource(std::string filename){
+    return std::string("webResources/")+filename;
   }
 }

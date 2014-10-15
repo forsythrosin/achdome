@@ -4,7 +4,7 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 namespace shaderUtils{
-  std::string absolutePathToShader(std::string filename){
-    return std::string(TOSTRING(SHADER_PATH))+"/"+filename;
+  std::string pathToShader(std::string filename){
+    return "shaders/"+filename;
   }
 }
