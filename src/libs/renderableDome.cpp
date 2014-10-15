@@ -1,30 +1,26 @@
-#include <domeSurface.h>
+#include <renderableDome.h>
 
-DomeSurface::DomeSurface(int as, int is) {
+RenderableDome::RenderableDome(int as, int is) {
   azmSegs = as;
   inclSegs = is;
 
   vertexCount = azmSegs*inclSegs;
-  triangleCount = azmSegs*(inclSegs-1)*2;
+  elementCount = azmSegs*(inclSegs-1)*2;
 
   sphericalVertexData = new GLfloat[vertexCount*2];
   cartesianVertexData = new GLfloat[vertexCount*3];
-  triangleData = new GLuint[triangleCount*3];
+  elementData = new GLuint[elementCount*VERTS_PER_ELEMENT];
 
   createVertices();
-  createTriangles();
+  createElements();
 };
 
-DomeSurface::~DomeSurface() {
-  delete [] sphericalVertexData;
-  delete [] cartesianVertexData;
-  delete [] triangleData;
-};
+RenderableDome::~RenderableDome() {};
 
 /**
  * Vertex placement
  */
-void DomeSurface::createVertices() {
+void RenderableDome::createVertices() {
   for (int j = 0; j < inclSegs; ++j) {
     float theta = glm::half_pi<float>()*(float)j/inclSegs;
     for (int i = 0; i < azmSegs; ++i) {
@@ -49,7 +45,7 @@ void DomeSurface::createVertices() {
 /**
  * Tessellation of the dome
  */
-void DomeSurface::createTriangles() {
+void RenderableDome::createElements() {
   for (int i = 0; i < azmSegs*(inclSegs-1); ++i) {
     int idx = i*6;
     int rowIndex = i%azmSegs;
@@ -60,46 +56,30 @@ void DomeSurface::createTriangles() {
     int prev = rowIndex ? i - 1 : i + azmSegs - 1;
     int nextDown = rowIndex == (azmSegs - 1) ? i + 1 : i + azmSegs + 1;
 
-    // left triangle
-    triangleData[idx] = self;
-    triangleData[idx + 1] = straightDown;
-    triangleData[idx + 2] = prev;
+    // left element
+    elementData[idx] = self;
+    elementData[idx + 1] = straightDown;
+    elementData[idx + 2] = prev;
 
-    // right triangle
-    triangleData[idx + 3] = self;
-    triangleData[idx + 4] = nextDown;
-    triangleData[idx + 5] = straightDown;
+    // right element
+    elementData[idx + 3] = self;
+    elementData[idx + 4] = nextDown;
+    elementData[idx + 5] = straightDown;
   }
 };
 
-const int DomeSurface::getAzmSegs() const {
+const int RenderableDome::getAzmSegs() const {
   return azmSegs;
 };
 
-const int DomeSurface::getInclSegs() const {
+const int RenderableDome::getInclSegs() const {
   return inclSegs;
 };
 
-const int DomeSurface::getRadius() const {
+const int RenderableDome::getRadius() const {
   return R;
 };
 
-const GLfloat * const DomeSurface::getCartesianVertexData() const {
-  return cartesianVertexData;
-};
-
-const GLfloat * const DomeSurface::getSphericalVertexData() const {
-  return sphericalVertexData;
-};
-
-const GLuint * const DomeSurface::getTriangleData() const {
-  return triangleData;
-};
-
-const int DomeSurface::getVertexCount() const {
-  return vertexCount;
-};
-
-const int DomeSurface::getTriangleCount() const {
-  return triangleCount;
+const GLuint RenderableDome::getVertsPerElement() const {
+  return VERTS_PER_ELEMENT;
 };
