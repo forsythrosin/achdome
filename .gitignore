@@ -1,3 +1,4 @@
 build/
 src/external
 compile*
+.DS_Store
