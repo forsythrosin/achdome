@@ -38,13 +38,13 @@ void WormHead::tick() {
 }
 
 /**
- * Get a string describing the 
+ * Get a string describing the
  */
 std::string WormHead::toString() {
   std::stringstream ss;
-  
+
   ss << "WormHead: { pos: " << glm::to_string(getPosition()) << " ";
-  
+
   ss << "posQuat: (" <<
     positionQuat.w << ", " <<
     positionQuat.x << ", " <<
@@ -56,7 +56,7 @@ std::string WormHead::toString() {
     velocityQuat.x << ", " <<
     velocityQuat.y << ", " <<
     velocityQuat.z << ")}";
-    
+
   return ss.str();
 }
 

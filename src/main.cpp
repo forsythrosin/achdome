@@ -3,24 +3,27 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <shaderUtils.h>
+#include <glm/gtx/constants.hpp>
+
+// #include <shaderUtils.h>
 #include <wormHead.h>
-#include <websocketBufferQueue.h>
 #include <Webserver.h>
 #include <fisheyeCollisionSpace.h>
 #include <clusterRenderSpace.h>
 #include <wormTracker.h>
-#include <domeSurface.h>
 #include <jsonActionResolver.h>
 #include <gameEngine.h>
 #include <gameController.h>
 #include <socketGameController.h>
 #include <keyboardGameController.h>
+#include <renderableDome.h>
+#include <renderableWormGroup.h>
+#include <Webserver.h>
+#include <wormArc.h>
+#include <renderer.h>
+#include <cmath>
 
 sgct::Engine * gEngine;
-Webserver webserver;
-WebsocketBufferQueue bufferQueue(&webserver);
-JsonActionResolver *actionResolver;
 
 void myDrawFun();
 void myPreSyncFun();
@@ -38,18 +41,18 @@ void mouseButtonCallback(int button, int action);
 GameEngine *gameEngine;
 ClusterRenderSpace *renderSpace;
 std::vector<GameController*> gameControllers;
-
-// DomeSurface buffers
-GLuint VBO = GL_FALSE;
-GLuint IBO = GL_FALSE;
-GLint Matrix_Loc = -1;
-GLuint vertexArray;
-DomeSurface *domeSurface;
 KeyboardGameController *keyboardGameController;
+
+// Renderer + renderables
+sgct::SharedVector<WormArc> wormArcs(1);
+Renderer *renderer;
+RenderableDome *dome;
+RenderableWormGroup *worms;
+int wormsId;
+float timer = 0.0f;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
-  actionResolver = new JsonActionResolver();
 
   gEngine->setInitOGLFunction( myInitOGLFun );
   gEngine->setDrawFunction( myDrawFun );
@@ -65,16 +68,21 @@ int main( int argc, char* argv[] ) {
       delete gEngine;
       return EXIT_FAILURE;
   }
-  
+
   if (gEngine->isMaster()){
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
     renderSpace = new ClusterRenderSpace();
-    
+
     WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace);
     PlayerManager *pm = new PlayerManager();
     gameEngine = new GameEngine(wt, pm);
 
-    SocketGameController *sgc = new SocketGameController(gameEngine, 8000);
+    Webserver *webServer = new Webserver();
+    webServer->start(8000);
+
+    JsonActionResolver *actionResolver = new JsonActionResolver();
+
+    SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver);
     gameControllers.push_back(sgc);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
@@ -86,44 +94,20 @@ int main( int argc, char* argv[] ) {
 
   // Clean up
   delete gEngine;
-  delete actionResolver;
 
   // Exit program
   exit( EXIT_SUCCESS );
 }
 
-void myInitOGLFun() {  
-  domeSurface = new DomeSurface(100, 30);
+void myInitOGLFun() {
+  renderer = new Renderer(gEngine);
 
-  const GLfloat* domeVertexData = domeSurface->getSphericalVertexData();
-  const GLuint* domeTriangleData = domeSurface->getTriangleData();
+  dome = new RenderableDome(50, 20);
+  renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeShader.frag", true);
 
-  glGenVertexArrays(1, &vertexArray);
-  glBindVertexArray(vertexArray);
-
-  // vertex buffer
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, domeSurface->getVertexCount()*sizeof(GLfloat)*2, domeVertexData, GL_STATIC_DRAW);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-  // index buffer
-  glGenBuffers(1, &IBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, domeSurface->getTriangleCount()*sizeof(GLuint)*3, domeTriangleData, GL_STATIC_DRAW);
-
-  glBindVertexArray(0); //unbind
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-  std::string vertShader = shaderUtils::absolutePathToShader("domeShader.vert");
-  std::string fragShader = shaderUtils::absolutePathToShader("domeShader.frag");
-  sgct::ShaderManager::instance()->addShaderProgram( "xform", vertShader, fragShader );
-  sgct::ShaderManager::instance()->bindShaderProgram( "xform" );
-  Matrix_Loc = sgct::ShaderManager::instance()->getShaderProgram( "xform" ).getUniformLocation( "MVP" );
-
-  sgct::ShaderManager::instance()->unBindShaderProgram();
+  worms = new RenderableWormGroup(1, 20);
+  worms->setWormArcs(wormArcs.getVal());
+  wormsId = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
 }
 
 void myPreSyncFun() {
@@ -133,34 +117,34 @@ void myPreSyncFun() {
     }
     gameEngine->tick();
   }
+
+  // Update worm positions
+  if( gEngine->isMaster() ) {
+    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
+    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+
+    timer += 0.005f;
+    WormArc wa(0, first, second);
+
+    std::vector<WormArc> arcs;
+    arcs.push_back(wa);
+    wormArcs.setVal(arcs);
+  }
 }
 
 void myDrawFun() {
-  glm::mat4 scene_mat = glm::rotate( glm::mat4(1.0f), -117.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-  glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix() * scene_mat;
-
-  sgct::ShaderManager::instance()->bindShaderProgram( "xform" );
-
-  glUniformMatrix4fv(Matrix_Loc, 1, GL_FALSE, &MVP[0][0]);
-
-  glBindVertexArray(vertexArray);
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-  glDrawElements(GL_LINE_LOOP, domeSurface->getTriangleCount()*3, GL_UNSIGNED_INT, 0);
-  glDisableVertexAttribArray(0);
-
-  //unbind
-  glBindVertexArray(0);
-  sgct::ShaderManager::instance()->unBindShaderProgram();
+  worms->setWormArcs(wormArcs.getVal());
+  renderer->render(wormsId);
 }
 
 void myEncodeFun() {
   // get things from renderSpace and send it to everyone.
+  sgct::SharedData::instance()->writeVector( &wormArcs );
 }
 
 void myDecodeFun() {
   // read from buffer and insert data to GameRenderers.
+  sgct::SharedData::instance()->readVector( &wormArcs );
 }
 
 void keyCallback(int key, int action) {
@@ -171,10 +155,7 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
-  if (VBO)
-    glDeleteBuffers(1, &VBO);
-  if (IBO)
-    glDeleteBuffers(1, &IBO);
-  if (vertexArray)
-    glDeleteVertexArrays(1, &vertexArray);
+  delete dome;
+  delete worms;
+  delete renderer;
 }

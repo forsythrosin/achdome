@@ -25,7 +25,7 @@ set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
 set(PROJECT_SHADERS_DIR ${PROJECT_SOURCE_DIR}/shaders)
 set(PROJECT_WEBRESOURCES_DIR ${PROJECT_SOURCE_DIR}/webResources)
 
-
+# First for the generic no-config case (e.g. with mingw)
 
 include_directories(${PROJECT_INCLUDE_DIR})
 file(GLOB PROJECT_LIBS_FILES ${PROJECT_LIBS_DIR}/*.cpp)
@@ -206,3 +206,37 @@ set(LIBS ${LIBS} INT_LIBS)
 target_link_libraries(INT_LIBS ${LIBWEBSOCKETS_LIBRARIES_STATIC})
 target_link_libraries(INT_LIBS ${Boost_LIBRARIES} )
 target_link_libraries(${APP_NAME} ${LIBS} )
+
+
+
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
+set( RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
+set_target_properties(${APP_NAME} 
+						PROPERTIES 
+						CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+# Second, for multi-config builds (e.g. msvc)
+foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+    string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+    set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR} )
+	set( RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR} )
+
+	set_target_properties(${APP_NAME} 
+							PROPERTIES 
+							RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR})
+
+endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+
+string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+
+get_target_property(exec_location ${APP_NAME} "RUNTIME_OUTPUT_DIRECTORY_${build_type}")
+
+add_custom_target(copyResources)
+add_custom_command(TARGET copyResources PRE_BUILD
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${PROJECT_SHADERS_DIR} "${exec_location}/shaders"
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${PROJECT_WEBRESOURCES_DIR} "${exec_location}/webResources"
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${CMAKE_SOURCE_DIR}/configs "${exec_location}/configs"
+										)
+add_dependencies(${APP_NAME} copyResources)

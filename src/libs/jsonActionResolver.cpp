@@ -1,5 +1,3 @@
-#pragma once
-
 #include "jsonActionResolver.h"
 #include <string>
 
@@ -11,7 +9,7 @@ JsonActionResolver::~JsonActionResolver() {
 
 }
 
-bool JsonActionResolver::resolve(std::string jsonMessage, Action &action) {
+bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) {
 	std::cout << "Resolving " << jsonMessage << std::endl;
 	const char *json = jsonMessage.c_str();
 	picojson::value v;
@@ -31,8 +29,11 @@ bool JsonActionResolver::resolve(std::string jsonMessage, Action &action) {
 		return false;
 	}
 
-	std::transform(message.begin(), message.end(), message.begin(), ::tolower);
-	if (message == "register") {
+  std::transform(message.begin(), message.end(), message.begin(), ::tolower);
+  if (message == "start_game") {
+    action.type = ClientAction::START_GAME;
+    return true;
+  } else if (message == "register") {
 		picojson::value data;
 		if (!getObject(v, "data", data)) {
 			return false;
@@ -42,22 +43,25 @@ bool JsonActionResolver::resolve(std::string jsonMessage, Action &action) {
 			return false;
 		}
 		action.data.insert(std::pair<std::string, std::string>("name", name));
-		action.type = REGISTER;
+    action.type = ClientAction::REGISTER;
 		return true;
-	} else if (message == "start") {
-		action.type = START;
+  } else if (message == "unregister") {
+    action.type = ClientAction::UNREGISTER;
+    return true;
+  } else if (message == "start_moving") {
+    action.type = ClientAction::START_MOVING;
 		return true;
 	} else if (message == "left_down") {
-		action.type = LEFT_DOWN;
+    action.type = ClientAction::LEFT_DOWN;
 		return true;
 	} else if (message == "left_up") {
-		action.type = LEFT_UP;
+    action.type = ClientAction::LEFT_UP;
 		return true;
 	} else if (message == "right_down") {
-		action.type = RIGHT_DOWN;
+    action.type = ClientAction::RIGHT_DOWN;
 		return true;
 	} else if (message == "right_up") {
-		action.type = RIGHT_UP;
+    action.type = ClientAction::RIGHT_UP;
 		return true;
 	}
 	std::cout << "Message not recognized: " << message << std::endl;

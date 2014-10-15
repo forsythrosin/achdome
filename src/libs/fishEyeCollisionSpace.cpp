@@ -6,7 +6,7 @@
 #include <wormArc.h>
 
 FisheyeCollisionSpace::FisheyeCollisionSpace(int radius) {
-  
+
 }
 
 FisheyeCollisionSpace::~FisheyeCollisionSpace() {
@@ -14,7 +14,7 @@ FisheyeCollisionSpace::~FisheyeCollisionSpace() {
 }
 
 std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> arcs) {
-  
+
 
   std::vector<WormCollision> v;
   return v;

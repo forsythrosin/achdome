@@ -68,6 +68,37 @@ button.positive {
   }
 }
 
+.gameController {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  .button {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    cursor: pointer;
+  }
+
+  .button#left {
+    background: rgba(255,255,255,0.2);
+    right: 50%;
+  }
+
+  .button#right {
+    background: rgba(255,255,255,0.22);
+    left: 50%;
+  }
+
+  .button#left:hover, .button#right:hover {
+    background: rgba(255,255,255,0.3);
+  }
+}
+
 /* Chrome, Safari, Opera */
 @-webkit-keyframes dualRotation {
   0%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}

@@ -90,6 +90,7 @@ void GameEngine::endGame() {
   currentGame = nullptr;
 }
 
+
 std::string GameEngine::getName(int playerId) {
   return playerManager->getName(playerId);
 }
@@ -131,5 +132,3 @@ void GameEngine::tick() {
 GameEngine::State GameEngine::getGameState() {
   return state;
 }
-
-

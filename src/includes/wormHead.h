@@ -34,7 +34,7 @@ class WormHead {
    * Get position in quaternions
    */
   glm::quat getQuaternionPosition();
-  
+
   /**
    * Get velocity in quaternions
    */

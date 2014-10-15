@@ -43,7 +43,7 @@ bool WormTracker::createWormHead(int id, glm::vec3 eulerPosition, glm::vec3 eule
 void WormTracker::tick() {
 
   std::vector<WormArc> arcs;
-  
+
   for (const auto &pair : wormHeads) {
     int id = pair.first;
     WormHead wh = pair.second;
@@ -54,9 +54,9 @@ void WormTracker::tick() {
       arcs.push_back(WormArc(id, prevPosition, position));
     }
   }
-  
+
   std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
-  
+
   renderSpace->addArcs(arcs);
   renderSpace->addCollisions(collisions);
 
