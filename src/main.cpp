@@ -12,6 +12,10 @@
 #include <wormTracker.h>
 #include <domeSurface.h>
 #include <jsonActionResolver.h>
+#include <gameEngine.h>
+#include <gameController.h>
+#include <socketGameController.h>
+#include <keyboardGameController.h>
 
 sgct::Engine * gEngine;
 Webserver webserver;
@@ -30,12 +34,18 @@ void webDecoder(const char *, size_t);
 void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
 
+// Game Engine
+GameEngine *gameEngine;
+ClusterRenderSpace *renderSpace;
+std::vector<GameController*> gameControllers;
+
 // DomeSurface buffers
 GLuint VBO = GL_FALSE;
 GLuint IBO = GL_FALSE;
 GLint Matrix_Loc = -1;
 GLuint vertexArray;
 DomeSurface *domeSurface;
+KeyboardGameController *keyboardGameController;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -55,10 +65,21 @@ int main( int argc, char* argv[] ) {
       delete gEngine;
       return EXIT_FAILURE;
   }
+  
+  if (gEngine->isMaster()){
+    FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
+    renderSpace = new ClusterRenderSpace();
+    
+    WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace);
+    gameEngine = new GameEngine(wt);
 
-  if(gEngine->isMaster()){
-    webserver.start(8000);
+    SocketGameController *sgc = new SocketGameController(gameEngine, 8000);
+    gameControllers.push_back(sgc);
+
+    keyboardGameController = new KeyboardGameController(gameEngine);
+    gameControllers.push_back(keyboardGameController);
   }
+
   // Main loop
   gEngine->render();
 
@@ -70,23 +91,9 @@ int main( int argc, char* argv[] ) {
   exit( EXIT_SUCCESS );
 }
 
-void myInitOGLFun() {
+void myInitOGLFun() {  
+  domeSurface = new DomeSurface(100, 30);
 
-  FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
-  ClusterRenderSpace *renderSpace = new ClusterRenderSpace();
-
-
-  WormTracker wt(fisheyeSpace, renderSpace);
-
-  wt.createWormHead(0, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.1, 0.0));
-
-  for (int i = 0; i < 10; i++) {
-    wt.tick();
-
-  }
-
-  domeSurface = new DomeSurface(50, 20);
-  // const GLfloat* domeVertexData = domeSurface->getCartesianVertexData();
   const GLfloat* domeVertexData = domeSurface->getSphericalVertexData();
   const GLuint* domeTriangleData = domeSurface->getTriangleData();
 
@@ -119,27 +126,12 @@ void myInitOGLFun() {
 }
 
 void myPreSyncFun() {
-    while(!bufferQueue.empty()){
-		QueueElement *qe = bufferQueue.pop();
-		Action action;
-		if (actionResolver->resolve(qe->message, action)) {
-			ActionType at = action.type;
-			std::string atName = at == REGISTER ? "REGISTER" :
-				at == START ? "START" :
-				at == LEFT_UP ? "LEFT_UP" :
-				at == LEFT_DOWN ? "LEFT_DOWN" :
-				at == RIGHT_UP ? "RIGHT_UP" :
-				at == RIGHT_DOWN ? "RIGHT_DOWN" :
-				"UNRECOGNIZED";
-			std::cout << "message: " << atName << std::endl <<
-				"data: {" << std::endl;
-			for (auto it = action.data.begin(); it != action.data.end(); ++it) {
-				std::cout << "  " << it->first << ": " << it->second << std::endl;
-			}
-			std::cout << "}" << std::endl;
-		}
-        delete qe;
+  if(gEngine->isMaster()){
+    for (GameController *ge : gameControllers) {
+      ge->performActions();
     }
+    gameEngine->tick();
+  }
 }
 
 void myDrawFun() {
@@ -163,12 +155,15 @@ void myDrawFun() {
 }
 
 void myEncodeFun() {
+  // get things from renderSpace and send it to everyone.
 }
 
 void myDecodeFun() {
+  // read from buffer and insert data to GameRenderers.
 }
 
 void keyCallback(int key, int action) {
+  keyboardGameController->processKeyEvent(key, action);
 }
 
 void mouseButtonCallback(int button, int action) {
