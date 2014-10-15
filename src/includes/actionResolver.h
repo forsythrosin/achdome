@@ -2,17 +2,17 @@
 
 #include <map>
 
-enum ActionType {
-	REGISTER,
-	START,
-	LEFT_DOWN,
-	LEFT_UP,
-	RIGHT_DOWN,
-	RIGHT_UP
-};
-
 struct Action {
-	ActionType type;
+  enum Type {
+    REGISTER,
+    UNREGISTER,
+    START,
+    LEFT_DOWN,
+    LEFT_UP,
+    RIGHT_DOWN,
+    RIGHT_UP
+  };
+	Type type;
 	std::map<std::string, std::string> data;
 };
 

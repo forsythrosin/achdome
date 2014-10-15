@@ -5,7 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <shaderUtils.h>
 #include <wormHead.h>
-#include <websocketBufferQueue.h>
 #include <Webserver.h>
 #include <fisheyeCollisionSpace.h>
 #include <clusterRenderSpace.h>
@@ -18,9 +17,6 @@
 #include <keyboardGameController.h>
 
 sgct::Engine * gEngine;
-Webserver webserver;
-WebsocketBufferQueue bufferQueue(&webserver);
-JsonActionResolver *actionResolver;
 
 void myDrawFun();
 void myPreSyncFun();
@@ -49,7 +45,6 @@ KeyboardGameController *keyboardGameController;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
-  actionResolver = new JsonActionResolver();
 
   gEngine->setInitOGLFunction( myInitOGLFun );
   gEngine->setDrawFunction( myDrawFun );
@@ -73,7 +68,12 @@ int main( int argc, char* argv[] ) {
     WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace);
     gameEngine = new GameEngine(wt);
 
-    SocketGameController *sgc = new SocketGameController(gameEngine, 8000);
+    Webserver *webServer = new Webserver();
+    webServer->start(8000);
+
+    JsonActionResolver *actionResolver = new JsonActionResolver();
+
+    SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver);
     gameControllers.push_back(sgc);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
@@ -85,7 +85,6 @@ int main( int argc, char* argv[] ) {
 
   // Clean up
   delete gEngine;
-  delete actionResolver;
 
   // Exit program
   exit( EXIT_SUCCESS );
