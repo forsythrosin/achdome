@@ -1,33 +1,34 @@
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
+#include <playerManager.h>
 
 class WormTracker;
-
-enum GameState {
-  Intro,
-  Lobby,
-  Game,
-  Results
-};
+class Game;
 
 
 class GameEngine {
  public: 
-  GameEngine(WormTracker *wt);
+
+  enum State {
+    INTRO,
+    LOBBY,
+    GAME
+  };
+
+  GameEngine(WormTracker *wt, PlayerManager *pm);
   int connectPlayer();
   bool disconnectPlayer(int playerId);
   void disconnectAll();
 
-  void turnLeft(int playerId, bool turn);
-  void turnRight(int playerId, bool turn);
-  void startMoving(int playerId);
+  bool turnLeft(int playerId, bool turn);
+  bool turnRight(int playerId, bool turn);
+  bool startMoving(int playerId);
   bool setName(int playerId, std::string name);
 
   void startLobby();
   void startGame();
   void endGame();
-  void showResults();
 
   std::string getName(int playerId);
   bool isAlive(int playerId);
@@ -35,17 +36,19 @@ class GameEngine {
   std::vector<int> getKills(int playerId);
   bool hasStartedMoving(int playerId);
   glm::vec3 getColor(int playerId);
-  
-  std::string getCountry();
-  glm::vec2 getPosition(); // phi, theta
+
+  std::string getCountry(int playerId);
+  glm::vec2 getPosition(int playerId); // phi, theta
   
   void tick();
 
   /* TODO: get spawn position */
-  GameState getGameState();
+  State getGameState();
     
-  
  private:
+  int nextPlayerId;
+  State state;
+  Game *currentGame;
+  PlayerManager *playerManager;
   WormTracker *wormTracker;
-  GameState state;
 };

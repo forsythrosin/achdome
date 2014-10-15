@@ -1,6 +1,7 @@
 #include <keyboardGameController.h>
 #include <gameEngine.h>
 #include "sgct.h"
+#include <iostream>
 
 KeyboardGameController::KeyboardGameController(GameEngine *ge) {
   gameEngine = ge;
@@ -61,7 +62,7 @@ void KeyboardGameController::processKeyEvent(int key, int action) {
 
 
 void KeyboardGameController::startGame() {
-  if (gameEngine->getGameState() != Game) {
+  if (gameEngine->getGameState() != GameEngine::GAME) {
     playerId = gameEngine->connectPlayer();
     gameEngine->startGame();
   }
