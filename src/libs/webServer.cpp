@@ -103,13 +103,13 @@ enum libwebsocket_callback_reasons reason,
     /* if not, send a file the easy way */
     if (strcmp(data, "/"))
     {
-      auto pathToFile = webUtils::absolutePathToResource(data + 1);
+      auto pathToFile = webUtils::pathToResource(data + 1);
       strcat(buf, pathToFile.c_str());
     }
     else /* default file to serve */
     {
       //strcat(buf, "D:/Projects/ixel_tools/websocket_test/bin/");
-      strcat(buf, webUtils::absolutePathToResource("index.html").c_str());
+      strcat(buf, webUtils::pathToResource("index.html").c_str());
     }
     buf[sizeof(buf) - 1] = '\0';
 

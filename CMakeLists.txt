@@ -206,3 +206,18 @@ set(LIBS ${LIBS} INT_LIBS)
 target_link_libraries(INT_LIBS ${LIBWEBSOCKETS_LIBRARIES_STATIC})
 target_link_libraries(INT_LIBS ${Boost_LIBRARIES} )
 target_link_libraries(${APP_NAME} ${LIBS} )
+
+string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+
+get_target_property(exec_location ${APP_NAME} "RUNTIME_OUTPUT_DIRECTORY_${build_type}")
+
+add_custom_target(copyResources)
+add_custom_command(TARGET copyResources PRE_BUILD
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${PROJECT_SHADERS_DIR} "${exec_location}/shaders"
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${PROJECT_WEBRESOURCES_DIR} "${exec_location}/webResources"
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${CMAKE_SOURCE_DIR}/configs "${exec_location}/configs"
+										)
+add_dependencies(${APP_NAME} copyResources)

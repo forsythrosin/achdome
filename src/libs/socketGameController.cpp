@@ -28,9 +28,11 @@ void SocketGameController::performActions() {
         playerIds.insert({ sessionId, playerId });
         break;
       case Action::UNREGISTER:
-        playerId = playerIds.at(sessionId);
+        if(playerIds.count( sessionId ) != 0){
+          playerId = playerIds.at(sessionId);
+          playerIds.erase(sessionId);
+        }
         gameEngine->disconnectPlayer(playerId);
-        playerIds.erase(sessionId);
         sessionIds.erase(playerId);
         break;
       case Action::START_MOVING:
