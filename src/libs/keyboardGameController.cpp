@@ -33,10 +33,24 @@ void KeyboardGameController::perform(KeyEvent e) {
     startMoving();
     break;
   case GLFW_KEY_LEFT:
-    turnLeft(action == GLFW_PRESS);
+    switch (action) {
+    case GLFW_PRESS:
+      turnLeft(true);
+      break;
+    case GLFW_RELEASE:
+      turnLeft(false);
+      break;
+    }
     break;
   case GLFW_KEY_RIGHT:
-    turnRight(action == GLFW_PRESS);
+    switch (action) {
+    case GLFW_PRESS:
+      turnRight(true);
+      break;
+    case GLFW_RELEASE:
+      turnRight(false);
+      break;
+    }
     break;
   }
 }
