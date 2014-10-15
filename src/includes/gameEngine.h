@@ -13,7 +13,7 @@ enum GameState {
 
 
 class GameEngine {
- public: 
+ public:
   GameEngine(WormTracker *wt);
   int connectPlayer();
   bool disconnectPlayer(int playerId);
@@ -35,16 +35,16 @@ class GameEngine {
   std::vector<int> getKills(int playerId);
   bool hasStartedMoving(int playerId);
   glm::vec3 getColor(int playerId);
-  
+
   std::string getCountry();
   glm::vec2 getPosition(); // phi, theta
-  
+
   void tick();
 
   /* TODO: get spawn position */
   GameState getGameState();
-    
-  
+
+
  private:
   WormTracker *wormTracker;
   GameState state;

@@ -5,7 +5,7 @@
 #include <wormCollision.h>
 
 ClusterRenderSpace::ClusterRenderSpace() {
-  
+
 }
 
 ClusterRenderSpace::~ClusterRenderSpace() {

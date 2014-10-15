@@ -7,7 +7,7 @@ class WormArc;
 class WormCollision;
 
 class FisheyeCollisionSpace : public CollisionSpace {
- public: 
+ public:
   /**
    * Constructor.
    */

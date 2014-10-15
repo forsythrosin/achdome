@@ -13,11 +13,11 @@ bool GameEngine::disconnectPlayer(int playerId) {
 }
 
 void GameEngine::turnLeft(int playerId, bool turn) {
-  
+
 }
 
 void GameEngine::turnRight(int playerId, bool turn) {
-  
+
 }
 
 bool GameEngine::setName(int playerId, std::string name) {
@@ -25,7 +25,7 @@ bool GameEngine::setName(int playerId, std::string name) {
 }
 
 void GameEngine::startMoving(int playerId) {
-  
+
 }
 
 void GameEngine::startLobby() {
@@ -33,7 +33,7 @@ void GameEngine::startLobby() {
 }
 
 void GameEngine::startGame() {
-  
+
 }
 
 void GameEngine::endGame() {
@@ -77,11 +77,9 @@ glm::vec2 GameEngine::getPosition() {
 }
 
 void GameEngine::tick() {
-  
+
 }
 
 GameState GameEngine::getGameState() {
   return state;
 }
-
-

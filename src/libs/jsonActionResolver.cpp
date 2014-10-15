@@ -1,5 +1,3 @@
-#pragma once
-
 #include "jsonActionResolver.h"
 #include <string>
 
