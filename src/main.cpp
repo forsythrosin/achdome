@@ -21,6 +21,7 @@
 #include <Webserver.h>
 #include <wormArc.h>
 #include <renderer.h>
+#include <cmath>
 
 sgct::Engine * gEngine;
 
@@ -40,13 +41,15 @@ void mouseButtonCallback(int button, int action);
 GameEngine *gameEngine;
 ClusterRenderSpace *renderSpace;
 std::vector<GameController*> gameControllers;
-
-
 KeyboardGameController *keyboardGameController;
 
+// Renderer + renderables
+sgct::SharedVector<WormArc> wormArcs(1);
 Renderer *renderer;
-RenderableDome *domeSurface;
-RenderableWormGroup *renderableWorms;
+RenderableDome *dome;
+RenderableWormGroup *worms;
+int wormsId;
+float timer = 0.0f;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -96,24 +99,14 @@ int main( int argc, char* argv[] ) {
 }
 
 void myInitOGLFun() {
-  // quat interpolation tests
-  glm::quat first(glm::vec3(0.0, 0.0, 0.1));
-  glm::quat second(glm::vec3(0.0, 0.1, 0.0));
-  WormArc wa(0, first, second);
-  glm::vec3 res = wa.getCartesianLerp(0.5);
-  std::cout << "(" << res.x << ", " << res.y << ", " << res.z << ")" << std::endl;
-
-  std::vector<WormArc> wormArcs;
-  wormArcs.push_back(wa);
-
   renderer = new Renderer(gEngine);
 
-  domeSurface = new RenderableDome(50, 20);
-  renderer->addRenderable(domeSurface, GL_LINES, "domeShader.vert", "domeShader.frag", true);
+  dome = new RenderableDome(50, 20);
+  renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeShader.frag", true);
 
-  renderableWorms = new RenderableWormGroup(1, 3);
-  renderableWorms->setWormArcs(wormArcs);
-  // renderer->addRenderable(domeSurface, GL_LINES, "wormShader.vert", "wormShader.frag", true);
+  worms = new RenderableWormGroup(1, 20);
+  worms->setWormArcs(wormArcs.getVal());
+  wormsId = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
 }
 
 void myPreSyncFun() {
@@ -123,18 +116,34 @@ void myPreSyncFun() {
     }
     gameEngine->tick();
   }
+
+  // Update worm positions
+  if( gEngine->isMaster() ) {
+    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
+    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+
+    timer += 0.005f;
+    WormArc wa(0, first, second);
+
+    std::vector<WormArc> arcs;
+    arcs.push_back(wa);
+    wormArcs.setVal(arcs);
+  }
 }
 
 void myDrawFun() {
-  renderer->renderAll();
+  worms->setWormArcs(wormArcs.getVal());
+  renderer->render(wormsId);
 }
 
 void myEncodeFun() {
   // get things from renderSpace and send it to everyone.
+  sgct::SharedData::instance()->writeVector( &wormArcs );
 }
 
 void myDecodeFun() {
   // read from buffer and insert data to GameRenderers.
+  sgct::SharedData::instance()->readVector( &wormArcs );
 }
 
 void keyCallback(int key, int action) {
@@ -145,4 +154,7 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
+  delete dome;
+  delete worms;
+  delete renderer;
 }

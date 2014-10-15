@@ -2,6 +2,8 @@
 
 #include "sgct/ogl_headers.h"
 
+// class Renderer;
+
 class Renderable {
 public:
   Renderable() = default;
@@ -23,4 +25,7 @@ protected:
   int vertexCount, elementCount;
   GLfloat *cartesianVertexData, *sphericalVertexData;
   GLuint *elementData;
+  bool update = false;
+
+friend class Renderer;
 };
