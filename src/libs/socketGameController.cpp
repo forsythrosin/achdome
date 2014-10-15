@@ -16,42 +16,43 @@ void SocketGameController::performActions() {
   int playerId;
   std::string message;
   while (webServer->read(sessionId, message)) {
-    Action action;
+    ClientAction action;
     if (actionResolver->resolve(message, action)) {
       switch (action.type) {
-      case Action::START_GAME:
+      case ClientAction::START_GAME:
         gameEngine->startGame();
         break;
-      case Action::REGISTER:
+      case ClientAction::REGISTER:
         playerId = gameEngine->connectPlayer();
         sessionIds.insert({ playerId, sessionId });
         playerIds.insert({ sessionId, playerId });
+        webServer->addMessage(sessionId, "{\"message\":\"started\"}");
         break;
-      case Action::UNREGISTER:
+      case ClientAction::UNREGISTER:
         if(playerIds.count( sessionId ) != 0){
           playerId = playerIds.at(sessionId);
           playerIds.erase(sessionId);
+          gameEngine->disconnectPlayer(playerId);
+          sessionIds.erase(playerId);
         }
-        gameEngine->disconnectPlayer(playerId);
-        sessionIds.erase(playerId);
         break;
-      case Action::START_MOVING:
+      case ClientAction::START_MOVING:
         playerId = playerIds.at(sessionId);
         gameEngine->startMoving(playerId);
         break;
-      case Action::LEFT_DOWN:
+      case ClientAction::LEFT_DOWN:
         playerId = playerIds.at(sessionId);
         gameEngine->turnLeft(playerId, true);
         break;
-      case Action::LEFT_UP:
+      case ClientAction::LEFT_UP:
         playerId = playerIds.at(sessionId);
         gameEngine->turnLeft(playerId, false);
         break;
-      case Action::RIGHT_DOWN:
+      case ClientAction::RIGHT_DOWN:
         playerId = playerIds.at(sessionId);
         gameEngine->turnRight(playerId, true);
         break;
-      case Action::RIGHT_UP:
+      case ClientAction::RIGHT_UP:
         playerId = playerIds.at(sessionId);
         gameEngine->turnRight(playerId, false);
         break;

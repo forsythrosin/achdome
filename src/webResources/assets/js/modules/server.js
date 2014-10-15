@@ -31,7 +31,6 @@ function setupSocket() {
   function onopen() {
     connected = true;
     console.log('Connected');
-    sendToServer('connected');
   }
 
   function onclose() {
@@ -102,10 +101,10 @@ var server = {
     sendToServer('start');
   },
   left: function (down) {
-    sendToServer('leftButton' + (down ? 'Down' : 'Up'));
+    sendToServer('left_' + (down ? 'down' : 'up'));
   },
   right: function (down) {
-    sendToServer('rightButton' + (down ? 'Down' : 'Up'));
+    sendToServer('right_' + (down ? 'down' : 'up'));
   },
   on: function (message, callback) {
     if (!callbacks[message]) {

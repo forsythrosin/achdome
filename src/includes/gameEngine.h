@@ -48,4 +48,5 @@ class GameEngine {
  private:
   WormTracker *wormTracker;
   GameState state;
+  int idCounter;
 };

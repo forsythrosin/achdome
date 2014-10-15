@@ -2,7 +2,7 @@
 
 #include <map>
 
-struct Action {
+struct ClientAction {
   enum Type {
     START_GAME,
     REGISTER,
@@ -20,5 +20,5 @@ struct Action {
 class ActionResolver {
 public:
 	virtual ~ActionResolver() {};
-	virtual bool resolve(std::string data, Action &action) = 0;
+  virtual bool resolve(std::string data, ClientAction &action) = 0;
 };

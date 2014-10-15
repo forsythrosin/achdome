@@ -1,6 +1,8 @@
 var handlebars = require('handlebars');
 var server = require('./server');
-var $ = require('jquery');
+//var $ = require('jquery');
+var $ = require('jquery-mobile');
+console.log('mobile', $);
 
 var welcomeScreen = require('../../templates/welcome.hbs');
 var lobby = require('../../templates/lobby.hbs');
@@ -14,8 +16,6 @@ var options = {
 
 $(function() {
   var $body = $('body');
-
-  handlebars.registerPartial('player', 'Mr. {{name}}');
 
   $body
     .on('click', '#play', function() {
@@ -31,22 +31,22 @@ $(function() {
     .on('click', '#start', function() {
       server.start();
     })
-    .on('mousedown', '#left', function() {
+    .on('vmousedown', '#left', function() {
       server.left(true);
     })
-    .on('mouseup', '#left', function() {
+    .on('vmouseup', '#left', function() {
       server.left(false);
     })
-    .on('mousedown', '#right', function() {
+    .on('vmousedown', '#right', function() {
       server.right(true);
     })
-    .on('mouseup', '#right', function() {
+    .on('vmouseup', '#right', function() {
       server.right(false);
     });
 
   var $startedScreen = $(startedScreen());
 
-$body.html(welcomeScreen({/*waiting: true*/}));
+  $body.html(welcomeScreen({/*waiting: true*/}));
 
   server.on('welcome', function(err, data) {
     console.log('Welcome');
