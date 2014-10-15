@@ -1,6 +1,6 @@
 #version 330 core
 
-layout(location = 0) in vec2 phiTheta;
+layout(location = 0) in vec3 pos;
 uniform mat4 MVP;
 
 out vec2 phiThetaCoords;
@@ -10,12 +10,12 @@ void main() {
   float r = 7.5;
 
   // Output position of the vertex, in clip space : MVP * position
-  vec3 vertPosition = vec3(
-    r*sin(phiTheta.y)*cos(phiTheta.x),
-    r*sin(phiTheta.y)*sin(phiTheta.x),
-    r*cos(phiTheta.y)
-  );
+  // vec3 vertPosition = vec3(
+  //   r*sin(phiTheta.y)*cos(phiTheta.x),
+  //   r*sin(phiTheta.y)*sin(phiTheta.x),
+  //   r*cos(phiTheta.y)
+  // );
 
-  phiThetaCoords = phiTheta;
-  gl_Position =  MVP * vec4(vertPosition, 1.0);
+  phiThetaCoords = pos.xy;
+  gl_Position =  MVP * vec4(pos*r, 1.0);
 }

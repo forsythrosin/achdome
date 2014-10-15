@@ -34,9 +34,11 @@ void webDecoder(const char *, size_t);
 void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
 
+sgct::SharedVector<WormArc> wormArcs(1);
 Renderer *renderer;
 RenderableDome *dome;
 RenderableWormGroup *worms;
+float timer = 0.0f;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -81,25 +83,16 @@ void myInitOGLFun() {
 
   for (int i = 0; i < 10; i++) {
     wt.tick();
-
   }
-
-  // quat interpolation tests
-  glm::quat first(glm::vec3(0.0, 0.0, glm::half_pi<float>()));
-  glm::quat second(glm::vec3(0.0, -glm::half_pi<float>(), 0.0));
-  WormArc wa(0, first, second);
-
-  std::vector<WormArc> wormArcs;
-  wormArcs.push_back(wa);
 
   renderer = new Renderer(gEngine);
 
   dome = new RenderableDome(50, 20);
   renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeShader.frag", true);
 
-  worms = new RenderableWormGroup(1, 10);
-  worms->setWormArcs(wormArcs);
-  renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", true);
+  worms = new RenderableWormGroup(1, 20);
+  worms->setWormArcs(wormArcs.getVal());
+  renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
 }
 
 void myPreSyncFun() {
@@ -109,16 +102,32 @@ void myPreSyncFun() {
     std::cout << *str << std::endl;
     delete str;
   }
+
+  // Update worm positions
+  if( gEngine->isMaster() ) {
+    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
+    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+
+    timer += 0.005f;
+    WormArc wa(0, first, second);
+
+    std::vector<WormArc> arcs;
+    arcs.push_back(wa);
+    wormArcs.setVal(arcs);
+  }
 }
 
 void myDrawFun() {
+  worms->setWormArcs(wormArcs.getVal());
   renderer->renderAll();
 }
 
 void myEncodeFun() {
+  sgct::SharedData::instance()->writeVector( &wormArcs );
 }
 
 void myDecodeFun() {
+  sgct::SharedData::instance()->readVector( &wormArcs );
 }
 
 void keyCallback(int key, int action) {

@@ -22,6 +22,7 @@ void RenderableWormGroup::setWormArcs(std::vector<WormArc> wormArcs) {
   this->wormArcs = wormArcs;
   createVertices();
   createElements();
+  update = true;
 }
 
 void RenderableWormGroup::createVertices() {
@@ -34,10 +35,10 @@ void RenderableWormGroup::createVertices() {
       int sphereIdx = (j*vertsPerWorm + i)*2;
 
       float t = (float)i/(float)segsPerWorm;
-      std::cout << "t = " << t << std::endl;
+      // std::cout << "t = " << t << std::endl;
 
       glm::vec3 coord = arc.getCartesianLerp(t);
-      std::cout << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")" << std::endl;
+      // std::cout << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")" << std::endl;
       cartesianVertexData[cartIdx] = coord.x;
       cartesianVertexData[cartIdx + 1] = coord.y;
       cartesianVertexData[cartIdx + 2] = coord.z;
