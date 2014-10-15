@@ -6,5 +6,5 @@ out vec4 color;
 void main() {
   const float PI = 3.1415;
   // color = vec4(phiThetaCoords.x/(PI*2.0), phiThetaCoords.y/(PI/2.0), 1.0, 0.8);
-  color = vec4(0.3, 0.3, 0.3, 1.0);
+  color = vec4(0.2, 0.2, 0.2, 1.0);
 }
