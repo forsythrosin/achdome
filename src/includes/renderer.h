@@ -21,6 +21,8 @@ struct RenderConfig {
   std::string fragShader;
   bool sphericalCoords;
 
+  std::string shaderId;
+
   GLuint VBO = GL_FALSE;
   GLuint IBO = GL_FALSE;
   GLuint VAO;
@@ -38,6 +40,7 @@ public:
 private:
   void init(RenderConfig &renderConfig);
   std::vector<RenderConfig> renderConfigs;
-  const float DOME_ROTATION = -117.0;
+  // const float DOME_ROTATION = -117.0;
+  float rot = 0.0f;
   sgct::Engine *gEngine;
 };

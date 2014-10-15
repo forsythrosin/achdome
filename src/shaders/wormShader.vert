@@ -19,4 +19,3 @@ void main() {
   phiThetaCoords = phiTheta;
   gl_Position =  MVP * vec4(vertPosition, 1.0);
 }
-

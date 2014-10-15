@@ -1,5 +1,7 @@
 #include <renderer.h>
 #include <shaderUtils.h>
+#include <string>
+#include <iostream>
 
 Renderer::Renderer(sgct::Engine *gEngine) {
   this->gEngine = gEngine;
@@ -52,20 +54,25 @@ void Renderer::init(RenderConfig &renderConfig) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   // init shaders
+  renderConfig.shaderId = std::to_string(renderConfigs.size());
+
   std::string vertShader = shaderUtils::absolutePathToShader(renderConfig.vertShader);
   std::string fragShader = shaderUtils::absolutePathToShader(renderConfig.fragShader);
-  sgct::ShaderManager::instance()->addShaderProgram( "xform", vertShader, fragShader );
-  sgct::ShaderManager::instance()->bindShaderProgram( "xform" );
-  renderConfig.Matrix_Loc = sgct::ShaderManager::instance()->getShaderProgram( "xform" ).getUniformLocation( "MVP" );
+  sgct::ShaderManager::instance()->addShaderProgram( renderConfig.shaderId, vertShader, fragShader );
+  sgct::ShaderManager::instance()->bindShaderProgram( renderConfig.shaderId );
+  renderConfig.Matrix_Loc = sgct::ShaderManager::instance()->getShaderProgram( renderConfig.shaderId ).getUniformLocation( "MVP" );
 
   sgct::ShaderManager::instance()->unBindShaderProgram();
 };
 
 void Renderer::render(RenderConfig &renderConfig) {
-  glm::mat4 scene_mat = glm::rotate( glm::mat4(1.0f), DOME_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
+  rot += 0.04f;
+  glm::mat4 rot_stat = glm::rotate( glm::mat4(1.0f), -60.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  glm::mat4 rot_mat = glm::rotate( glm::mat4(1.0f), rot, glm::vec3(0.0f, 0.0f, 1.0f));
+  glm::mat4 scene_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, -1.0, -25.0)) * rot_stat * rot_mat;
   glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix() * scene_mat;
 
-  sgct::ShaderManager::instance()->bindShaderProgram( "xform" );
+  sgct::ShaderManager::instance()->bindShaderProgram( renderConfig.shaderId );
 
   glUniformMatrix4fv(renderConfig.Matrix_Loc, 1, GL_FALSE, &MVP[0][0]);
 

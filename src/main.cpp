@@ -34,20 +34,9 @@ void webDecoder(const char *, size_t);
 void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
 
-// DomeSurface buffers
-// GLuint VBO = GL_FALSE;
-// GLuint IBO = GL_FALSE;
-// GLint Matrix_Loc = -1;
-// GLuint vertexArray;
-
-// float domeRot = -117.0f;
-
-// float rot = 0.0f;
-
 Renderer *renderer;
-
-RenderableDome *domeSurface;
-RenderableWormGroup *renderableWorms;
+RenderableDome *dome;
+RenderableWormGroup *worms;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -96,32 +85,30 @@ void myInitOGLFun() {
   }
 
   // quat interpolation tests
-  glm::quat first(glm::vec3(0.0, 0.0, 0.1));
-  glm::quat second(glm::vec3(0.0, 0.1, 0.0));
+  glm::quat first(glm::vec3(0.0, 0.0, glm::half_pi<float>()));
+  glm::quat second(glm::vec3(0.0, -glm::half_pi<float>(), 0.0));
   WormArc wa(0, first, second);
-  glm::vec3 res = wa.getCartesianLerp(0.5);
-  std::cout << "(" << res.x << ", " << res.y << ", " << res.z << ")" << std::endl;
 
   std::vector<WormArc> wormArcs;
   wormArcs.push_back(wa);
 
   renderer = new Renderer(gEngine);
 
-  domeSurface = new RenderableDome(50, 20);
-  renderer->addRenderable(domeSurface, GL_LINES, "domeShader.vert", "domeShader.frag", true);
+  dome = new RenderableDome(50, 20);
+  renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeShader.frag", true);
 
-  renderableWorms = new RenderableWormGroup(1, 3);
-  renderableWorms->setWormArcs(wormArcs);
-  // renderer->addRenderable(domeSurface, GL_LINES, "wormShader.vert", "wormShader.frag", true);
+  worms = new RenderableWormGroup(1, 10);
+  worms->setWormArcs(wormArcs);
+  renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", true);
 }
 
 void myPreSyncFun() {
-    while(!bufferQueue.empty()){
-        std::string *str = bufferQueue.pop();
-        Webserver::instance()->addBroadcast(*str);
-        std::cout << *str << std::endl;
-        delete str;
-    }
+  while(!bufferQueue.empty()){
+    std::string *str = bufferQueue.pop();
+    Webserver::instance()->addBroadcast(*str);
+    std::cout << *str << std::endl;
+    delete str;
+  }
 }
 
 void myDrawFun() {
@@ -141,4 +128,7 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
+  delete dome;
+  delete worms;
+  delete renderer;
 }
