@@ -19,6 +19,9 @@ void SocketGameController::performActions() {
     Action action;
     if (actionResolver->resolve(message, action)) {
       switch (action.type) {
+      case Action::START_GAME:
+        gameEngine->startGame();
+        break;
       case Action::REGISTER:
         playerId = gameEngine->connectPlayer();
         sessionIds.insert({ playerId, sessionId });
@@ -30,7 +33,7 @@ void SocketGameController::performActions() {
         playerIds.erase(sessionId);
         sessionIds.erase(playerId);
         break;
-      case Action::START:
+      case Action::START_MOVING:
         playerId = playerIds.at(sessionId);
         gameEngine->startMoving(playerId);
         break;

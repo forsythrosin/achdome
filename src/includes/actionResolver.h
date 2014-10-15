@@ -4,9 +4,10 @@
 
 struct Action {
   enum Type {
+    START_GAME,
     REGISTER,
     UNREGISTER,
-    START,
+    START_MOVING,
     LEFT_DOWN,
     LEFT_UP,
     RIGHT_DOWN,

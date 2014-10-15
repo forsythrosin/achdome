@@ -32,7 +32,10 @@ bool JsonActionResolver::resolve(std::string jsonMessage, Action &action) {
 	}
 
   std::transform(message.begin(), message.end(), message.begin(), ::tolower);
-  if (message == "register") {
+  if (message == "start_game") {
+    action.type = Action::START_GAME;
+    return true;
+  } else if (message == "register") {
 		picojson::value data;
 		if (!getObject(v, "data", data)) {
 			return false;
@@ -47,8 +50,8 @@ bool JsonActionResolver::resolve(std::string jsonMessage, Action &action) {
   } else if (message == "unregister") {
     action.type = Action::UNREGISTER;
     return true;
-  } else if (message == "start") {
-    action.type = Action::START;
+  } else if (message == "start_moving") {
+    action.type = Action::START_MOVING;
 		return true;
 	} else if (message == "left_down") {
     action.type = Action::LEFT_DOWN;
