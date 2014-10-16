@@ -48,8 +48,9 @@ sgct::SharedVector<WormArc> wormArcs(1);
 Renderer *renderer;
 RenderableDome *dome;
 RenderableWormGroup *worms;
-int wormsId;
+int domeGrid, domeWorms, wormLines;
 float timer = 0.0f;
+int stitchStep = 0;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -100,14 +101,16 @@ int main( int argc, char* argv[] ) {
 }
 
 void myInitOGLFun() {
+  // Define renderer + renderables
   renderer = new Renderer(gEngine);
 
   dome = new RenderableDome(50, 20);
-  renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeShader.frag", true);
+  domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
+  domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
   worms = new RenderableWormGroup(1, 20);
   worms->setWormArcs(wormArcs.getVal());
-  wormsId = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
+  wormLines = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
 }
 
 void myPreSyncFun() {
@@ -123,18 +126,30 @@ void myPreSyncFun() {
     glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
     glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
 
-    timer += 0.005f;
+    timer += 0.001f;
     WormArc wa(0, first, second);
 
     std::vector<WormArc> arcs;
     arcs.push_back(wa);
     wormArcs.setVal(arcs);
   }
+
+  // Reset stitch step
+  stitchStep = 0;
 }
 
 void myDrawFun() {
+  // Copy current worm positions
   worms->setWormArcs(wormArcs.getVal());
-  renderer->render(wormsId);
+
+  // render wormLines to FBO
+  renderer->renderToFBO(wormLines, stitchStep);
+  // render FBO as texture on dome
+  renderer->render(domeWorms, wormLines, stitchStep);
+  // render grid lines
+  renderer->render(domeGrid);
+
+  ++stitchStep;
 }
 
 void myEncodeFun() {
