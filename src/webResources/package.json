@@ -16,7 +16,6 @@
     "handlebars": "~1.2.0",
     "jquery": "~2.1.1",
     "browserify-handlebars": "0.2.0",
-    "grunt-contrib-copy": "~0.7.0",
-    "hammerjs": "~2.0.4"
+    "grunt-contrib-copy": "~0.7.0"
   }
 }
