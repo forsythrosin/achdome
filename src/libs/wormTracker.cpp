@@ -96,12 +96,16 @@ bool WormTracker::turnLeft(int id, bool turn) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
     it->second->turnLeft(turn);
+    return true;
   }
+  return false;
 }
 
 bool WormTracker::turnRight(int id, bool turn) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
     it->second->turnRight(turn);
+    return true;
   }
+  return false;
 }

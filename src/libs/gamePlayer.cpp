@@ -10,7 +10,7 @@ GamePlayer::GamePlayer(Player *p) {
 }
 
 std::vector<int> GamePlayer::getKillIds() {
-
+	return std::vector<int>();
 }
 
 int GamePlayer::getKiller() {

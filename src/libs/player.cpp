@@ -29,4 +29,5 @@ bool Player::isConnected() {
 
 bool Player::disconnect() {
   connected = false;
+  return true;
 }

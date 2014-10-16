@@ -55,7 +55,7 @@ int PlayerManager::getPlayerIdByName(std::string name) {
 
 
 bool PlayerManager::setName(int playerId, std::string name) {
-
+	return false;
 }
 
 
@@ -72,7 +72,7 @@ glm::vec3 PlayerManager::getColor(int playerId) {
 
 
 bool PlayerManager::setColor(int playerId, glm::vec3 color) {
-
+	return false;
 }
 
 void PlayerManager::addEventListener(PlayerEventListener *pel) {

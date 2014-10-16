@@ -21,6 +21,7 @@ bool Game::start() {
     GamePlayer *gamePlayer = iter.second;
     wormTracker->createWormHead(gamePlayer->getId(), glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.01));
   }
+  return true;
 }
 
 
