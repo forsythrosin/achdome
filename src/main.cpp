@@ -148,7 +148,9 @@ void myDecodeFun() {
 }
 
 void keyCallback(int key, int action) {
-  keyboardGameController->processKeyEvent(key, action);
+  if (gEngine->isMaster()){
+    keyboardGameController->processKeyEvent(key, action);
+  }
 }
 
 void mouseButtonCallback(int button, int action) {
