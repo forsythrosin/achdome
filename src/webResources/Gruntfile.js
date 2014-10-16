@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         tasks: ['browserify','copy']
       },
       copy: {
-        files: ['*', '!assets/js/modules/*.js', '!assets/templates/*.hbs', '!assets/templates/partials/*.hbs'],
+        files: ['*.html', 'assets/css/*.css', 'assets/less/**/*.less'],
         tasks: ['copy']
       }
     },

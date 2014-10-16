@@ -1,8 +1,6 @@
 var handlebars = require('handlebars');
 var server = require('./server');
-//var $ = require('jquery');
-var $ = require('jquery-mobile');
-console.log('mobile', $);
+var $ = require('jquery');
 
 var welcomeScreen = require('../../templates/welcome.hbs');
 var lobby = require('../../templates/lobby.hbs');
@@ -31,20 +29,22 @@ $(function() {
     .on('click', '#start', function() {
       server.start();
     })
-    .on('vmousedown', '#left', function() {
+    .on('touchstart', '#left', function() {
+      $body.find('#left').addClass('active');
       server.left(true);
     })
-    .on('vmouseup', '#left', function() {
+    .on('touchend', '#left', function() {
+      $body.find('#left').removeClass('active');
       server.left(false);
     })
-    .on('vmousedown', '#right', function() {
+    .on('touchstart', '#right', function() {
+      $body.find('#right').addClass('active');
       server.right(true);
     })
-    .on('vmouseup', '#right', function() {
+    .on('touchend', '#right', function() {
+      $body.find('#right').removeClass('active');
       server.right(false);
     });
-
-  var $startedScreen = $(startedScreen());
 
   $body.html(welcomeScreen({/*waiting: true*/}));
 
@@ -65,7 +65,7 @@ $(function() {
 
   server.on('started', function (err, res) {
     console.log('Started');
-    $body.html($startedScreen);
+    $body.html(startedScreen());
   });
 
   server.on('ended', function (err, res) {
