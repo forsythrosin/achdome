@@ -8,7 +8,7 @@
 #include <renderSpace.h>
 #include <map>
 #include <vector>
-
+#include <wormEventListener.h>
 
 WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace) {
   this->collisionSpace = collisionSpace;
@@ -17,6 +17,18 @@ WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpac
 
 WormTracker::~WormTracker() {
 
+}
+
+void WormTracker::addEventListener(WormEventListener *wel) {
+  eventListeners.push_back(wel);
+}
+
+void WormTracker::removeEventListener(WormEventListener *wel) {
+  for (int i = 0; i < eventListeners.size(); i++) {
+    if (eventListeners[i] == wel) {
+      eventListeners.erase(eventListeners.begin() + i);
+    }
+  }
 }
 
 bool WormTracker::createWormHead(int id, glm::vec3 eulerPosition, glm::vec3 eulerRotation) {
@@ -35,14 +47,54 @@ void WormTracker::tick() {
   for (const auto &pair : wormHeads) {
     int id = pair.first;
     WormHead wh = pair.second;
-    glm::quat prevPosition = wh.getQuaternionPosition();
-    wh.tick();
-    glm::quat position = wh.getQuaternionPosition();
-    arcs.push_back(WormArc(id, prevPosition, position));
+    if (wh.isMoving()) {
+      glm::quat prevPosition = wh.getQuaternionPosition();
+      wh.tick();
+      glm::quat position = wh.getQuaternionPosition();
+      arcs.push_back(WormArc(id, prevPosition, position));
+    }
   }
 
   std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
 
   renderSpace->addArcs(arcs);
   renderSpace->addCollisions(collisions);
+
+  for (WormEventListener *wel : eventListeners) {
+    for (WormCollision c : collisions) {
+      wel->onWormCollision(c);
+    }
+  }
+}
+
+void WormTracker::clear() {
+  wormHeads.clear();
+}
+
+void WormTracker::startWormHead(int id) {
+  auto it = wormHeads.find(id);
+  if (it != wormHeads.end()) {
+    it->second.start();
+  }
+}
+
+void WormTracker::stopWormHead(int id) {
+  auto it = wormHeads.find(id);
+  if (it != wormHeads.end()) {
+    it->second.stop();
+  }
+}
+
+bool WormTracker::turnLeft(int id, bool turn) {
+  auto it = wormHeads.find(id);
+  if (it != wormHeads.end()) {
+    it->second.turnLeft(turn);
+  }
+}
+
+bool WormTracker::turnRight(int id, bool turn) {
+  auto it = wormHeads.find(id);
+  if (it != wormHeads.end()) {
+    it->second.turnRight(turn);
+  }
 }

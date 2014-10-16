@@ -1,87 +1,134 @@
 #include <gameEngine.h>
 #include <iostream>
+#include <player.h>
+#include <vector>
+#include <wormTracker.h>
+#include <game.h>
 
-GameEngine::GameEngine(WormTracker* wt) {
-  state = Intro;
-  idCounter = 0;
+GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm) {
+  state = State::INTRO;
+  playerManager = pm;
+  currentGame = nullptr;
+  nextPlayerId = 0;
+  wormTracker = wt;
 }
 
+/**
+ * Connect a player and return the new identifier
+ */
 int GameEngine::connectPlayer() {
-  return idCounter++;
+  return playerManager->connectPlayer();
 }
 
+/**
+ * Disconnect a player.
+ */
 bool GameEngine::disconnectPlayer(int playerId) {
+  playerManager->disconnectPlayer(playerId);
+}
+
+/**
+ * Turn left.
+ */
+bool GameEngine::turnLeft(int playerId, bool turn) {
+  if (state == State::GAME && currentGame != nullptr) {
+    return currentGame->turnLeft(playerId, turn);
+  }
   return false;
 }
 
-void GameEngine::turnLeft(int playerId, bool turn) {
-  std::cout << "left turn " << (turn ? "true" : "false") << std::endl;
+/**
+ * Turn right.
+ */
+bool GameEngine::turnRight(int playerId, bool turn) {
+  if (state == State::GAME && currentGame != nullptr) {
+    return currentGame->turnRight(playerId, turn);
+  }
+  return false;
 }
 
-void GameEngine::turnRight(int playerId, bool turn) {
-  std::cout << "right turn " << (turn ? "true" : "false") << std::endl;
+/**
+ * Start moving.
+ */
+bool GameEngine::startMoving(int playerId) {
+  if (state == State::GAME && currentGame != nullptr) {
+    return currentGame->startMoving(playerId);
+  }
+  return false;
 }
 
+/**
+ * Set name.
+ */
 bool GameEngine::setName(int playerId, std::string name) {
-  return false;
+  return playerManager->setName(playerId, name);
 }
 
-void GameEngine::startMoving(int playerId) {
 
-}
-
+/**
+ * Start Lobby.
+ */
 void GameEngine::startLobby() {
-
+  state = State::LOBBY;
 }
 
+/**
+ * Start Lobby.
+ */
 void GameEngine::startGame() {
-  std::cout << "Game started" << std::endl;
+  currentGame = new Game(playerManager, wormTracker);
+  currentGame->start();
+  state = State::GAME;
 }
 
+/**
+ *
+ */
 void GameEngine::endGame() {
-  std::cout << "Game ended" << std::endl;
+  currentGame->end();
+  delete currentGame;
+  currentGame = nullptr;
 }
 
-void GameEngine::showResults() {
-
-}
 
 std::string GameEngine::getName(int playerId) {
-  return "";
+  return playerManager->getName(playerId);
 }
 
 bool GameEngine::isAlive(int playerId) {
-  return true;
+  return currentGame->isAlive(playerId);
 }
 
 int GameEngine::getKiller(int playerId) {
-  return -1;
+  return currentGame->getKiller(playerId);
 }
 
 std::vector<int> GameEngine::getKills(int playerId) {
-  return std::vector<int>();
+  return currentGame->getKills(playerId);
 }
 
 bool GameEngine::hasStartedMoving(int playerId) {
-  return false;
+  return currentGame->hasStartedMoving(playerId);
 }
 
 glm::vec3 GameEngine::getColor(int playerId) {
-  return glm::vec3(0.0, 0.0, 0.0);
+  return playerManager->getColor(playerId);
 }
 
-std::string GameEngine::getCountry() {
-  return "Sweden";
+std::string GameEngine::getCountry(int playerId) {
+  return currentGame->getCountry(playerId);
 }
 
-glm::vec2 GameEngine::getPosition() {
-  return glm::vec2(0.0, 0.0);
+glm::vec2 GameEngine::getPosition(int playerId) {
+  return currentGame->getPosition(playerId);
 }
 
 void GameEngine::tick() {
-
+  if (state == State::GAME && currentGame != nullptr) {
+    currentGame->tick();
+  }
 }
 
-GameState GameEngine::getGameState() {
+GameEngine::State GameEngine::getGameState() {
   return state;
 }

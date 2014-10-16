@@ -1,11 +1,10 @@
+#pragma once
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 
 class WormHead {
-  bool alive;
-  glm::quat positionQuat;
-  glm::quat velocityQuat;
  public:
   WormHead(glm::vec3 p, glm::vec3 v);
   void tick();
@@ -40,4 +39,37 @@ class WormHead {
    * Get velocity in quaternions
    */
   glm::quat getQuaternionVelocity();
+  
+  /**
+   * Turn left.
+   */
+  void turnLeft(bool turn);
+
+  /**
+   * Turn right.
+   */
+  void turnRight(bool turn);
+
+  /**
+   * Is moving?
+   */
+  bool isMoving();
+
+  /**
+   * Stop.
+   */
+  void stop();
+
+  /**
+   * Start.
+   */
+  void start();
+
+ private: 
+  bool moving;
+  bool turningLeft;
+  bool turningRight;
+  glm::quat positionQuat;
+  glm::quat velocityQuat;
+  float turnSpeed;
 };

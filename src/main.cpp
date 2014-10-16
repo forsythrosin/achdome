@@ -74,7 +74,8 @@ int main( int argc, char* argv[] ) {
     renderSpace = new ClusterRenderSpace();
 
     WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace);
-    gameEngine = new GameEngine(wt);
+    PlayerManager *pm = new PlayerManager();
+    gameEngine = new GameEngine(wt, pm);
 
     Webserver *webServer = new Webserver();
     webServer->start(8000);

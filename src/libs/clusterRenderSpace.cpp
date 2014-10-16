@@ -23,3 +23,5 @@ void ClusterRenderSpace::addCollisions(std::vector<WormCollision> arcs) {
 void ClusterRenderSpace::clear() {
 
 }
+
+
