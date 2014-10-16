@@ -1,7 +1,7 @@
 # Copyright Linkoping University 2011
 # SGCT Project Authors see Authors.txt
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 2.8.12)
 SET(APP_NAME Achdome)
 include(CheckCXXCompilerFlag)
 project(${APP_NAME} CXX)
@@ -238,7 +238,6 @@ add_custom_command(TARGET resources PRE_BUILD
 										${PROJECT_CONFIG_DIR} "${exec_location}/configs"
                     )
 
-message(${PROJECT_WEBRESOURCES_DIR})
 add_custom_target(npmModules
 									COMMAND npm install --prefix ${PROJECT_WEBRESOURCES_DIR} ${PROJECT_WEBRESOURCES_DIR})
 
