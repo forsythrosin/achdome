@@ -33,8 +33,8 @@ void WormTracker::removeEventListener(WormEventListener *wel) {
 
 bool WormTracker::createWormHead(int id, glm::vec3 eulerPosition, glm::vec3 eulerRotation) {
   if (wormHeads.find(id) == wormHeads.end()) {
-    WormHead wh(eulerPosition, eulerRotation);
-    wormHeads.insert(std::pair<int, WormHead>(id, wh));
+    WormHead *wh = new WormHead(eulerPosition, eulerRotation);
+    wormHeads.insert(std::pair<int, WormHead*>(id, wh));
     return true;
   }
   return false;
@@ -46,11 +46,11 @@ void WormTracker::tick() {
 
   for (const auto &pair : wormHeads) {
     int id = pair.first;
-    WormHead wh = pair.second;
-    if (wh.isMoving()) {
-      glm::quat prevPosition = wh.getQuaternionPosition();
-      wh.tick();
-      glm::quat position = wh.getQuaternionPosition();
+    WormHead *wh = pair.second;
+    if (wh->isMoving()) {
+      glm::quat prevPosition = wh->getQuaternionPosition();
+      wh->tick();
+      glm::quat position = wh->getQuaternionPosition();
       arcs.push_back(WormArc(id, prevPosition, position));
     }
   }
@@ -68,33 +68,40 @@ void WormTracker::tick() {
 }
 
 void WormTracker::clear() {
+  for (auto it : wormHeads) {
+    delete it.second;
+  }
   wormHeads.clear();
 }
 
-void WormTracker::startWormHead(int id) {
+bool WormTracker::startWormHead(int id) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
-    it->second.start();
+    it->second->start();
+    return true;
   }
+  return false;
 }
 
-void WormTracker::stopWormHead(int id) {
+bool WormTracker::stopWormHead(int id) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
-    it->second.stop();
+    it->second->stop();
+    return true;
   }
+  return false;
 }
 
 bool WormTracker::turnLeft(int id, bool turn) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
-    it->second.turnLeft(turn);
+    it->second->turnLeft(turn);
   }
 }
 
 bool WormTracker::turnRight(int id, bool turn) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
-    it->second.turnRight(turn);
+    it->second->turnRight(turn);
   }
 }

@@ -11,8 +11,13 @@ class GamePlayer {
   int getKiller();
   int getId();
   bool isAlive();
+  bool startMoving();
+  bool kill(int killerId);
+  bool addKill(int playerId);
+  bool hasKilled(int playerId);
  private:
   bool alive;
+  bool startedMoving;
   Player *player;
   std::vector<int> kills;
   int killer;

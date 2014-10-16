@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <iostream>
 #include <cmath>
 
 /**
@@ -12,6 +11,10 @@
 WormHead::WormHead(glm::vec3 pos, glm::vec3 vel) {
   setEulerPosition(pos);
   setEulerVelocity(vel);
+  
+  float angle = 0.01;
+  glm::vec3 axis(0, 0, 1);
+  glm::vec3 normalizedAxis = ((float)sin(angle/2.0)) * axis;
   turnSpeed = 0.1;
 }
 
@@ -21,19 +24,33 @@ WormHead::WormHead(glm::vec3 pos, glm::vec3 vel) {
 void WormHead::tick() {
   glm::vec3 pos = getPosition();
   if (turningLeft) {
-    float angle = turnSpeed;
-    glm::vec3 normalizedAxis = pos*((float)sin(angle/2.0));
-    glm::quat turnLeftQuat(cos(angle/2), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
-    velocityQuat = velocityQuat * turnLeftQuat;
+    float turnAngle = -turnSpeed;
+    glm::vec3 normalizedAxis = pos*((float)sin(turnAngle/2.0));
+    glm::quat turnLeftQuat(cos(turnAngle/2.0), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
+
+    float angle = acos(velocityQuat.w)*2;
+    glm::vec3 axis = glm::normalize(glm::axis(velocityQuat));
+
+    glm::vec3 newAxis = glm::mat3_cast(turnLeftQuat) * axis;
+    glm::vec3 normalizedNewAxis = ((float)sin(angle/2.0))*newAxis;
+
+    velocityQuat = glm::quat(cos(angle/2.0), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
   if (turningRight) {
-    float angle = -turnSpeed;
-    glm::vec3 normalizedAxis = pos*((float)sin(angle/2));
-    glm::quat turnRightQuat(cos(angle/2), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
-    velocityQuat = velocityQuat * turnRightQuat;
+    float turnAngle = turnSpeed;
+    glm::vec3 normalizedAxis = pos*((float)sin(turnAngle/2.0));
+    glm::quat turnRightQuat(cos(turnAngle/2.0), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
+
+    float angle = acos(velocityQuat.w)*2;
+    glm::vec3 axis = glm::normalize(glm::axis(velocityQuat));
+
+    glm::vec3 newAxis = glm::mat3_cast(turnRightQuat) * axis;
+    glm::vec3 normalizedNewAxis = ((float)sin(angle/2.0))*newAxis;
+    
+     velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
   if (isMoving()) {
-    positionQuat = positionQuat * velocityQuat;
+    positionQuat = velocityQuat * positionQuat;
   }
 }
 
@@ -106,7 +123,7 @@ glm::quat WormHead::getQuaternionVelocity() {
 }
 
 
-bool WormHead::isMoving() {
+bool WormHead::isMoving() const {
   return moving;
 }
 

@@ -12,14 +12,14 @@ Game::Game(PlayerManager *playerManager, WormTracker *wormTracker) {
   }
   
   playerManager->addEventListener(this);
+  this->wormTracker = wormTracker;
 }
 
 bool Game::start() {
   wormTracker->clear();
   for (auto iter : gamePlayers) {
     GamePlayer *gamePlayer = iter.second;
-    wormTracker->createWormHead(gamePlayer->getId(), glm::vec3(0.0, 1.0, 0.0), glm::vec3(1.0, 0.0, 0.0));
-    
+    wormTracker->createWormHead(gamePlayer->getId(), glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.01));
   }
 }
 
@@ -79,10 +79,8 @@ std::vector<int> Game::getKills(int playerId) {
 
 
 void Game::tick() {
-
+  wormTracker->tick();
 }
-
-
 
 
 std::string Game::getCountry(int playerId) {
@@ -94,6 +92,19 @@ glm::vec2 Game::getPosition(int playerId) {
 }
 
 bool Game::startMoving(int playerId) {
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return false;
+  }
+  if (!gamePlayers[playerId]->isAlive()) {
+    return false;
+  }
+  if (hasStartedMoving(playerId)) {
+    return false;
+  }
+  gamePlayers[playerId]->startMoving();
+  return wormTracker->startWormHead(playerId);
+  
+  
   return true;
 }
 

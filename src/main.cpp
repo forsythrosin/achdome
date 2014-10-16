@@ -49,6 +49,7 @@ Renderer *renderer;
 RenderableDome *dome;
 RenderableWormGroup *worms;
 int wormsId;
+int domeId;
 float timer = 0.0f;
 
 int main( int argc, char* argv[] ) {
@@ -103,7 +104,7 @@ void myInitOGLFun() {
   renderer = new Renderer(gEngine);
 
   dome = new RenderableDome(50, 20);
-  renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeShader.frag", true);
+  domeId = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeShader.frag", true);
 
   worms = new RenderableWormGroup(1, 20);
   worms->setWormArcs(wormArcs.getVal());
@@ -120,20 +121,25 @@ void myPreSyncFun() {
 
   // Update worm positions
   if( gEngine->isMaster() ) {
-    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
-    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+    //glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
+    //glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
 
-    timer += 0.005f;
-    WormArc wa(0, first, second);
+    //timer += 0.005f;
+    //WormArc wa(0, first, second);
 
-    std::vector<WormArc> arcs;
-    arcs.push_back(wa);
+    std::vector<WormArc> arcs = renderSpace->getArcs();
+    if (arcs.size() > 0) {
+      glm::vec3 start = arcs[0].getCartesianLerp(0);
+      glm::vec3 end = arcs[0].getCartesianLerp(1);
+    }
     wormArcs.setVal(arcs);
+    renderSpace->clear();
   }
 }
 
 void myDrawFun() {
   worms->setWormArcs(wormArcs.getVal());
+  renderer->render(domeId);
   renderer->render(wormsId);
 }
 

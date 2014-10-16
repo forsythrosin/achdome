@@ -22,11 +22,9 @@ class PlayerManager {
   void removeEventListener(PlayerEventListener *pm);
   int getPlayerIdByName(std::string name);
   std::vector<Player*> getConnectedPlayers();
-
-
 private:
   std::map<int, Player*> players;
   std::string generatePlayerName();
   int nextPlayerId = 0;
-std::vector<PlayerEventListener*> eventListeners;
+  std::vector<PlayerEventListener*> eventListeners;
 };
