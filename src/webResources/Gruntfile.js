@@ -4,10 +4,10 @@ module.exports = function(grunt) {
     watch: {
       browserify: {
         files: ['assets/js/modules/*.js', 'assets/templates/*.hbs', 'assets/templates/partials/*.hbs'],
-        tasks: ['browserify']
+        tasks: ['browserify','copy']
       },
       copy: {
-        files: ['*'],
+        files: ['*', '!assets/js/modules/*.js', '!assets/templates/*.hbs', '!assets/templates/partials/*.hbs'],
         tasks: ['copy']
       }
     },
