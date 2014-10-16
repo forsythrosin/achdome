@@ -24,7 +24,7 @@ int GameEngine::connectPlayer() {
  * Disconnect a player.
  */
 bool GameEngine::disconnectPlayer(int playerId) {
-  playerManager->disconnectPlayer(playerId);
+  return playerManager->disconnectPlayer(playerId);
 }
 
 /**
