@@ -71,30 +71,38 @@ void WormTracker::clear() {
   wormHeads.clear();
 }
 
-void WormTracker::startWormHead(int id) {
+bool WormTracker::startWormHead(int id) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
     it->second.start();
+	return true;
   }
+  return false;
 }
 
-void WormTracker::stopWormHead(int id) {
+bool WormTracker::stopWormHead(int id) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
     it->second.stop();
+	return true;
   }
+  return false;
 }
 
 bool WormTracker::turnLeft(int id, bool turn) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
     it->second.turnLeft(turn);
+	return true;
   }
+  return false;
 }
 
 bool WormTracker::turnRight(int id, bool turn) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
     it->second.turnRight(turn);
+	return true;
   }
+  return false;
 }

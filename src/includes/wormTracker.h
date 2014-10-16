@@ -14,8 +14,8 @@ class WormTracker {
   bool createWormHead(int id, glm::vec3 eulerPosition, glm::vec3 eulerRotation);
   void tick();
   void clear();
-  void startWormHead(int id);
-  void stopWormHead(int id);
+  bool startWormHead(int id);
+  bool stopWormHead(int id);
   bool turnLeft(int id, bool turn);
   bool turnRight(int id, bool turn);
   void addEventListener(WormEventListener *we);

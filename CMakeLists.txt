@@ -1,7 +1,7 @@
 # Copyright Linkoping University 2011
 # SGCT Project Authors see Authors.txt
 
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 3.0.0)
 SET(APP_NAME Achdome)
 include(CheckCXXCompilerFlag)
 project(${APP_NAME} CXX)
@@ -11,8 +11,8 @@ project(${APP_NAME} CXX)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 
 if (NOT CMAKE_BUILD_TYPE)
-	message(STATUS "No build type selected, default to Release")
-	set(CMAKE_BUILD_TYPE "Release")
+	message(STATUS "No build type selected, default to Debug")
+	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
@@ -39,10 +39,10 @@ add_definitions(-DWEBRESOURCES_PATH=${PROJECT_WEBRESOURCES_DIR})
 add_executable(${APP_NAME}
 ${PROJECT_SOURCE_DIR}/main.cpp)
 
-set_target_properties(${APP_NAME} PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${EXECUTABLE_OUTPUT_PATH}/debug
-	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${EXECUTABLE_OUTPUT_PATH}/release
-)
+#set_target_properties(${APP_NAME} PROPERTIES
+#	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${EXECUTABLE_OUTPUT_PATH}/debug
+#	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${EXECUTABLE_OUTPUT_PATH}/release
+#)
 
 # Include external project
 set(LWS_WITH_SSL OFF CACHE BOOL "" FORCE)
@@ -211,34 +211,42 @@ target_link_libraries(${APP_NAME} ${LIBS} )
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 set( RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
-set_target_properties(${APP_NAME} 
-						PROPERTIES 
+set_target_properties(${APP_NAME}
+						PROPERTIES
 						CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 # Second, for multi-config builds (e.g. msvc)
 foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
     set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR} )
-	set( RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR} )
-
-	set_target_properties(${APP_NAME} 
-							PROPERTIES 
+		set( RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR} )
+		set_target_properties(${APP_NAME}
+							PROPERTIES
 							RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR})
 
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+get_target_property(exec_location ${APP_NAME} "CMAKE_RUNTIME_OUTPUT_DIRECTORY")
 
-string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
-
-get_target_property(exec_location ${APP_NAME} "RUNTIME_OUTPUT_DIRECTORY_${build_type}")
-
-add_custom_target(copyResources)
-add_custom_command(TARGET copyResources PRE_BUILD
+add_custom_target(resources)
+add_custom_command(TARGET resources PRE_BUILD
 										COMMAND ${CMAKE_COMMAND} -E copy_directory
 										${PROJECT_SHADERS_DIR} "${exec_location}/shaders"
 										)
 
 set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/configs)
-add_custom_command(TARGET copyResources PRE_BUILD
+add_custom_command(TARGET resources PRE_BUILD
 										COMMAND ${CMAKE_COMMAND} -E copy_directory
 										${PROJECT_CONFIG_DIR} "${exec_location}/configs"
                     )
-add_dependencies(${APP_NAME} copyResources)
+
+message(${PROJECT_WEBRESOURCES_DIR})
+add_custom_target(npmModules
+									COMMAND npm install --prefix ${PROJECT_WEBRESOURCES_DIR} ${PROJECT_WEBRESOURCES_DIR})
+
+add_custom_target(webResources
+									COMMAND grunt --base ${PROJECT_WEBRESOURCES_DIR}
+																--gruntfile ${PROJECT_WEBRESOURCES_DIR}/Gruntfile.js)
+add_dependencies(webResources npmModules)
+add_dependencies(resources webResources)
+
+
+add_dependencies(${APP_NAME} resources)
