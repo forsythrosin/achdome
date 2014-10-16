@@ -234,9 +234,11 @@ add_custom_target(copyResources)
 add_custom_command(TARGET copyResources PRE_BUILD
 										COMMAND ${CMAKE_COMMAND} -E copy_directory
 										${PROJECT_SHADERS_DIR} "${exec_location}/shaders"
-										COMMAND ${CMAKE_COMMAND} -E copy_directory
-										${PROJECT_WEBRESOURCES_DIR} "${exec_location}/webResources"
-										COMMAND ${CMAKE_COMMAND} -E copy_directory
-										${CMAKE_SOURCE_DIR}/configs "${exec_location}/configs"
 										)
+
+set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/configs)
+add_custom_command(TARGET copyResources PRE_BUILD
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${PROJECT_CONFIG_DIR} "${exec_location}/configs"
+                    )
 add_dependencies(${APP_NAME} copyResources)
