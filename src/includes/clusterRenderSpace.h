@@ -36,4 +36,12 @@ class ClusterRenderSpace : public RenderSpace {
    * Clear the render space
    */
   void clear();
+
+  /**
+   * Get arcs
+   */
+  std::vector<WormArc> getArcs();
+
+ private:
+  std::vector<WormArc>arcs;
 };

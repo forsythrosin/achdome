@@ -65,6 +65,7 @@ void KeyboardGameController::startGame() {
   if (gameEngine->getGameState() != GameEngine::GAME) {
     playerId = gameEngine->connectPlayer();
     gameEngine->startGame();
+    gameEngine->startMoving(playerId);
   }
 }
 

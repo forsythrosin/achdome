@@ -34,6 +34,7 @@ html {
 *:before,
 *:after {
 	box-sizing: inherit;
+	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
 }
 
 /* consider resetting the default cursor: https://gist.github.com/murtaugh/5247154 */
@@ -130,4 +131,4 @@ input[type=button] {width: auto; overflow: visible;}
 /* let's clear some floats */
 .clearfix:before, .clearfix:after { content: "\0020"; display: block; height: 0; overflow: hidden; }
 .clearfix:after { clear: both; }
-.clearfix { zoom: 1; }  
+.clearfix { zoom: 1; }

@@ -9,6 +9,10 @@ WormArc::WormArc(int id, glm::quat firstQuat, glm::quat secondQuat) {
   this->secondQuat = secondQuat;
 }
 
+int WormArc::getWormId() {
+  return wormId;
+}
+
 glm::vec3 WormArc::getCartesianLerp(float t) {
   // glm::vec3 v1 = glm::mat3_cast(glm::normalize(firstQuat)) * glm::vec3(1.0, 0.0, 0.0);
   // glm::vec3 v2 = glm::mat3_cast(glm::normalize(secondQuat)) * glm::vec3(1.0, 0.0, 0.0);

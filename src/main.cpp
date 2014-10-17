@@ -123,15 +123,19 @@ void myPreSyncFun() {
 
   // Update worm positions
   if( gEngine->isMaster() ) {
-    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
-    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+    //glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
+    //glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
 
-    timer += 0.001f;
-    WormArc wa(0, first, second);
+    //timer += 0.005f;
+    //WormArc wa(0, first, second);
 
-    std::vector<WormArc> arcs;
-    arcs.push_back(wa);
+    std::vector<WormArc> arcs = renderSpace->getArcs();
+    if (arcs.size() > 0) {
+      glm::vec3 start = arcs[0].getCartesianLerp(0);
+      glm::vec3 end = arcs[0].getCartesianLerp(1);
+    }
     wormArcs.setVal(arcs);
+    renderSpace->clear();
   }
 
   // Reset stitch step
@@ -163,7 +167,9 @@ void myDecodeFun() {
 }
 
 void keyCallback(int key, int action) {
-  keyboardGameController->processKeyEvent(key, action);
+  if (gEngine->isMaster()){
+    keyboardGameController->processKeyEvent(key, action);
+  }
 }
 
 void mouseButtonCallback(int button, int action) {

@@ -53,7 +53,7 @@ class WormHead {
   /**
    * Is moving?
    */
-  bool isMoving();
+  bool isMoving() const;
 
   /**
    * Stop.
