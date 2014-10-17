@@ -82,10 +82,10 @@ void Renderer::render(int configId) {
   }
 
   rot += 0.04f;
-  glm::mat4 rot_stat = glm::rotate(glm::mat4(1.0f), -60.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  glm::mat4 rot_stat = glm::rotate(glm::mat4(1.0f), DOME_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
   glm::mat4 rot_mat = glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 0.0f, 1.0f));
   glm::mat4 scene_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, -1.0, -25.0))*rot_stat*rot_mat;
-  glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix() * scene_mat;
+  glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix() * rot_stat;
 
   sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
 
