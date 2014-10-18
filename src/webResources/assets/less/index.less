@@ -21,6 +21,13 @@ h1 {
   .text-stroke(5px, @accent);
 }
 
+#logotype {
+  display: block;
+  margin: 0 auto;
+  width: 350px;
+  height: 350px;
+}
+
 .bottom {
   position: absolute;
   bottom: 0;
@@ -77,48 +84,141 @@ button.positive {
 
   .button {
     position: absolute;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0);
+
+    .center {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+    }
+  }
+
+  .button:after {
+    content: '';
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    cursor: pointer;
+    background-size: 30%;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    .opacity(0.5);
+  }
+
+  #positionInfo {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: @base;
+
+    #domeContainer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 50%;
+
+      #dome {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: black;
+        border-radius: 50%;
+
+        .identifier {
+          float: none;
+          position: absolute;
+        }
+      }
+    }
+
+    .button#startMoving {
+      background: @positive;
+      right: 0;
+      width: 50%;
+      overflow: hidden;
+    }
+
+    /* Chrome, Safari, Opera */
+    @-webkit-keyframes rollImage {
+      0%  {
+            background-position: 50% 100%;
+            .opacity(0)
+          }
+      50% {
+            background-position: 50% 50%;
+            .opacity(0.75)
+          }
+      100%{
+            background-position: 50% 0%;
+            .opacity(0)
+          }
+    }
+
+    /* Standard syntax */
+    @keyframes rollImage {
+      0%  {
+            background-position: 50% 100%;
+            .opacity(0)
+          }
+      50% {
+            background-position: 50% 50%;
+            .opacity(0.75)
+          }
+      100%{
+            background-position: 50% 0%;
+            .opacity(0)
+          }
+    }
+
+    .button#startMoving:after {
+      background-image: url('../images/up.png');
+      .loop(rollImage, 1.3s);
+    }
+  }
+
+  #buttonDivider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: rgba(255,255,255,0.5);
   }
 
   .button#left {
-    background: rgba(255,255,255,0.2);
-    right: 50%;
+    width: 50%;
+    left: 0;
+  }
+
+  .button#left:after {
+    background-image: url('../images/left.png');
   }
 
   .button#right {
-    background: rgba(255,255,255,0.22);
-    left: 50%;
+    width: 50%;
+    right: 0;
+  }
+
+  .button#right:after {
+    background-image: url('../images/right.png');
   }
 
   .button#left.active, .button#right.active {
-    background: rgba(255,255,255,0.3);
+    background: rgba(0,0,0,0.1);
   }
 }
 
 /* Chrome, Safari, Opera */
 @-webkit-keyframes dualRotation {
-  0%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
-  25%   {width:0px;height:50px;margin-left:25px;margin-top:0px;}
-  50%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
-  75%   {width:50px;height:0px;margin-left:0px;margin-top:25px;}
-  100%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
-}
-
-/* Standard syntax */
-@keyframes dualRotation {
-  0%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
-  25%   {width:0px;height:50px;margin-left:25px;margin-top:0px;}
-  50%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
-  75%   {width:50px;height:0px;margin-left:0px;margin-top:25px;}
-  100%   {width:50px;height:50px;margin-left:0px;margin-top:0px;}
-}
-
-/* Chrome, Safari, Opera */
-@-webkit-keyframes dualRotation2 {
   0%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white;}
   25%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:white;}
   26%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:@accent;}
@@ -129,7 +229,7 @@ button.positive {
 }
 
 /* Standard syntax */
-@keyframes dualRotation2 {
+@keyframes dualRotation {
   0%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white;}
   25%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:white;}
   26%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:@accent;}
@@ -144,7 +244,7 @@ button.positive {
   height: 50px;
   background: #ddd;
   .radius(5px);
-  .loop(dualRotation2, 1.3s);
+  .loop(dualRotation, 1.3s);
 }
 
 @import "portrait";

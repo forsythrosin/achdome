@@ -1,0 +1,112 @@
+<svg
+    id="logotype"
+    onload="animateLogotype({{#if length}}{{length}}{{else}}null{{/if}},{{#if ease}}'{{ease}}'{{else}}null{{/if}},{{#if delay}}{{delay}}{{else}}null{{/if}});"
+    height="{{#if size}}{{size}}{{else}}512{{/if}}"
+    width="{{#if size}}{{size}}{{else}}512{{/if}}"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg">
+  <path
+    id="logotypePath"
+    stroke="#ff0066"
+    stroke-linecap="round"
+    fill="none"/>
+</svg>
+<script>
+  function animateLogotype(length, ease, delay) {
+    var easing = {
+      linear: function (t) { return t },
+      easeInQuad: function (t) { return t*t },
+      easeOutQuad: function (t) { return t*(2-t) },
+      easeInOutQuad: function (t) { return t<.5 ? 2*t*t : -1+(4-2*t)*t },
+      easeInCubic: function (t) { return t*t*t },
+      easeOutCubic: function (t) { return (--t)*t*t+1 },
+      easeInOutCubic: function (t) { return t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1 },
+      easeInQuart: function (t) { return t*t*t*t },
+      easeOutQuart: function (t) { return 1-(--t)*t*t*t },
+      easeInOutQuart: function (t) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t },
+      easeInQuint: function (t) { return t*t*t*t*t },
+      easeOutQuint: function (t) { return 1+(--t)*t*t*t*t },
+      easeInOutQuint: function (t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
+    };
+    length = length || 750;
+    delay = delay || 0;
+    var easeFun = (ease !== undefined && easing[ease] !== undefined) ? easing[ease] : easing['linear'];
+
+    var svg = document.getElementById('logotype');
+    var path = document.getElementById('logotypePath');
+    var size = svg.offsetWidth;
+    var lineRatio = 0.14;
+    var lineWidth = size*lineRatio;
+    var radius = size*(1 - lineRatio - 0.01)/2;
+
+    var arcAngle = 27 * Math.PI / 16;
+    var lineLength = 1;
+    var pathLength = arcAngle + lineLength;
+    var lineLimit = lineLength / pathLength;
+    var arcLimit = (lineLength + Math.PI) / pathLength;
+
+    var center = size/2;
+    var padded = center + radius;
+
+    path.setAttribute('d', 'M ' + padded + ' ' + padded);
+    path.setAttribute('stroke-width', lineWidth);
+
+    function add(values) {
+      var d = path.getAttribute('d');
+      var str = '';
+      for (var i = 0, len = values.length; i < len; i++) {
+        str += ' ' + values[i];
+      }
+      path.setAttribute('d', d + str);
+    }
+
+    var s = 'L 482 256 A 226 226 0 1 0 416 416"';
+    setTimeout(function() {
+      var timer = length;
+      var d = new Date();
+      var prevTime = d.getTime();
+
+      var drawnAngle = null;
+      var iv = setInterval(function() {
+        var newD = new Date();
+        var newTime = newD.getTime();
+        var timeDiff = newTime - prevTime;
+        if (timeDiff > 0) {
+          prevTime = newTime;
+          timer -= timeDiff;
+          if (timer < 0) {
+            if (drawnAngle == null) {
+              add(['L', padded, padded-radius]);
+              drawnAngle = 0;
+            }
+            var angle = arcAngle;
+            var big = (angle - drawnAngle) > Math.PI ? 1 : 0;
+            var x = center + radius*Math.cos(angle);
+            var y = center - radius*Math.sin(angle);
+            add(['A', radius, radius, 0, big, 0, x, y]);
+            clearInterval(iv);
+          } else {
+            var s = easeFun((length-timer)/length);
+            if (s < lineLimit) {
+              // draw line
+              var part = s/lineLimit;
+              add(['L', padded, padded-part*radius]);
+            } else {
+              // draw arc
+              if (drawnAngle == null) {
+                add(['L', padded, padded-radius]);
+                drawnAngle = 0;
+              }
+              var angle = (s - lineLimit) / (1 - lineLimit) * arcAngle;
+              var big = (angle - drawnAngle) > Math.PI ? 1 : 0;
+              var x = center + radius*Math.cos(angle);
+              var y = center - radius*Math.sin(angle);
+              add(['A', radius, radius, 0, big, 0, x, y]);
+              drawnAngle = angle;
+            }
+          }
+        }
+      },0);
+    }, delay);
+  }
+</script>

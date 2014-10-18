@@ -27,8 +27,8 @@ var server = {
       }
     });
   },
-  start: function () {
-    emit('started');
+  startMoving: function () {
+    emit('started moving');
   },
   left: function (down) {
     if (++lc + rc > limit) {

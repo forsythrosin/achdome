@@ -1,4 +1,4 @@
-<div class="player"{{#if me}} id="me"{{/if}}>
-  <div class="identifier" style="background: rgb({{color.[0]}},{{color.[1]}},{{color.[2]}})"></div>
-  <p class="name" style="color: rgb({{color.[0]}},{{color.[1]}},{{color.[2]}})">{{name}}</p>
+<div class="player">
+  <div class="identifier" style="background: {{> color color}}"></div>
+  <p class="name" style="color: {{> color color}}">{{name}}</p>
 </div>
