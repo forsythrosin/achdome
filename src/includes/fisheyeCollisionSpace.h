@@ -1,7 +1,10 @@
+#pragma once
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <collisionSpace.h>
 #include <vector>
+#include <bitmap.h>
 
 class WormArc;
 class WormCollision;
@@ -29,5 +32,10 @@ class FisheyeCollisionSpace : public CollisionSpace {
   void clear();
 
  private:
+  int size;
+  Bitmap *bitmap;
   glm::vec2 transform(glm::quat in);
+  std::vector<glm::quat> getArcPoints(WormArc arc, float start = 0.0, float end = 1.0);
+  static const float HALF_PIXEL;
+
 };
