@@ -30,11 +30,13 @@ function get_appropriate_ws_url() {
 function setupSocket() {
   function onopen() {
     connected = true;
+    emit('connected', null, null);
   }
 
   function onclose() {
     console.log('Server disconnected, reconnecting...');
     connected = false;
+    emit('disconnected', null, null);
     setTimeout(function () {
       // Connection has closed so try to reconnect every 1 second.
       createSocket();

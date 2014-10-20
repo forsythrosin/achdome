@@ -44,7 +44,7 @@ std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
 
 // Renderer + renderables
-sgct::SharedVector<WormArc> wormArcs(1);
+sgct::SharedVector<WormArc> wormArcs(100);
 Renderer *renderer;
 RenderableDome *dome;
 RenderableWormGroup *worms;
@@ -123,17 +123,22 @@ void myPreSyncFun() {
 
   // Update worm positions
   if( gEngine->isMaster() ) {
-    //glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
-    //glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
+    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+    glm::quat first2(glm::vec3(0.0, 0.5, 1.0*glm::pi<float>()*timer));
+    glm::quat second2(glm::vec3(0.0, 0.5, 1.0*glm::pi<float>()*timer + 1.0));
 
-    //timer += 0.005f;
-    //WormArc wa(0, first, second);
+    timer += 0.005f;
+    WormArc wa(0, first, second);
+    WormArc wa2(0, first2, second2);
 
     std::vector<WormArc> arcs = renderSpace->getArcs();
-    if (arcs.size() > 0) {
-      glm::vec3 start = arcs[0].getCartesianLerp(0);
-      glm::vec3 end = arcs[0].getCartesianLerp(1);
+    if (arcs.size() < 1) {
+      arcs.push_back(wa);
     }
+    //arcs.push_back(wa);
+    //arcs.push_back(wa2);
+
     wormArcs.setVal(arcs);
     renderSpace->clear();
   }
@@ -158,12 +163,12 @@ void myDrawFun() {
 
 void myEncodeFun() {
   // get things from renderSpace and send it to everyone.
-  sgct::SharedData::instance()->writeVector( &wormArcs );
+  sgct::SharedData::instance()->writeVector(&wormArcs);
 }
 
 void myDecodeFun() {
   // read from buffer and insert data to GameRenderers.
-  sgct::SharedData::instance()->readVector( &wormArcs );
+  sgct::SharedData::instance()->readVector(&wormArcs);
 }
 
 void keyCallback(int key, int action) {

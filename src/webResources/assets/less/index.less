@@ -14,18 +14,48 @@ body {
 }
 
 h1 {
-  text-align: center;
   font-family: @header-typeface;
-  font-size: 100px;
   color: white;
-  .text-stroke(5px, @accent);
+}
+
+#registerLogotype {
+  position: absolute;
+  top: 0;
+  bottom: 130px;
+  left: 0;
+  right: 0;
 }
 
 #logotype {
   display: block;
   margin: 0 auto;
-  width: 350px;
-  height: 350px;
+  width: 200px;
+  height: 200px;
+}
+
+.center #logotype {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -126px 0 0 -100px;
+}
+
+h1#logotypeText {
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 40px;
+  padding: 13px 0 0;
+  span {
+    letter-spacing: -0.1em;
+  }
+}
+
+.center h1#logotypeText {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  margin: 74px 0 0 0;
 }
 
 .bottom {
@@ -62,20 +92,108 @@ button.positive {
 .player {
   overflow: hidden;
 
-  .identifier {
-    float: left;
-    width: 2em;
-    height: 2em;
-    .radius(50%);
-  }
-
   .name {
     float: left;
     padding: 0.35em;
   }
 }
 
-.gameController {
+.identifier {
+  float: left;
+  width: 2em;
+  height: 2em;
+  .radius(50%);
+}
+
+#positionInfo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  #domeContainer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 50%;
+
+    #dome {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: black;
+      border-radius: 50%;
+
+      .identifier {
+        float: none;
+        position: absolute;
+      }
+    }
+  }
+
+  .button#startMoving {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    width: 50%;
+    background: @positive;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  /* Chrome, Safari, Opera */
+  @-webkit-keyframes rollImage {
+    0%  {
+          background-position: 50% 100%;
+          .opacity(0)
+        }
+    50% {
+          background-position: 50% 50%;
+          .opacity(0.75)
+        }
+    100%{
+          background-position: 50% 0%;
+          .opacity(0)
+        }
+  }
+
+  /* Standard syntax */
+  @keyframes rollImage {
+    0%  {
+          background-position: 50% 100%;
+          .opacity(0)
+        }
+    50% {
+          background-position: 50% 50%;
+          .opacity(0.75)
+        }
+    100%{
+          background-position: 50% 0%;
+          .opacity(0)
+        }
+  }
+
+  .button#startMoving:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-size: 30%;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    .opacity(0.5);
+    background-image: url('../images/up.png');
+    .loop(rollImage, 1.3s);
+  }
+}
+
+#gameController {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -88,12 +206,6 @@ button.positive {
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,0);
-
-    .center {
-      display: table-cell;
-      vertical-align: middle;
-      text-align: center;
-    }
   }
 
   .button:after {
@@ -107,91 +219,6 @@ button.positive {
     background-repeat: no-repeat;
     background-position: 50% 50%;
     .opacity(0.5);
-  }
-
-  #positionInfo {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: @base;
-
-    #domeContainer {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 50%;
-
-      #dome {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: black;
-        border-radius: 50%;
-
-        .identifier {
-          float: none;
-          position: absolute;
-        }
-      }
-    }
-
-    .button#startMoving {
-      background: @positive;
-      right: 0;
-      width: 50%;
-      overflow: hidden;
-    }
-
-    /* Chrome, Safari, Opera */
-    @-webkit-keyframes rollImage {
-      0%  {
-            background-position: 50% 100%;
-            .opacity(0)
-          }
-      50% {
-            background-position: 50% 50%;
-            .opacity(0.75)
-          }
-      100%{
-            background-position: 50% 0%;
-            .opacity(0)
-          }
-    }
-
-    /* Standard syntax */
-    @keyframes rollImage {
-      0%  {
-            background-position: 50% 100%;
-            .opacity(0)
-          }
-      50% {
-            background-position: 50% 50%;
-            .opacity(0.75)
-          }
-      100%{
-            background-position: 50% 0%;
-            .opacity(0)
-          }
-    }
-
-    .button#startMoving:after {
-      background-image: url('../images/up.png');
-      .loop(rollImage, 1.3s);
-    }
-  }
-
-  #buttonDivider {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 1px;
-    background: rgba(255,255,255,0.5);
   }
 
   .button#left {
@@ -217,34 +244,5 @@ button.positive {
   }
 }
 
-/* Chrome, Safari, Opera */
-@-webkit-keyframes dualRotation {
-  0%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white;}
-  25%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:white;}
-  26%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:@accent;}
-  50%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:@accent}
-  75%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:@accent}
-  76%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:white}
-  100%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white}
-}
-
-/* Standard syntax */
-@keyframes dualRotation {
-  0%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white;}
-  25%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:white;}
-  26%   {.transform(~"rotateX(90deg) rotateY(0deg)");background:@accent;}
-  50%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:@accent}
-  75%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:@accent}
-  76%   {.transform(~"rotateX(0deg) rotateY(90deg)");background:white}
-  100%   {.transform(~"rotateX(0deg) rotateY(0deg)");background:white}
-}
-
-.loader {
-  width: 50px;
-  height: 50px;
-  background: #ddd;
-  .radius(5px);
-  .loop(dualRotation, 1.3s);
-}
-
 @import "portrait";
+@import "landscape";

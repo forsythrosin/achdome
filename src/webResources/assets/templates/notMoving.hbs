@@ -1,0 +1,12 @@
+{{#if player}}
+  {{#if player.position}}
+    <div id="positionInfo">
+      <div id="domeContainer">
+        <div id="dome">
+          <div class="identifier" style="background:{{> color player.color}}; bottom:{{player.position.y}}; left:{{player.position.x}}"></div>
+        </div>
+      </div>
+      <div class="button" id="startMoving"></div>
+    </div>
+  {{/if}}
+{{/if}}

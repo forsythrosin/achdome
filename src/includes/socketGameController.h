@@ -1,8 +1,7 @@
 #include <gameController.h>
+#include <gameEngine.h>
 #include <webserver.h>
 #include <actionResolver.h>
-
-class GameEngine;
 
 class SocketGameController : public GameController {
 public:
@@ -15,4 +14,6 @@ private:
   ActionResolver *actionResolver;
   std::map<int, int> sessionIds;
   std::map<int, int> playerIds;
+  std::map<int, bool> lives;
+  GameEngine::State currentState;
 };

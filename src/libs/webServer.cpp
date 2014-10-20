@@ -54,6 +54,9 @@ const char * get_mimetype(const char *file)
   if (!strcmp(&file[n - 4], ".png"))
     return "image/png";
 
+  if (!strcmp(&file[n - 4], ".gif"))
+    return "image/gif";
+
   if (!strcmp(&file[n - 4], ".jpg"))
     return "image/png";
 
@@ -162,6 +165,7 @@ enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
     break;
   case LWS_CALLBACK_CLOSED:{
     Webserver *webserver = Webserver::instance();
+    // TODO: Find out a way to push these messages (format independantly)
     const char *msg = "{\"message\":\"unregister\"}";
     QueueElement qe;
     qe.sessionId = sessionInfo->sessionId;

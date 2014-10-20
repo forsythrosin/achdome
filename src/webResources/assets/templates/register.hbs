@@ -5,8 +5,10 @@
     Argh! There is no game running right now.
   </p>
 {{else}}
-  {{> logotype logotypeSettings}}
-  <div class="bottom">
+  <div id="registerLogotype" class="center">
+    {{> logotype}}
+  </div>
+  <div id="registerForm" class="bottom">
     <input name="name" type="text" placeholder="Name" required/>
     <button class="positive" id="play">Play</button>
   </div>

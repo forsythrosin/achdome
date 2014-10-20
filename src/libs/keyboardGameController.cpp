@@ -63,9 +63,9 @@ void KeyboardGameController::processKeyEvent(int key, int action) {
 
 void KeyboardGameController::startGame() {
   if (gameEngine->getGameState() != GameEngine::GAME) {
-    playerId = gameEngine->connectPlayer();
+    //playerId = gameEngine->connectPlayer();
     gameEngine->startGame();
-    gameEngine->startMoving(playerId);
+    //gameEngine->startMoving(playerId);
   }
 }
 
