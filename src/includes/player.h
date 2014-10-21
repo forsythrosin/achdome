@@ -9,6 +9,8 @@ class Player {
   int getId();
   void setName(std::string name);
   std::string getName();
+  void setColor(glm::vec3 color);
+  glm::vec3 getColor();
   bool isConnected();
   bool disconnect();
  private:

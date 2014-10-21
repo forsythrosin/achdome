@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <glm/glm.hpp>
+#include <random>
 
 class Player;
 class PlayerEventListener;
@@ -29,4 +30,6 @@ private:
   std::string generatePlayerName();
   int nextPlayerId = 0;
   std::vector<PlayerEventListener*> eventListeners;
+  std::mt19937 randGen;
+
 };

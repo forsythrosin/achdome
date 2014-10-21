@@ -12,6 +12,7 @@
 #include <clusterRenderSpace.h>
 #include <wormTracker.h>
 #include <jsonActionResolver.h>
+#include <jsonBuilder.h>
 #include <gameEngine.h>
 #include <gameController.h>
 #include <socketGameController.h>
@@ -82,8 +83,9 @@ int main( int argc, char* argv[] ) {
     webServer->start(8000);
 
     JsonActionResolver *actionResolver = new JsonActionResolver();
+    JsonBuilder *dataSerializationBuilder = new JsonBuilder();
 
-    SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver);
+    SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder);
     gameControllers.push_back(sgc);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
@@ -148,15 +150,15 @@ void myPreSyncFun() {
 }
 
 void myDrawFun() {
-  // Copy current worm positions
-  worms->setWormArcs(wormArcs.getVal());
+  //// Copy current worm positions
+  //worms->setWormArcs(wormArcs.getVal());
 
-  // render wormLines to FBO
-  renderer->renderToFBO(wormLines, stitchStep);
-  // render FBO as texture on dome
-  renderer->render(domeWorms, wormLines, stitchStep);
-  // render grid lines
-  renderer->render(domeGrid);
+  //// render wormLines to FBO
+  //renderer->renderToFBO(wormLines, stitchStep);
+  //// render FBO as texture on dome
+  //renderer->render(domeWorms, wormLines, stitchStep);
+  //// render grid lines
+  //renderer->render(domeGrid);
 
   ++stitchStep;
 }

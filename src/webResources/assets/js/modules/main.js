@@ -68,6 +68,7 @@ var renderRegistered = function ($container, params) {
 var startCountdown = function ($container, params) {
   var t = params.time * 1000 - 3000;
   if (t < 0) t = 0;
+  params.time = 3;
 
   logotypeAnimator.finishLoader();
   setTimeout(function () {
@@ -120,6 +121,10 @@ var setButtonListeners = function ($container) {
     });
 };
 
+var transformColor = function(color) {
+  return [Math.floor(color[0] * 255), Math.floor(color[1] * 255), Math.floor(color[2] * 255)];
+}
+
 var me = {
   name: "",
   color: []
@@ -142,7 +147,7 @@ var setServerListeners = function ($container) {
     } else {
       if (res !== undefined) {
         if (res.name !== undefined) me.name = res.name;
-        if (res.color !== undefined) me.color = res.color;
+        if (res.color !== undefined) me.color = transformColor(res.color);
       }
       renderRegistered($container, {player: me});
       $container.find('#logotypeText').show();
@@ -161,17 +166,24 @@ var setServerListeners = function ($container) {
         if (res.time !== undefined) {
           data.time = res.time;
         }
-        var p = me;
         if (res.phi !== undefined && res.theta !== undefined) {
           var r = res.phi, t = res.theta;
-          p.position = {
+          me.position = {
             x: (1 + r * Math.cos(t)) / 2 * 100 + '%',
             y: (1 + r * Math.sin(t)) / 2 * 100 + '%'
           }
         }
       }
-      data.player = p;
+      data.player = me;
       startCountdown($container, data);
+    }
+  });
+
+  server.on('notMoving', function(err, res) {
+    if (err) {
+      console.warn(err);
+    } else {
+      renderNotMoving($container, {player: me});
     }
   });
 
@@ -189,11 +201,9 @@ var setServerListeners = function ($container) {
     } else {
       var data = {};
       if (res !== undefined) {
-        if (res.name !== undefined && res.color !== undefined) {
-          data.killer = {
-            name: res.name,
-            color: res.color
-          };
+        if (res.killer !== undefined) {
+          data.killer = res.killer;
+          data.killer.color = transformColor(res.killer.color);
         }
         if (res.points !== undefined) {
           data.points = res.points;

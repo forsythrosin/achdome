@@ -14,6 +14,8 @@
 @negative: #e67878;
 @negative-dark: darken(@negative, 40%);
 
+@disabled: #8a8a8a;
+
 .text-shadow (@dist: 5px, @size: 5px, @opac: 50%) {
   text-shadow: 0 @dist @size rgba(0,0,0,@opac);
 }
@@ -56,6 +58,12 @@
   -ms-transform: @options; /* IE 9 */
   -webkit-transform: @options; /* Chrome, Safari, Opera */
   transform: @options;
+}
+
+.transition(@options) {
+  -ms-transition: @options; /* IE 9 */
+  -webkit-transition: @options; /* Chrome, Safari, Opera */
+  transition: @options;
 }
 
 .loop(@keyframes, @duration) {

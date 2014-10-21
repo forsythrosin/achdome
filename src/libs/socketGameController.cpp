@@ -1,11 +1,14 @@
 #include <socketGameController.h>
 #include <gameEngine.h>
+#include <chrono>
+#include <thread>
 
-SocketGameController::SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar) {
+SocketGameController::SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb) {
   gameEngine = ge;
   currentState = ge->getGameState();
   webServer = ws;
   actionResolver = ar;
+  dataSerializationBuilder = dsb;
 }
 
 SocketGameController::~SocketGameController() {
@@ -18,6 +21,7 @@ void SocketGameController::performActions() {
   std::string message;
   glm::vec3 color;
   std::string name;
+  std::string sendMessage;
   while (webServer->read(sessionId, message)) {
     ClientAction action;
     if (actionResolver->resolve(message, action)) {
@@ -28,12 +32,23 @@ void SocketGameController::performActions() {
         break;
       case ClientAction::REGISTER:
         playerId = gameEngine->connectPlayer();
+        if (action.data.count("name") > 0) {
+          gameEngine->setName(playerId, action.data.at("name"));
+        }
         sessionIds.insert({ playerId, sessionId });
         playerIds.insert({ sessionId, playerId });
         name = gameEngine->getName(playerId);
         color = gameEngine->getColor(playerId);
         // Mock messages, these sould be built by e.g a messageBuilder
-        webServer->addMessage(sessionId, "{\"message\":\"registered\", \"data\":{\"name\":\"Player\",\"color\":[255,0,0]}}");
+        sendMessage =
+          dataSerializationBuilder
+            ->add("message", "registered")
+            ->add("data", dataSerializationBuilder->group()
+              ->add("name", name)
+              ->add("color", color)
+            )
+            ->build();
+        webServer->addMessage(sessionId, sendMessage);
         break;
       case ClientAction::UNREGISTER:
         if(playerIds.count( sessionId ) != 0){
@@ -100,6 +115,14 @@ void SocketGameController::performActions() {
     case GameEngine::GAME:
       // Mock message, this sould be built by e.g a messageBuilder
       webServer->addBroadcast("{\"message\":\"countdown\", \"data\":{\"time\":5,\"phi\":0.75,\"theta\":0.75}}");
+      std::cout << "Countdown started";
+      int time = 5;
+      while (time > 0) {
+        std::cout << " " << time--;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      }
+      std::cout << std::endl;
+      webServer->addBroadcast("{\"message\":\"notMoving\"}");
       std::cout << "State changed to Game" << std::endl;
       break;
     }
