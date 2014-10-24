@@ -4,14 +4,14 @@
 #include <vector>
 #include <map>
 #include <glm/glm.hpp>
-#include <random>
+#include "colorTheme.h"
 
 class Player;
 class PlayerEventListener;
 
 class PlayerManager {
  public:
-  PlayerManager();
+   PlayerManager(ColorTheme*);
 
   int connectPlayer();
   bool disconnectPlayer(int playerId);
@@ -30,6 +30,5 @@ private:
   std::string generatePlayerName();
   int nextPlayerId = 0;
   std::vector<PlayerEventListener*> eventListeners;
-  std::mt19937 randGen;
-
+  ColorTheme *colorTheme;
 };

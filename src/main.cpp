@@ -17,6 +17,7 @@
 #include <gameController.h>
 #include <socketGameController.h>
 #include <keyboardGameController.h>
+#include <rainbowColorTheme.h>
 #include <renderableDome.h>
 #include <renderableWormGroup.h>
 #include <Webserver.h>
@@ -75,8 +76,10 @@ int main( int argc, char* argv[] ) {
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
     renderSpace = new ClusterRenderSpace();
 
+    ColorTheme *ct = new RainbowColorTheme();
+
     WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace);
-    PlayerManager *pm = new PlayerManager();
+    PlayerManager *pm = new PlayerManager(ct);
     gameEngine = new GameEngine(wt, pm);
 
     Webserver *webServer = new Webserver();

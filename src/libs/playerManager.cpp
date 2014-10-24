@@ -5,21 +5,14 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-PlayerManager::PlayerManager() {
-  std::random_device rd;
-  randGen = std::mt19937(rd());
+PlayerManager::PlayerManager(ColorTheme* ct) {
+  colorTheme = ct;
 }
 
 int PlayerManager::connectPlayer() {
   int id = nextPlayerId++;
   std::string playerName = generatePlayerName();
-
-  // Generate color in HSV space and convert to RGB
-  std::uniform_real_distribution<float> dis(0.0, 1.0);
-  float v = 0.9f + 0.1f * dis(randGen); // [0.9,1.0[
-  float s = 0.4f + (1 - v) * 0.3f; // [0.4,0.7[
-  float h = dis(randGen) * 360.f; // [0.0,360.0[
-  glm::vec3 color = glm::rgbColor(glm::vec3(h,s,v));
+  glm::vec3 color = colorTheme->playerColor(id);
 
   Player *p = new Player(players.size(), color, playerName);
   players[id] = p;
