@@ -3,6 +3,7 @@
 @header-typeface: 'Comfortaa', sans-serif;
 
 @base: #1a1a1a;
+@bright-base: lighten(@base, 20%);
 @diffuse: #999;
 
 @highlight: white;
@@ -13,8 +14,6 @@
 @positive-dark: darken(@positive, 40%);
 @negative: #e67878;
 @negative-dark: darken(@negative, 40%);
-
-@disabled: #8a8a8a;
 
 .text-shadow (@dist: 5px, @size: 5px, @opac: 50%) {
   text-shadow: 0 @dist @size rgba(0,0,0,@opac);

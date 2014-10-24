@@ -1,4 +1,1 @@
-<div class="player">
-  <div class="identifier" style="background: {{> color color}}"></div>
-  <p class="name" style="color: {{> color color}}">{{name}}</p>
-</div>
+<div class="identifier{{#if me}} me{{/if}}" style="background:{{> color color}}; top:{{position.y}}; left:{{position.x}}"></div>

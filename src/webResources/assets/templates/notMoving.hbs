@@ -1,38 +1,40 @@
 {{#if player}}
-  {{#if player.position}}
-    <div id="positionInfo">
-      <div id="domeContainer">
-        <div id="dome">
-          <div class="identifier" style="background:{{> color player.color}}; bottom:{{player.position.y}}; left:{{player.position.x}}"></div>
+  <div id="positionInfo">
+    <div id="domeContainer">
+      <div id="dome">
+        <div id="identifierWrapper">
+          {{#each players}}
+            {{> player this}}
+          {{/each}}
         </div>
       </div>
-      <div class="button" id="startMoving"></div>
-      {{#if time}}
-        <script>
-          var button = document.getElementById('startMoving');
-          if (button) {
-            var time = Math.round({{time}});
-            if (time > 0) {
-              var timerWrapper = document.createElement('div');
-              var timer = document.createElement('div');
-              var t = document.createTextNode(time);
-              timer.classList.add('timer');
-              timer.appendChild(t);
-              timerWrapper.classList.add('timerWrapper');
-              timerWrapper.appendChild(timer);
-              button.classList.add('disabled');
-              button.appendChild(timerWrapper);
-              var iv = setInterval(function() {
-                if (--time < 0) {
-                  clearInterval(iv);
-                } else {
-                  t.nodeValue = time;
-                }
-              }, 1000);
-            }
-          }
-        </script>
-      {{/if}}
     </div>
-  {{/if}}
+    <div class="button" id="startMoving"></div>
+    {{#if time}}
+      <script>
+        var button = document.getElementById('startMoving');
+        if (button) {
+          var time = Math.round({{time}});
+          if (time > 0) {
+            var timerWrapper = document.createElement('div');
+            var timer = document.createElement('div');
+            var t = document.createTextNode(time);
+            timer.classList.add('timer');
+            timer.appendChild(t);
+            timerWrapper.classList.add('timerWrapper');
+            timerWrapper.appendChild(timer);
+            button.classList.add('disabled');
+            button.appendChild(timerWrapper);
+            var iv = setInterval(function() {
+              if (--time <= 0) {
+                clearInterval(iv);
+              } else {
+                t.nodeValue = time;
+              }
+            }, 1000);
+          }
+        }
+      </script>
+    {{/if}}
+  </div>
 {{/if}}

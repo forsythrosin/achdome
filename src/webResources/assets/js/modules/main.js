@@ -16,17 +16,18 @@ var _color = require('../../templates/partials/color.hbs'),
     _player = require('../../templates/partials/player.hbs'),
     _logotype = require('../../templates/partials/logotype.hbs');
 
-
+var waitForCountdown = 2; // seconds
 
 
 $(function () {
-  $(window).resize(function () {
-    setTimeout(logotypeAnimator.resize, 0);
-  });
-
   var $body = $('body');
   setButtonListeners($body);
   setServerListeners($body);
+
+  $(window).resize(function () {
+    setTimeout(function() { resizeDome($body); }, 0);
+    setTimeout(logotypeAnimator.resize, 0);
+  });
 
   server.init();
 });
@@ -42,6 +43,36 @@ var options = {
     color: _color,
     player: _player,
     logotype: _logotype
+  }
+};
+
+var resizeDome = function($body) {
+  $container = $body.find('#domeContainer');
+  if ($container.length) {
+    var mW, mH;
+    var w = $container.width(),
+        h = $container.height();
+    if (w == h) {
+      mW = 0;
+      mH = 0;
+    } else {
+      var min = Math.min(w,h),
+          max = Math.max(w,h),
+          diff = max - min;
+      if (w == min) {
+        mW = 0;
+        mH = diff/2;
+      } else {
+        mW = diff/2;
+        mH = 0;
+      }
+    }
+    $container.find('#dome').css({
+      left: mW,
+      right: mW,
+      top: mH,
+      bottom: mH
+    });
   }
 };
 
@@ -66,18 +97,19 @@ var renderRegistered = function ($container, params) {
 };
 
 var startCountdown = function ($container, params) {
-  var t = params.time * 1000 - 3000;
-  if (t < 0) t = 0;
-  params.time = 3;
+  var wait = waitForCountdown;
+  if (wait > params.time) wait = 0;
+  params.time -= wait;
 
   logotypeAnimator.finishLoader();
   setTimeout(function () {
     renderNotMoving($container, params);
-  }, t);
+  }, wait * 1000);
 };
 
 var renderNotMoving = function ($container, params) {
   $container.html(notMoving(params, options));
+  setTimeout(function() { resizeDome($container) }, 0);
 };
 
 var renderMoving = function ($container, params) {
@@ -126,9 +158,12 @@ var transformColor = function(color) {
 }
 
 var me = {
+  id: -1,
   name: "",
   color: []
 };
+
+var players = [];
 
 var setServerListeners = function ($container) {
   server.on('connected', function (err, res) {
@@ -146,6 +181,7 @@ var setServerListeners = function ($container) {
       console.warn(err);
     } else {
       if (res !== undefined) {
+        if (res.id !== undefined) me.id = res.id;
         if (res.name !== undefined) me.name = res.name;
         if (res.color !== undefined) me.color = transformColor(res.color);
       }
@@ -166,15 +202,32 @@ var setServerListeners = function ($container) {
         if (res.time !== undefined) {
           data.time = res.time;
         }
-        if (res.phi !== undefined && res.theta !== undefined) {
-          var r = res.phi, t = res.theta;
-          me.position = {
-            x: (1 + r * Math.cos(t)) / 2 * 100 + '%',
-            y: (1 + r * Math.sin(t)) / 2 * 100 + '%'
-          }
+        if (res.players !== undefined) {
+          players = [];
+          Object.keys(res.players).forEach(function(key) {
+            var p = res.players[key];
+            var pos = p.position;
+            if (pos !== undefined && pos.phi !== undefined && pos.theta !== undefined) {
+              var r = pos.theta / (Math.PI / 2), t = pos.phi;
+              p.position = {
+                x: (1 + r * Math.cos(t)) / 2 * 100 + '%',
+                y: (1 - r * Math.sin(t)) / 2 * 100 + '%'
+              }
+            }
+            if (p.color !== undefined) {
+              p.color = transformColor(p.color);
+            }
+            if (key == me.id) {
+              p.me = true;
+              data.player = p;
+            }
+            p.id = key;
+            players.push(p);
+          });
+          data.players = players;
+          console.log('players', players);
         }
       }
-      data.player = me;
       startCountdown($container, data);
     }
   });
@@ -183,7 +236,7 @@ var setServerListeners = function ($container) {
     if (err) {
       console.warn(err);
     } else {
-      renderNotMoving($container, {player: me});
+      renderNotMoving($container, {player: me, players: players});
     }
   });
 

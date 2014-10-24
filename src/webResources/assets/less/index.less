@@ -100,9 +100,16 @@ button.positive {
 
 .identifier {
   float: left;
-  width: 2em;
-  height: 2em;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
   .radius(50%);
+}
+
+.identifier.me {
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
 }
 
 #positionInfo {
@@ -118,6 +125,7 @@ button.positive {
     bottom: 0;
     left: 0;
     right: 50%;
+    background: @bright-base;
 
     #dome {
       position: absolute;
@@ -127,10 +135,70 @@ button.positive {
       right: 0;
       background: black;
       border-radius: 50%;
+      .gradient(@base 50%, black 50%);
 
-      .identifier {
-        float: none;
+      #identifierWrapper {
         position: absolute;
+        top: 5%;
+        bottom: 5%;
+        left: 5%;
+        right: 5%;
+        // Half of the identifier size
+
+        .identifier {
+          float: none;
+          position: absolute;
+          width: 5%;
+          height: 5%;
+          margin: -2.5% 0 0 -2.5%;
+        }
+
+        .identifier.me {
+          z-index: 2;
+        }
+
+        /* Chrome, Safari, Opera */
+        @-webkit-keyframes findMeBefore {
+          0%  { top:-5px; bottom:-5px; left:-5px; right:-5px; .opacity(1); }
+          100%{ top:-25px; bottom:-25px; left:-25px; right:-25px; .opacity(0); }
+        }
+
+        /* Standard syntax */
+        @keyframes findMeBefore {
+          0%  { top:-5px; bottom:-5px; left:-5px; right:-5px; .opacity(1); }
+          100%{ top:-25px; bottom:-25px; left:-25px; right:-25px; .opacity(0); }
+        }
+
+        /* Chrome, Safari, Opera */
+        @-webkit-keyframes findMeAfter {
+          0%  { top:-15px; bottom:-15px; left:-15px; right:-15px; .opacity(0.5); }
+          50%{ top:-25px; bottom:-25px; left:-25px; right:-25px; .opacity(0); }
+          50.1%{ top:-5px; bottom:-5px; left:-5px; right:-5px; .opacity(1); }
+          100%{ top:-15px; bottom:-15px; left:-15px; right:-15px; .opacity(0.5); }
+        }
+
+        /* Standard syntax */
+        @keyframes findMeAfter {
+          0%  { top:-15px; bottom:-15px; left:-15px; right:-15px; .opacity(0.5); }
+          50%{ top:-25px; bottom:-25px; left:-25px; right:-25px; .opacity(0); }
+          50.1%{ top:-5px; bottom:-5px; left:-5px; right:-5px; .opacity(1); }
+          100%{ top:-15px; bottom:-15px; left:-15px; right:-15px; .opacity(0.5); }
+        }
+
+        .identifier.me:before, .identifier.me:after {
+          content: '';
+          position: absolute;
+          border: 2px solid rgba(255,255,255,1);
+          .radius(50%);
+        }
+
+        .identifier.me:before {
+          .loop(findMeBefore, 2s);
+        }
+
+        .identifier.me:after {
+          .loop(findMeAfter, 2s);
+        }
       }
     }
   }
@@ -143,7 +211,7 @@ button.positive {
     background: @positive;
     overflow: hidden;
     cursor: pointer;
-    .transition(all 0.2s);
+    .transition(background 0.2s);
 
     .timerWrapper {
       display: table;
@@ -163,39 +231,21 @@ button.positive {
   }
 
   .button#startMoving.disabled {
-    background: @disabled;
+    background: @bright-base;
   }
 
   /* Chrome, Safari, Opera */
   @-webkit-keyframes rollImage {
-    0%  {
-          background-position: 50% 100%;
-          .opacity(0)
-        }
-    50% {
-          background-position: 50% 50%;
-          .opacity(0.75)
-        }
-    100%{
-          background-position: 50% 0%;
-          .opacity(0)
-        }
+    0%  { background-position: 50% 100%; .opacity(0) }
+    50% { background-position: 50% 50%; .opacity(0.75) }
+    100%{ background-position: 50% 0%; .opacity(0) }
   }
 
   /* Standard syntax */
   @keyframes rollImage {
-    0%  {
-          background-position: 50% 100%;
-          .opacity(0)
-        }
-    50% {
-          background-position: 50% 50%;
-          .opacity(0.75)
-        }
-    100%{
-          background-position: 50% 0%;
-          .opacity(0)
-        }
+    0%  { background-position: 50% 100%; .opacity(0) }
+    50% { background-position: 50% 50%; .opacity(0.75) }
+    100%{ background-position: 50% 0%; .opacity(0) }
   }
 
   .button#startMoving:not(.disabled):after {
