@@ -66,6 +66,10 @@ bool Game::isAlive(int playerId) {
   return true;
 }
 
+bool Game::isParticipating(int playerId) {
+  return gamePlayers.find(playerId) != gamePlayers.end();
+}
+
 int Game::getKiller(int playerId) {
   return -1;
 }
@@ -89,7 +93,17 @@ std::string Game::getCountry(int playerId) {
 }
 
 glm::vec2 Game::getPosition(int playerId) {
-  return glm::vec2(0.0); // phi, theta
+  float phi = playerId + 1;
+  // phi % (3.14 * 2)
+  while (phi > 3.14 * 2) {
+    phi -= 3.14 * 2;
+  }
+  float theta = playerId + 1;
+  // theta % (3.14 / 2)
+  while (theta > 3.14 / 2) {
+    theta -= 3.14 / 2;
+  }
+  return glm::vec2(phi, theta); // phi, theta
 }
 
 bool Game::startMoving(int playerId) {

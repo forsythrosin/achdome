@@ -146,7 +146,7 @@ enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
     std::string *message;
     boost::shared_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
     while (sessionInfo->messages->pop(message)){
-      char buf[512] = { 0 };
+      char buf[1024] = { 0 };
       memcpy(&buf[LWS_SEND_BUFFER_PRE_PADDING], message->c_str(), message->length());
 
       libwebsocket_write(wsi, (unsigned char*)&buf[LWS_SEND_BUFFER_PRE_PADDING], message->length(), LWS_WRITE_TEXT);
@@ -165,12 +165,12 @@ enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
     break;
   case LWS_CALLBACK_CLOSED:{
     Webserver *webserver = Webserver::instance();
-    // TODO: Find out a way to push these messages (format independantly)
-    const char *msg = "{\"message\":\"unregister\"}";
-    QueueElement qe;
-    qe.sessionId = sessionInfo->sessionId;
-    qe.message = msg;
-    webserver->pushElement(qe);
+    // TODO: Find out a way to push these messages (format independently)
+    std::string msg = "{\"message\":\"unregister\"}";
+    QueueElement qe2;
+    qe2.sessionId = sessionInfo->sessionId;
+    qe2.message = msg;
+    webserver->pushElement(qe2);
       {
         boost::unique_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
         Webserver::instance()->removeSession(sessionInfo->sessionId);
@@ -187,10 +187,10 @@ enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
 
     Webserver *webserver = Webserver::instance();
     const char *msg = reinterpret_cast<const char *>(in);
-    QueueElement qe;
-    qe.sessionId = sessionInfo->sessionId;
-    qe.message = msg;
-    webserver->pushElement(qe);
+    QueueElement qe1;
+    qe1.sessionId = sessionInfo->sessionId;
+    qe1.message = msg;
+    webserver->pushElement(qe1);
   }
     break;
   }

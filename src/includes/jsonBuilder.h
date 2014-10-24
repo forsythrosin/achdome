@@ -12,7 +12,9 @@ protected:
   std::string prefix();
   std::string suffix();
   std::string separator();
-  std::string keyValue(std::string key, std::string value);
-  std::string vec3(glm::vec3);
-  std::string string(std::string);
+  std::string formatKeyValue(std::string key, std::string value);
+  std::string formatVec3(glm::vec3);
+  std::string formatString(std::string);
+  std::string formatInteger(int);
+  std::string formatFloat(float);
 };
