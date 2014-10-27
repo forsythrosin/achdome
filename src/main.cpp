@@ -113,7 +113,7 @@ void myInitOGLFun() {
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
-  worms = new RenderableWormGroup(2, 20);
+  worms = new RenderableWormGroup(100, 4, 2.0);
   worms->setWormArcs(wormArcs.getVal());
 
   glm::vec4 red(1.0, 0.0, 0.0, 1.0);
@@ -146,10 +146,8 @@ void myPreSyncFun() {
 
     std::vector<WormArc> arcs = renderSpace->getArcs();
     if (arcs.size() < 1) {
-      // arcs.push_back(wa);
+      arcs.push_back(wa);
     }
-    //arcs.push_back(wa);
-    //arcs.push_back(wa2);
 
     wormArcs.setVal(arcs);
     renderSpace->clear();

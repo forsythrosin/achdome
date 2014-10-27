@@ -47,7 +47,7 @@ private:
   void init(RenderConfig &renderConfig);
   void loadToGPU(RenderConfig &renderConfig);
   std::vector<RenderConfig> renderConfigs;
-  const float DOME_ROTATION = -117.0;
+  const float DOME_ROTATION = -90.0;
   float rot = 0.0f;
   sgct::Engine *gEngine;
 };

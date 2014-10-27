@@ -3,10 +3,11 @@
 #include <cassert>
 #include <iostream>
 
-RenderableWormGroup::RenderableWormGroup(int wormCount, int segsPerWorm) {
+RenderableWormGroup::RenderableWormGroup(int wormCount, int segsPerWorm, GLfloat wormThickness) {
   assert(segsPerWorm != 0);
 
   this->segsPerWorm = segsPerWorm;
+  this->wormThickness = wormThickness;
   vertsPerWorm = segsPerWorm + 1; // e.g. 3 segs need 4 verts
   vertexCount = wormCount*vertsPerWorm;
   elementCount = wormCount*segsPerWorm;
