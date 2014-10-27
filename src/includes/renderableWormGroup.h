@@ -12,6 +12,7 @@ public:
   const std::vector<WormArc> getWormArcs() const;
 
   void setWormArcs(std::vector<WormArc> wormArcs);
+  void setWormColors(std::vector<glm::vec3> wormColors);
   void setWormColors(std::vector<glm::vec4> wormColors);
 
   const GLuint getVertsPerElement() const;
