@@ -133,7 +133,7 @@ void SocketGameController::performActions() {
       break;
     case GameEngine::GAME:
       // The countdown should be a state on GameEngine rather than being controlled from here.
-      int time = 12;
+      int time = 0;
 
       DataSerializationBuilder *players = dataSerializationBuilder->group();
       dataSerializationBuilder

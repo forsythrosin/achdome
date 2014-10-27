@@ -138,7 +138,7 @@ void myPreSyncFun() {
     glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 0.000001));
 
     // timer += 0.005f;
-    WormArc wa(0, first, second);
+    WormArc wa(0, first, second, 0);
 
     std::vector<WormArc> arcs = renderSpace->getArcs();
     if (arcs.size() < 1) {

@@ -12,7 +12,7 @@ class WormTracker {
   WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace);
   ~WormTracker();
   bool createWormHead(int id, glm::vec3 eulerPosition, glm::vec3 eulerRotation);
-  void tick();
+  void tick(int time);
   void clear();
   bool startWormHead(int id);
   bool stopWormHead(int id);

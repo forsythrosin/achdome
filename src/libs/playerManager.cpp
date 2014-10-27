@@ -4,6 +4,7 @@
 #include <sstream>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <iostream>
 
 PlayerManager::PlayerManager(ColorTheme* ct) {
   colorTheme = ct;
@@ -16,6 +17,9 @@ int PlayerManager::connectPlayer() {
 
   Player *p = new Player(players.size(), color, playerName);
   players[id] = p;
+
+  std::cout << '"' << playerName << '"' << " connected with id = " << id << std::endl; 
+  
   return id;
 }
 

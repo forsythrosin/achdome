@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <wormEventListener.h>
+#include <iostream>
 
 WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace) {
   this->collisionSpace = collisionSpace;
@@ -40,7 +41,7 @@ bool WormTracker::createWormHead(int id, glm::vec3 eulerPosition, glm::vec3 eule
   return false;
 }
 
-void WormTracker::tick() {
+void WormTracker::tick(int time) {
 
   std::vector<WormArc> arcs;
 
@@ -51,11 +52,11 @@ void WormTracker::tick() {
       glm::quat prevPosition = wh->getQuaternionPosition();
       wh->tick();
       glm::quat position = wh->getQuaternionPosition();
-      arcs.push_back(WormArc(id, prevPosition, position));
+      arcs.push_back(WormArc(id, prevPosition, position, time));
     }
   }
 
-  std::vector<WormCollision> collisions;// = collisionSpace->addArcs(arcs);
+  std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
 
   renderSpace->addArcs(arcs);
   renderSpace->addCollisions(collisions);

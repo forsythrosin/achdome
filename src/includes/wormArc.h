@@ -5,7 +5,7 @@
 
 class WormArc {
  public:
-  WormArc(int id, glm::quat firstQuat, glm::quat secondQuat);
+  WormArc(int id, glm::quat firstQuat, glm::quat secondQuat, int time);
   glm::vec3 getCartesianLerp(float t);
   glm::quat getLerp(float t);
   int getWormId();

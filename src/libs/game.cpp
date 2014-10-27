@@ -3,6 +3,7 @@
 #include <gamePlayer.h>
 #include <wormTracker.h>
 #include <playerManager.h>
+#include <iostream>
 
 Game::Game(PlayerManager *playerManager, WormTracker *wormTracker) {
   std::vector<Player*> players = playerManager->getConnectedPlayers();
@@ -12,14 +13,17 @@ Game::Game(PlayerManager *playerManager, WormTracker *wormTracker) {
   }
   
   playerManager->addEventListener(this);
+  wormTracker->addEventListener(this);
+
   this->wormTracker = wormTracker;
 }
 
 bool Game::start() {
+  time = 0;
   wormTracker->clear();
   for (auto iter : gamePlayers) {
     GamePlayer *gamePlayer = iter.second;
-    wormTracker->createWormHead(gamePlayer->getId(), glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.01));
+    wormTracker->createWormHead(gamePlayer->getId(), glm::vec3(0.0, -M_PI/2, 0.0), glm::vec3(0.0, 0.01, 0));
   }
   return true;
 }
@@ -55,6 +59,18 @@ bool Game::turnRight(int playerId, bool turn) {
 
 void Game::onWormCollision (WormCollision wc) {
 
+  int id = wc.collider;
+  int killer = wc.collidee;
+
+  if (gamePlayers.find(id) != gamePlayers.end()) {
+    wormTracker->stopWormHead(wc.collider);
+    gamePlayers[id]->kill(wc.collidee);
+    
+    if (gamePlayers.find(killer) != gamePlayers.end()) {
+      gamePlayers[killer]->addKill(id);
+    }
+  }
+  std::cout << "COLLISION!" << std::endl;
 }
 
 void Game::onPlayerDisconnect(int playerId) {
@@ -84,7 +100,7 @@ std::vector<int> Game::getKills(int playerId) {
 
 
 void Game::tick() {
-  wormTracker->tick();
+  wormTracker->tick(time++);
 }
 
 
