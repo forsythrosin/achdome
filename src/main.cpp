@@ -25,6 +25,10 @@
 #include <renderer.h>
 #include <cmath>
 
+// Render states
+#include <renderState.h>
+#include <gameRenderState.h>
+
 sgct::Engine * gEngine;
 
 void myDrawFun();
@@ -45,14 +49,7 @@ ClusterRenderSpace *renderSpace;
 std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
 
-// Renderer + renderables
-sgct::SharedVector<WormArc> wormArcs(100);
-Renderer *renderer;
-RenderableDome *dome;
-RenderableWormGroup *worms;
-int domeGrid, domeWorms, wormLines;
-float timer = 0.0f;
-int stitchStep = 0;
+RenderState *renderState;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -106,22 +103,8 @@ int main( int argc, char* argv[] ) {
 }
 
 void myInitOGLFun() {
-  // Define renderer + renderables
-  renderer = new Renderer(gEngine);
-
-  dome = new RenderableDome(50, 20);
-  domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
-  domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
-
-  worms = new RenderableWormGroup(100, 4, 0.02);
-  worms->setWormArcs(wormArcs.getVal());
-
-  glm::vec4 red(1.0, 0.0, 0.0, 1.0);
-  glm::vec4 blue(0.0, 0.0, 1.0, 1.0);
-  std::vector<glm::vec4> colors = {red, blue};
-
-  worms->setWormColors(colors);
-  wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
+  renderState = new GameRenderState(gEngine);
+  renderState->init();
 }
 
 void myPreSyncFun() {
@@ -131,50 +114,19 @@ void myPreSyncFun() {
     }
     gameEngine->tick();
   }
-
-  // Update worm positions
-  if( gEngine->isMaster() ) {
-    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
-    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 0.000001));
-
-    // timer += 0.005f;
-    WormArc wa(0, first, second);
-
-    std::vector<WormArc> arcs = renderSpace->getArcs();
-    if (arcs.size() < 1) {
-      arcs.push_back(wa);
-    }
-    wormArcs.setVal(arcs);
-
-    renderSpace->clear();
-  }
-
-  // Reset stitch step
-  stitchStep = 0;
+  renderState->preSync();
 }
 
 void myDrawFun() {
-  // Copy current worm positions and colors
-  worms->setWormArcs(wormArcs.getVal());
-
-  // render wormLines to FBO
-  renderer->renderToFBO(wormLines, stitchStep);
-  // render FBO as texture on dome
-  renderer->render(domeWorms, wormLines, stitchStep);
-  // render grid lines
-  renderer->render(domeGrid);
-
-  ++stitchStep;
+  renderState->draw();
 }
 
 void myEncodeFun() {
-  // get things from renderSpace and send it to everyone.
-  sgct::SharedData::instance()->writeVector(&wormArcs);
+  renderState->encode();
 }
 
 void myDecodeFun() {
-  // read from buffer and insert data to GameRenderers.
-  sgct::SharedData::instance()->readVector(&wormArcs);
+  renderState->decode();
 }
 
 void keyCallback(int key, int action) {
@@ -187,7 +139,4 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
-  delete dome;
-  delete worms;
-  delete renderer;
 }
