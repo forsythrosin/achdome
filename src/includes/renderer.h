@@ -38,7 +38,7 @@ struct RenderConfig {
 class Renderer {
 public:
   Renderer(sgct::Engine *gEngine);
-  ~Renderer() = default;
+  ~Renderer();
   int addRenderable(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical);
   void render(int configId, int configWithFBOId = -1, int stitchStep = 0);
   void renderToFBO(int configId, int stitchStep = 0);

@@ -6,7 +6,7 @@
 #include <renderableWormGroup.h>
 
 GameRenderState::GameRenderState(sgct::Engine *gEngine) : RenderState(gEngine) {
-  wormArcs = new sgct::SharedVector<WormArc>(100);
+  wormArcs = new sgct::SharedVector<WormArc>(2);
 }
 
 GameRenderState::~GameRenderState() {
@@ -20,7 +20,7 @@ void GameRenderState::init() {
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
-  worms = new RenderableWormGroup(100, 4, 0.05);
+  worms = new RenderableWormGroup(2, 4, 0.05);
   worms->setWormArcs(wormArcs->getVal());
 
   glm::vec4 red(1.0, 0.0, 0.0, 1.0);

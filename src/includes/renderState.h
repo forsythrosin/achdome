@@ -9,6 +9,7 @@ class RenderState {
     renderer = new Renderer(gEngine);
   };
   virtual ~RenderState() {
+    std::cout << "RenderState destructor called" << std::endl;
     delete renderer;
   };
 

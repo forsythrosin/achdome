@@ -3,7 +3,6 @@
 #include <renderState.h>
 #include <wormArc.h>
 
-class Renderer;
 class RenderableDome;
 class RenderableWormGroup;
 

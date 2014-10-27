@@ -28,6 +28,7 @@
 // Render states
 #include <renderState.h>
 #include <gameRenderState.h>
+#include <lobbyRenderState.h>
 
 sgct::Engine * gEngine;
 
@@ -103,7 +104,8 @@ int main( int argc, char* argv[] ) {
 }
 
 void myInitOGLFun() {
-  renderState = new GameRenderState(gEngine);
+  // renderState = new GameRenderState(gEngine);
+  renderState = new LobbyRenderState(gEngine);
   renderState->init();
 }
 
@@ -133,6 +135,10 @@ void keyCallback(int key, int action) {
   if (gEngine->isMaster()){
     keyboardGameController->processKeyEvent(key, action);
   }
+
+  delete renderState;
+  renderState = new GameRenderState(gEngine);
+  renderState->init();
 }
 
 void mouseButtonCallback(int button, int action) {

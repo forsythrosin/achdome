@@ -5,11 +5,24 @@
 
 Renderer::Renderer(sgct::Engine *gEngine) {
   this->gEngine = gEngine;
+};
 
-  float lineWidth[2];
-  glGetFloatv(GL_LINE_WIDTH_RANGE, lineWidth);
-  std::cout << "Line min = " << lineWidth[0] << std::endl;
-  std::cout << "Line max = " << lineWidth[1] << std::endl;
+Renderer::~Renderer() {
+  for (auto rc : renderConfigs) {
+    // delete shaders
+    sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
+
+    // delete buffers + VAO
+    glDeleteBuffers(1, &rc.positionBuffer);
+    glDeleteBuffers(1, &rc.colorBuffer);
+    glDeleteBuffers(1, &rc.indexBuffer);
+    glDeleteVertexArrays(1, &rc.vertexArray);
+
+    // delete FBOs
+    for (auto fbo : rc.framebuffers) {
+      delete fbo;
+    }
+  }
 };
 
 /**
