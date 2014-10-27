@@ -25,5 +25,5 @@ private:
   GLfloat wormThickness;
   std::vector<WormArc> wormArcs;
   std::vector<glm::vec4> wormColors;
-  const GLuint VERTS_PER_ELEMENT = 2;
+  const GLuint VERTS_PER_ELEMENT = 3;
 };
