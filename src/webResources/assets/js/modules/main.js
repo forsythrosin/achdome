@@ -132,22 +132,25 @@ var setButtonListeners = function ($container) {
         $name.addClass('warning').attr('placeholder', 'Choose a name');
       }
     })
+    .on('click', '#unregister', function () {
+      server.unregister();
+    })
     .on('click', '#positionInfo', function () {
       server.startMoving();
     })
-    .on('touchstart', '#left', function () {
+    .on('touchstart mousedown', '#left', function () {
       $container.find('#left').addClass('active');
       server.left(true);
     })
-    .on('touchend', '#left', function () {
+    .on('touchend mouseup', '#left', function () {
       $container.find('#left').removeClass('active');
       server.left(false);
     })
-    .on('touchstart', '#right', function () {
+    .on('touchstart mousedown', '#right', function () {
       $container.find('#right').addClass('active');
       server.right(true);
     })
-    .on('touchend', '#right', function () {
+    .on('touchend mouseup', '#right', function () {
       $container.find('#right').removeClass('active');
       server.right(false);
     });
@@ -167,6 +170,11 @@ var players = [];
 
 var setServerListeners = function ($container) {
   server.on('connected', function (err, res) {
+    if (err) console.warn(err);
+    renderRegister($container, res);
+  });
+
+  server.on('register', function (err, res) {
     if (err) console.warn(err);
     renderRegister($container, res);
   });

@@ -54,7 +54,13 @@ void SocketGameController::performActions() {
         if(playerIds.count( sessionId ) != 0){
           playerId = playerIds.at(sessionId);
           playerIds.erase(sessionId);
-          gameEngine->disconnectPlayer(playerId);
+          if (gameEngine->disconnectPlayer(playerId)) {
+            sendMessage =
+              dataSerializationBuilder
+              ->add("message", "register")
+              ->build();
+            webServer->addMessage(sessionId, sendMessage);
+          }
           sessionIds.erase(playerId);
           std::cout << "Unregister player " << playerId << std::endl;
         }

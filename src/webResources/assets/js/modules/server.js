@@ -98,6 +98,9 @@ var server = {
   register: function (name) {
     sendToServer('register', {name: name});
   },
+  unregister: function () {
+    sendToServer('unregister');
+  },
   startMoving: function () {
     sendToServer('start_moving');
   },

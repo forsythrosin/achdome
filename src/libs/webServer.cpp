@@ -165,12 +165,6 @@ enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
     break;
   case LWS_CALLBACK_CLOSED:{
     Webserver *webserver = Webserver::instance();
-    // TODO: Find out a way to push these messages (format independently)
-    std::string msg = "{\"message\":\"unregister\"}";
-    QueueElement qe2;
-    qe2.sessionId = sessionInfo->sessionId;
-    qe2.message = msg;
-    webserver->pushElement(qe2);
       {
         boost::unique_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
         Webserver::instance()->removeSession(sessionInfo->sessionId);

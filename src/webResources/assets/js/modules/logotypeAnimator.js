@@ -111,14 +111,17 @@ function animateLogotype(length, delay, ease, loader, callback) {
     var timer = length;
     var d = new Date();
     var prevTime = d.getTime();
+    var path = document.getElementById('logotypePath');
+    var newPath;
 
     var iv = setInterval(function() {
       calcParams();
-      path = document.getElementById('logotypePath');
-      if (!path) {
+      newPath = document.getElementById('logotypePath');
+      if (path != newPath) {
         clearInterval(iv);
         return;
       }
+      path = newPath;
       var newD = new Date();
       var newTime = newD.getTime();
       var timeDiff = newTime - prevTime;
