@@ -63,7 +63,7 @@ int main( int argc, char* argv[] ) {
   gEngine->setCleanUpFunction( myCleanUpFun );
   sgct::SharedData::instance()->setEncodeFunction( myEncodeFun );
   sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
-  gEngine->setClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+  gEngine->setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
   if (!gEngine->init( sgct::Engine::OpenGL_3_3_Core_Profile )) {
       delete gEngine;
@@ -108,8 +108,12 @@ void myInitOGLFun() {
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
-  worms = new RenderableWormGroup(1, 20);
+  worms = new RenderableWormGroup(2, 20);
   worms->setWormArcs(wormArcs.getVal());
+  glm::vec4 red(1.0, 0.0, 0.0, 1.0);
+  glm::vec4 blue(0.0, 0.0, 1.0, 1.0);
+  std::vector<glm::vec4> colors = {red, blue};
+  worms->setWormColors(colors);
   wormLines = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
 }
 
@@ -123,17 +127,24 @@ void myPreSyncFun() {
 
   // Update worm positions
   if( gEngine->isMaster() ) {
-    //glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
-    //glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
+    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
 
-    //timer += 0.005f;
-    //WormArc wa(0, first, second);
+    WormArc wa1(0, first, second);
+
+    glm::quat third(glm::vec3(0.0, -0.3, 2.0*glm::pi<float>()*timer));
+    glm::quat fourth(glm::vec3(0.0, -0.3, 2.0*glm::pi<float>()*timer + 1.0));
+    WormArc wa2(0, third, fourth);
+
+    timer += 0.005f;
 
     std::vector<WormArc> arcs = renderSpace->getArcs();
     if (arcs.size() > 0) {
       glm::vec3 start = arcs[0].getCartesianLerp(0);
       glm::vec3 end = arcs[0].getCartesianLerp(1);
     }
+    arcs.push_back(wa1);
+    arcs.push_back(wa2);
     wormArcs.setVal(arcs);
     renderSpace->clear();
   }

@@ -14,6 +14,7 @@ public:
 
   const GLfloat * const getCartesianVertexData() const;
   const GLfloat * const getSphericalVertexData() const;
+  const GLfloat * const getVertexColorData() const;
   const GLuint * const getElementData() const;
 
   virtual const GLuint getVertsPerElement() const = 0;
@@ -23,7 +24,7 @@ protected:
   virtual void createElements() = 0;
 
   int vertexCount, elementCount;
-  GLfloat *cartesianVertexData, *sphericalVertexData;
+  GLfloat *cartesianVertexData, *sphericalVertexData, *vertexColorData;
   GLuint *elementData;
   bool update = false;
 

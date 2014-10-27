@@ -3,6 +3,7 @@
 Renderable::~Renderable() {
   delete [] sphericalVertexData;
   delete [] cartesianVertexData;
+  delete [] vertexColorData;
   delete [] elementData;
 };
 
@@ -12,6 +13,10 @@ const GLfloat * const Renderable::getCartesianVertexData() const {
 
 const GLfloat * const Renderable::getSphericalVertexData() const {
   return sphericalVertexData;
+};
+
+const GLfloat * const Renderable::getVertexColorData() const {
+  return vertexColorData;
 };
 
 const GLuint * const Renderable::getElementData() const {

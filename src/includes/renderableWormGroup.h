@@ -12,7 +12,7 @@ public:
   const std::vector<WormArc> getWormArcs() const;
 
   void setWormArcs(std::vector<WormArc> wormArcs);
-  // void setWormArc(int playerId);
+  void setWormColors(std::vector<glm::vec4> wormColors);
 
   const GLuint getVertsPerElement() const;
 
@@ -23,5 +23,6 @@ protected:
 private:
   int vertsPerWorm, segsPerWorm;
   std::vector<WormArc> wormArcs;
+  std::vector<glm::vec4> wormColors;
   const GLuint VERTS_PER_ELEMENT = 2;
 };

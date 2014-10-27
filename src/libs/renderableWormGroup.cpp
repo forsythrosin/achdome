@@ -13,6 +13,7 @@ RenderableWormGroup::RenderableWormGroup(int wormCount, int segsPerWorm) {
 
   sphericalVertexData = new GLfloat[vertexCount*2];
   cartesianVertexData = new GLfloat[vertexCount*3];
+  vertexColorData = new GLfloat[vertexCount*4];
   elementData = new GLuint[elementCount*VERTS_PER_ELEMENT];
 };
 
@@ -23,7 +24,29 @@ void RenderableWormGroup::setWormArcs(std::vector<WormArc> wormArcs) {
   createVertices();
   createElements();
   update = true;
-}
+};
+
+void RenderableWormGroup::setWormColors(std::vector<glm::vec4> wormColors) {
+  this->wormColors = wormColors;
+
+  for (int j = 0; j < wormColors.size(); ++j) {
+    glm::vec4 color = wormColors.at(j);
+
+    for (int i = 0; i < vertsPerWorm; ++i) {
+      int r = (j*vertsPerWorm + i)*4;
+      int g = (j*vertsPerWorm + i)*4 + 1;
+      int b = (j*vertsPerWorm + i)*4 + 2;
+      int a = (j*vertsPerWorm + i)*4 + 3;
+
+      vertexColorData[r] = color[0];
+      vertexColorData[g] = color[1];
+      vertexColorData[b] = color[2];
+      vertexColorData[a] = color[3];
+    }
+  }
+
+  update = true;
+};
 
 void RenderableWormGroup::createVertices() {
   for (int j = 0; j < wormArcs.size(); ++j) {
@@ -35,10 +58,8 @@ void RenderableWormGroup::createVertices() {
       int sphereIdx = (j*vertsPerWorm + i)*2;
 
       float t = (float)i/(float)segsPerWorm;
-      // std::cout << "t = " << t << std::endl;
 
       glm::vec3 coord = arc.getCartesianLerp(t);
-      // std::cout << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")" << std::endl;
       cartesianVertexData[cartIdx] = coord.x;
       cartesianVertexData[cartIdx + 1] = coord.y;
       cartesianVertexData[cartIdx + 2] = coord.z;
@@ -58,7 +79,7 @@ void RenderableWormGroup::createElements() {
   for (int j = 0; j < wormArcs.size(); ++j) {
     for (int i = 0; i < segsPerWorm; ++i) {
       int elementIdx = (j*segsPerWorm + i)*VERTS_PER_ELEMENT;
-      int vertexIdx = j*segsPerWorm + i;
+      int vertexIdx = j*vertsPerWorm+ i;
 
       elementData[elementIdx] = vertexIdx;
       elementData[elementIdx + 1] = vertexIdx + 1;

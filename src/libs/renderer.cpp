@@ -33,13 +33,14 @@ int Renderer::addRenderable(
  * @param renderConfig config to initialize from
  */
 void Renderer::init(RenderConfig &renderConfig) {
-  // generate VAO
-  glGenVertexArrays(1, &(renderConfig.VAO));
-  glBindVertexArray(renderConfig.VAO);
+  // generate vertexArray
+  glGenVertexArrays(1, &(renderConfig.vertexArray));
+  glBindVertexArray(renderConfig.vertexArray);
 
   // generate buffers
-  glGenBuffers(1, &(renderConfig.VBO));
-  glGenBuffers(1, &(renderConfig.IBO));
+  glGenBuffers(1, &(renderConfig.positionBuffer));
+  glGenBuffers(1, &(renderConfig.indexBuffer));
+  glGenBuffers(1, &(renderConfig.colorBuffer));
 
   loadToGPU(renderConfig);
 
@@ -62,30 +63,44 @@ void Renderer::init(RenderConfig &renderConfig) {
  * @param renderConfig config to upload data from
  */
 void Renderer::loadToGPU(RenderConfig &renderConfig) {
-  // Determine spherical or cartesian style vertices
+  // Determine entity dimensions
   int vertexDim = renderConfig.sphericalCoords ? 2 : 3;
+  int colorDim = 4;
 
+  // Get data arrays
   Renderable *renderable = renderConfig.renderable;
   const GLfloat* vertexData = vertexDim == 2 ?
     renderable->getSphericalVertexData():
     renderable->getCartesianVertexData();
+  const GLfloat* colorData = renderable->getVertexColorData();
   const GLuint* elementData = renderable->getElementData();
 
-  // Upload vertices
-  glBindBuffer(GL_ARRAY_BUFFER, renderConfig.VBO);
+  // Upload vertex positions
+  glBindBuffer(GL_ARRAY_BUFFER, renderConfig.positionBuffer);
   glBufferData(
     GL_ARRAY_BUFFER,
     renderable->getVertexCount()*sizeof(GLfloat)*vertexDim,
     vertexData,
     GL_STATIC_DRAW
   );
-
-  // Use previous buffer as vertex buffer
+  // Use buffer as position buffer for shader location = 0
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
 
+  // Upload colors
+  glBindBuffer(GL_ARRAY_BUFFER, renderConfig.colorBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    renderable->getVertexCount()*sizeof(GLfloat)*colorDim,
+    colorData,
+    GL_STATIC_DRAW
+  );
+  // Use buffer as color buffer for shader location = 1
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, colorDim, GL_FLOAT, GL_FALSE, 0, 0);
+
   // Upload elements (e.g. triangles or line segments)
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.IBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.indexBuffer);
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER,
     renderable->getElementCount()*sizeof(GLuint)*renderable->getVertsPerElement(),
@@ -163,11 +178,15 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
     glUniform1i(renderConfig.textureLocation, 0);
   }
 
-  // Bind vertex + element/index buffers
-  glBindVertexArray(renderConfig.VAO);
+  // Bind position array
+  glBindVertexArray(renderConfig.vertexArray);
   glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, renderConfig.VBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.IBO);
+  // glEnableVertexAttribArray(1);
+
+  // Don't seem to need to rebind buffers?
+  // glBindBuffer(GL_ARRAY_BUFFER, renderConfig.positionBuffer);
+  // glBindBuffer(GL_ARRAY_BUFFER, renderConfig.colorBuffer);
+  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.indexBuffer);
 
   // Draw!
   glDrawElements(

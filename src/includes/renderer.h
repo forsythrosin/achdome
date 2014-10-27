@@ -24,9 +24,10 @@ struct RenderConfig {
 
   int id;
 
-  GLuint VBO = GL_FALSE;
-  GLuint IBO = GL_FALSE;
-  GLuint VAO = GL_FALSE;
+  GLuint positionBuffer = GL_FALSE;
+  GLuint indexBuffer = GL_FALSE;
+  GLuint vertexArray = GL_FALSE;
+  GLuint colorBuffer = GL_FALSE;
   GLint matrixLocation = -1;
   GLint textureLocation = -1;
   GLint fboTexSizeLocation = -1;

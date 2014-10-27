@@ -9,6 +9,7 @@ RenderableDome::RenderableDome(int as, int is) {
 
   sphericalVertexData = new GLfloat[vertexCount*2];
   cartesianVertexData = new GLfloat[vertexCount*3];
+  vertexColorData = new GLfloat[vertexCount*4];
   elementData = new GLuint[elementCount*VERTS_PER_ELEMENT];
 
   createVertices();
