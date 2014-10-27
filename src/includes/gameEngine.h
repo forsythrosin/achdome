@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
@@ -32,6 +34,7 @@ class GameEngine {
 
   std::string getName(int playerId);
   bool isAlive(int playerId);
+  bool isInCurrentGame(int playerId);
   int getKiller(int playerId);
   std::vector<int> getKills(int playerId);
   bool hasStartedMoving(int playerId);

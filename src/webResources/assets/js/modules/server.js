@@ -30,12 +30,13 @@ function get_appropriate_ws_url() {
 function setupSocket() {
   function onopen() {
     connected = true;
-    console.log('Connected');
+    emit('connected', null, null);
   }
 
   function onclose() {
     console.log('Server disconnected, reconnecting...');
     connected = false;
+    emit('disconnected', null, null);
     setTimeout(function () {
       // Connection has closed so try to reconnect every 1 second.
       createSocket();
@@ -97,8 +98,8 @@ var server = {
   register: function (name) {
     sendToServer('register', {name: name});
   },
-  start: function () {
-    sendToServer('start');
+  startMoving: function () {
+    sendToServer('start_moving');
   },
   left: function (down) {
     sendToServer('left_' + (down ? 'down' : 'up'));

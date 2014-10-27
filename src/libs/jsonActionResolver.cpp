@@ -10,7 +10,6 @@ JsonActionResolver::~JsonActionResolver() {
 }
 
 bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) {
-	std::cout << "Resolving " << jsonMessage << std::endl;
 	const char *json = jsonMessage.c_str();
 	picojson::value v;
 	std::string err;

@@ -12,10 +12,12 @@
 #include <clusterRenderSpace.h>
 #include <wormTracker.h>
 #include <jsonActionResolver.h>
+#include <jsonBuilder.h>
 #include <gameEngine.h>
 #include <gameController.h>
 #include <socketGameController.h>
 #include <keyboardGameController.h>
+#include <rainbowColorTheme.h>
 #include <renderableDome.h>
 #include <renderableWormGroup.h>
 #include <Webserver.h>
@@ -44,7 +46,7 @@ std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
 
 // Renderer + renderables
-sgct::SharedVector<WormArc> wormArcs(1);
+sgct::SharedVector<WormArc> wormArcs(100);
 Renderer *renderer;
 RenderableDome *dome;
 RenderableWormGroup *worms;
@@ -74,16 +76,19 @@ int main( int argc, char* argv[] ) {
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
     renderSpace = new ClusterRenderSpace();
 
+    ColorTheme *ct = new RainbowColorTheme();
+
     WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace);
-    PlayerManager *pm = new PlayerManager();
+    PlayerManager *pm = new PlayerManager(ct);
     gameEngine = new GameEngine(wt, pm);
 
     Webserver *webServer = new Webserver();
     webServer->start(8000);
 
     JsonActionResolver *actionResolver = new JsonActionResolver();
+    JsonBuilder *dataSerializationBuilder = new JsonBuilder();
 
-    SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver);
+    SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder);
     gameControllers.push_back(sgc);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
@@ -110,9 +115,11 @@ void myInitOGLFun() {
 
   worms = new RenderableWormGroup(2, 20);
   worms->setWormArcs(wormArcs.getVal());
+
   glm::vec4 red(1.0, 0.0, 0.0, 1.0);
   glm::vec4 blue(0.0, 0.0, 1.0, 1.0);
   std::vector<glm::vec4> colors = {red, blue};
+
   worms->setWormColors(colors);
   wormLines = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
 }
@@ -130,21 +137,20 @@ void myPreSyncFun() {
     glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
     glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
 
-    WormArc wa1(0, first, second);
-
-    glm::quat third(glm::vec3(0.0, -0.3, 2.0*glm::pi<float>()*timer));
-    glm::quat fourth(glm::vec3(0.0, -0.3, 2.0*glm::pi<float>()*timer + 1.0));
-    WormArc wa2(0, third, fourth);
+    glm::quat first2(glm::vec3(0.0, 1.0, 1.0*glm::pi<float>()*timer));
+    glm::quat second2(glm::vec3(0.0, 1.0, 1.0*glm::pi<float>()*timer + 1.0));
 
     timer += 0.005f;
+    WormArc wa(0, first, second);
+    WormArc wa2(0, first2, second2);
 
     std::vector<WormArc> arcs = renderSpace->getArcs();
-    if (arcs.size() > 0) {
-      glm::vec3 start = arcs[0].getCartesianLerp(0);
-      glm::vec3 end = arcs[0].getCartesianLerp(1);
+    if (arcs.size() < 1) {
+      // arcs.push_back(wa);
     }
-    arcs.push_back(wa1);
-    arcs.push_back(wa2);
+    //arcs.push_back(wa);
+    //arcs.push_back(wa2);
+
     wormArcs.setVal(arcs);
     renderSpace->clear();
   }
@@ -169,12 +175,12 @@ void myDrawFun() {
 
 void myEncodeFun() {
   // get things from renderSpace and send it to everyone.
-  sgct::SharedData::instance()->writeVector( &wormArcs );
+  sgct::SharedData::instance()->writeVector(&wormArcs);
 }
 
 void myDecodeFun() {
   // read from buffer and insert data to GameRenderers.
-  sgct::SharedData::instance()->readVector( &wormArcs );
+  sgct::SharedData::instance()->readVector(&wormArcs);
 }
 
 void keyCallback(int key, int action) {

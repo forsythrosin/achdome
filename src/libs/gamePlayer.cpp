@@ -36,7 +36,11 @@ bool GamePlayer::kill(int killerId) {
 
 
 bool GamePlayer::addKill(int playerId) {
+  if (hasKilled(playerId)) {
+    return false;
+  }
   kills.push_back(playerId);
+  return true;
 }
 
 bool GamePlayer::hasKilled(int playerId) {

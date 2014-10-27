@@ -1,10 +1,14 @@
 #include <socketGameController.h>
 #include <gameEngine.h>
+#include <chrono>
+#include <thread>
 
-SocketGameController::SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar) {
+SocketGameController::SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb) {
   gameEngine = ge;
+  currentState = ge->getGameState();
   webServer = ws;
   actionResolver = ar;
+  dataSerializationBuilder = dsb;
 }
 
 SocketGameController::~SocketGameController() {
@@ -13,20 +17,38 @@ SocketGameController::~SocketGameController() {
 
 void SocketGameController::performActions() {
   int sessionId;
-  int playerId;
   std::string message;
   while (webServer->read(sessionId, message)) {
     ClientAction action;
+    int playerId;
+    std::string name;
+    glm::vec3 color;
+    std::string sendMessage;
     if (actionResolver->resolve(message, action)) {
       switch (action.type) {
       case ClientAction::START_GAME:
         gameEngine->startGame();
+        std::cout << "Game started" << std::endl;
         break;
       case ClientAction::REGISTER:
         playerId = gameEngine->connectPlayer();
+        if (action.data.count("name") > 0) {
+          gameEngine->setName(playerId, action.data.at("name"));
+        }
         sessionIds.insert({ playerId, sessionId });
         playerIds.insert({ sessionId, playerId });
-        webServer->addMessage(sessionId, "{\"message\":\"started\"}");
+        name = gameEngine->getName(playerId);
+        color = gameEngine->getColor(playerId);
+        sendMessage =
+          dataSerializationBuilder
+            ->add("message", "registered")
+            ->add("data", dataSerializationBuilder->group()
+              ->add("id", playerId)
+              ->add("name", name)
+              ->add("color", color)
+            )
+            ->build();
+        webServer->addMessage(sessionId, sendMessage);
         break;
       case ClientAction::UNREGISTER:
         if(playerIds.count( sessionId ) != 0){
@@ -34,11 +56,17 @@ void SocketGameController::performActions() {
           playerIds.erase(sessionId);
           gameEngine->disconnectPlayer(playerId);
           sessionIds.erase(playerId);
+          std::cout << "Unregister player " << playerId << std::endl;
         }
         break;
       case ClientAction::START_MOVING:
         playerId = playerIds.at(sessionId);
-        gameEngine->startMoving(playerId);
+        if (gameEngine->startMoving(playerId)) {
+          sendMessage = dataSerializationBuilder->add("message", "moving")->build();
+          webServer->addMessage(sessionId, sendMessage);
+        } else {
+          std::cout << "Don't start moving player " << playerId << std::endl;
+        }
         break;
       case ClientAction::LEFT_DOWN:
         playerId = playerIds.at(sessionId);
@@ -56,6 +84,118 @@ void SocketGameController::performActions() {
         playerId = playerIds.at(sessionId);
         gameEngine->turnRight(playerId, false);
         break;
+      }
+    }
+  }
+
+  GameEngine::State prevState = currentState;
+  currentState = gameEngine->getGameState();
+  if (currentState != prevState) {
+    // Game state changed
+    int sessionId;
+    int playerId;
+    std::string name;
+    glm::vec3 color;
+    std::string sendMessage;
+    switch (currentState) {
+    case GameEngine::INTRO:
+      sendMessage = dataSerializationBuilder->add("message", "register")->build();
+      webServer->addBroadcast(sendMessage);
+      std::cout << "State changed to Intro" << std::endl;
+      break;
+    case GameEngine::LOBBY:
+      if (prevState == GameEngine::GAME) {
+        // If coming from game, loop through players already registered and send "registered" message
+        for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+          sessionId = it->first;
+          playerId = it->second;
+          name = gameEngine->getName(playerId);
+          color = gameEngine->getColor(playerId);
+          sendMessage =
+            dataSerializationBuilder
+              ->add("message", "registered")
+              ->add("data", dataSerializationBuilder->group()
+                ->add("id", playerId)
+                ->add("name", name)
+                ->add("color", color)
+              )
+              ->build();
+          webServer->addMessage(sessionId, sendMessage);
+        }
+      }
+      std::cout << "State changed to Lobby" << std::endl;
+      break;
+    case GameEngine::GAME:
+      // The countdown should be a state on GameEngine rather than being controlled from here.
+      int time = 12;
+
+      DataSerializationBuilder *players = dataSerializationBuilder->group();
+      dataSerializationBuilder
+        ->add("message", "countdown")
+        ->add("data", dataSerializationBuilder->group()
+          ->add("time", time)
+          ->add("players", players)
+        );
+      for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+        sessionId = it->first;
+        playerId = it->second;
+        if (gameEngine->isInCurrentGame(playerId)) {
+          glm::vec3 color = gameEngine->getColor(playerId);
+          glm::vec2 position = gameEngine->getPosition(playerId);
+          players
+            ->add(std::to_string(playerId), dataSerializationBuilder->group()
+              ->add("color", color)
+              ->add("position", dataSerializationBuilder->group()
+                ->add("phi", position.x)
+                ->add("theta", position.y)
+              )
+            );
+        }
+      }
+      sendMessage = dataSerializationBuilder->build();
+      for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+        sessionId = it->first;
+        playerId = it->second;
+        if (gameEngine->isInCurrentGame(playerId)) {
+          webServer->addMessage(sessionId, sendMessage);
+        }
+      }
+      std::cout << "Countdown started";
+
+      while (time > 0) {
+        std::cout << " " << time--;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      }
+      std::cout << std::endl;
+
+      sendMessage = dataSerializationBuilder->add("message", "notMoving")->build();
+      for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+        sessionId = it->first;
+        playerId = it->second;
+        if (gameEngine->isInCurrentGame(playerId)) {
+          webServer->addMessage(sessionId, sendMessage);
+        }
+      }
+
+      std::cout << "State changed to Game" << std::endl;
+      break;
+    }
+  }
+
+  if (currentState == GameEngine::GAME) {
+    for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+      int sessionId = it->first;
+      int playerId = it->second;
+      bool isAlive = gameEngine->isAlive(playerId);
+      if (lives.count(playerId) != 0) {
+        auto it2 = lives.find(playerId);
+        bool wasAlive = it2->second;
+        if (wasAlive && !isAlive) {
+          webServer->addMessage(sessionId, "{\"message\":\"died\", \"data\":{\"name\":\"Tomas\",\"color\":[0,255,0]}}");
+        }
+        it2->second = isAlive;
+      } else {
+        lives.insert({playerId, isAlive});
       }
     }
   }

@@ -1,13 +1,17 @@
+#pragma once
+
+#include <pixelValue.h>
+
 class Bitmap {
  public:
-  Bitmap(int width, int height, int value);
+  Bitmap(int width, int height, PixelValue value);
   ~Bitmap();
-  void setPixel(int x, int y, int value);
-  int getPixel(int x, int y);
+  void setPixel(int x, int y, PixelValue value);
+  PixelValue getPixel(int x, int y);
   int **getData();
-  void clear(int value);
+  void clear(PixelValue value);
  private:
-  int *values;
+  PixelValue *values;
   int width;
   int height;
 };

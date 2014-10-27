@@ -1,15 +1,16 @@
 @typeface: 'Open Sans', sans-serif;
 @font-size: 18px;
-@header-typeface: 'Bangers', sans-serif;
+@header-typeface: 'Comfortaa', sans-serif;
 
-@base: #111;
+@base: #1a1a1a;
+@bright-base: lighten(@base, 20%);
 @diffuse: #999;
 
 @highlight: white;
 @highlight-2: darken(@highlight, 10%);
-@accent: #ffa200;
+@accent: #ff0066;
 
-@positive: #93c760;
+@positive: #88e182;
 @positive-dark: darken(@positive, 40%);
 @negative: #e67878;
 @negative-dark: darken(@negative, 40%);
@@ -42,10 +43,26 @@
   background: linear-gradient(@c1, @c2); /* Standard syntax */
 }
 
+.opacity(@opacity: 0.5) {
+  -moz-opacity: @opacity;
+  -khtml-opacity: @opacity;
+  -webkit-opacity: @opacity;
+  opacity: @opacity;
+  @opperc: @opacity * 100;
+  -ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
+  filter: ~"alpha(opacity=@{opperc})";
+}
+
 .transform(@options) {
   -ms-transform: @options; /* IE 9 */
   -webkit-transform: @options; /* Chrome, Safari, Opera */
   transform: @options;
+}
+
+.transition(@options) {
+  -ms-transition: @options; /* IE 9 */
+  -webkit-transition: @options; /* Chrome, Safari, Opera */
+  transition: @options;
 }
 
 .loop(@keyframes, @duration) {

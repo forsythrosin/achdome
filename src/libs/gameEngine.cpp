@@ -99,6 +99,11 @@ bool GameEngine::isAlive(int playerId) {
   return currentGame->isAlive(playerId);
 }
 
+bool GameEngine::isInCurrentGame(int playerId) {
+  if (!currentGame) return false;
+  return currentGame->isParticipating(playerId);
+}
+
 int GameEngine::getKiller(int playerId) {
   return currentGame->getKiller(playerId);
 }

@@ -20,6 +20,7 @@ class Game : WormEventListener, PlayerEventListener {
   bool startMoving(int playerId);
   bool hasStartedMoving(int playerId);
   bool isAlive(int playerId);
+  bool isParticipating(int playerId);
   int getKiller(int playerId);
   std::vector<int> getKills(int playerId);
   bool start();

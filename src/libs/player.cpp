@@ -22,6 +22,14 @@ std::string Player::getName() {
   return this->name;
 }
 
+void Player::setColor(glm::vec3 color) {
+  this->color = color;
+}
+
+glm::vec3 Player::getColor() {
+  return this->color;
+}
+
 bool Player::isConnected() {
   return connected;
 }
