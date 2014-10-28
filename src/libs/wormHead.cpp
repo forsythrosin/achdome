@@ -4,18 +4,25 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <cmath>
+#include <random>
 
 /**
  * Construct a worm head
  */
-WormHead::WormHead(glm::vec3 pos, glm::vec3 vel) {
-  setEulerPosition(pos);
-  setEulerVelocity(vel);
+WormHead::WormHead() {
+  setEulerPosition(glm::vec3(0.0));
+  setEulerVelocity(glm::vec3(0.0));
+
+  std::random_device rd;
+  randomGenerator = std::mt19937(rd());
+  gapDistribution = std::uniform_int_distribution<>(MIN_TIME_BETWEEN_GAPS, MAX_TIME_BETWEEN_GAPS);
   
-  float angle = 0.01;
-  glm::vec3 axis(0, 0, 1);
-  glm::vec3 normalizedAxis = ((float)sin(angle/2.0)) * axis;
+  moving = false;
+  turningLeft = false;
+  turningRight = false;
   turnSpeed = 0.1;
+
+  setGapTimer();
 }
 
 /**
@@ -47,10 +54,16 @@ void WormHead::tick() {
     glm::vec3 newAxis = glm::mat3_cast(turnRightQuat) * axis;
     glm::vec3 normalizedNewAxis = ((float)sin(angle/2.0))*newAxis;
     
-     velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
+    velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
+
   if (isMoving()) {
     positionQuat = velocityQuat * positionQuat;
+    gapTimer--;
+
+    if (gapTimer < -GAP_TIME) {
+      setGapTimer();
+    }
   }
 }
 
@@ -91,6 +104,20 @@ glm::vec3 WormHead::getVelocity() {
   return glm::mat3_cast(velocityQuat) * glm::vec3(1.0, 0.0, 0.0);
 }
 
+/**
+* Set position
+*/
+void WormHead::setPosition(glm::quat pos) {
+  positionQuat = pos;
+}
+
+/**
+* Set velocity
+*/
+void WormHead::setVelocity(glm::quat vel) {
+  velocityQuat = vel;
+}
+
 
 
 /** * Set position from Euler angles (XYZ)
@@ -127,7 +154,6 @@ bool WormHead::isMoving() const {
   return moving;
 }
 
-
 void WormHead::stop() {
   moving = false;
 }
@@ -141,5 +167,13 @@ void WormHead::turnLeft(bool turn) {
 }
 
 void WormHead::turnRight(bool turn) {
-  turningRight = turn;  
+  turningRight = turn;
+}
+
+void WormHead::setGapTimer() {
+  gapTimer = gapDistribution(randomGenerator);
+}
+
+bool WormHead::isInGap() {
+  return gapTimer < 0;
 }

@@ -32,6 +32,8 @@ class GameEngine {
   void startGame();
   void endGame();
 
+  std::vector<int> getCurrentGameParticipants();
+
   std::string getName(int playerId);
   bool isAlive(int playerId);
   bool isInCurrentGame(int playerId);

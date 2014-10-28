@@ -27,6 +27,10 @@ bool GameEngine::disconnectPlayer(int playerId) {
   return playerManager->disconnectPlayer(playerId);
 }
 
+std::vector<int> GameEngine::getCurrentGameParticipants() {
+  return currentGame->getParticipants();
+}
+
 /**
  * Turn left.
  */

@@ -45,7 +45,6 @@ void Webserver::startServer(int port){
   socketServer.stop();
 }
 
-
 void Webserver::addBroadcast(std::string message){
   for(auto sessionInfo : sessionIdToInfo){
     auto session = sessionInfo.second->session;

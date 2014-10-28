@@ -133,7 +133,7 @@ void SocketGameController::performActions() {
       break;
     case GameEngine::GAME:
       // The countdown should be a state on GameEngine rather than being controlled from here.
-      int time = 0;
+      int time = 5;
 
       DataSerializationBuilder *players = dataSerializationBuilder->group();
       dataSerializationBuilder
@@ -142,21 +142,19 @@ void SocketGameController::performActions() {
           ->add("time", time)
           ->add("players", players)
         );
-      for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
-        sessionId = it->first;
-        playerId = it->second;
-        if (gameEngine->isInCurrentGame(playerId)) {
-          glm::vec3 color = gameEngine->getColor(playerId);
-          glm::vec2 position = gameEngine->getPosition(playerId);
-          players
-            ->add(std::to_string(playerId), dataSerializationBuilder->group()
-              ->add("color", color)
-              ->add("position", dataSerializationBuilder->group()
-                ->add("phi", position.x)
-                ->add("theta", position.y)
-              )
-            );
-        }
+      // Gets poitions only of players using this controller
+      std::vector<int> activeIds = gameEngine->getCurrentGameParticipants();
+      for (int id : activeIds) {
+        glm::vec3 color = gameEngine->getColor(id);
+        glm::vec2 position = gameEngine->getPosition(id);
+        players
+          ->add(std::to_string(id), dataSerializationBuilder->group()
+            ->add("color", color)
+            ->add("position", dataSerializationBuilder->group()
+              ->add("phi", position.x)
+              ->add("theta", position.y)
+            )
+          );
       }
       sendMessage = dataSerializationBuilder->build();
       for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
