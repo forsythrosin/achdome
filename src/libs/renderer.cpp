@@ -8,7 +8,8 @@ Renderer::Renderer(sgct::Engine *gEngine) {
 };
 
 Renderer::~Renderer() {
-  for (auto rc : renderConfigs) {
+  for (auto pair : renderConfigs) {
+    RenderConfig rc = pair.second;
     // delete shaders
     sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
 
@@ -40,10 +41,28 @@ int Renderer::addRenderable(
   Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical) {
   RenderConfig rc(renderable, mode, vert, frag, spherical);
 
-  rc.id = renderConfigs.size();
+  rc.id = nextId++;
   init(rc);
-  renderConfigs.push_back(rc);
+  renderConfigs.emplace(rc.id, rc);
   return rc.id;
+};
+
+void Renderer::removeRenderable(int configId) {
+  RenderConfig &rc = renderConfigs.at(configId);
+
+  sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
+
+  // delete buffers + VAO
+  glDeleteBuffers(1, &rc.positionBuffer);
+  glDeleteBuffers(1, &rc.colorBuffer);
+  glDeleteBuffers(1, &rc.indexBuffer);
+  glDeleteVertexArrays(1, &rc.vertexArray);
+
+  // delete FBOs
+  for (auto fbo : rc.framebuffers) {
+    delete fbo;
+  }
+  renderConfigs.erase(configId);
 };
 
 /**
