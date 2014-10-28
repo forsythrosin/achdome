@@ -6,7 +6,7 @@
 
 class WormHead {
  public:
-  WormHead(glm::vec3 p, glm::vec3 v);
+  WormHead();
   void tick();
   std::string toString();
 
@@ -29,6 +29,16 @@ class WormHead {
    * Get velocity in cartesian coordinates
    */
   glm::vec3 getVelocity();
+
+  /**
+  * Set position
+  */
+  void setPosition(glm::quat);
+
+  /**
+  * Set velocity
+  */
+  void setVelocity(glm::quat);
 
   /**
    * Get position in quaternions

@@ -8,13 +8,11 @@
 /**
  * Construct a worm head
  */
-WormHead::WormHead(glm::vec3 pos, glm::vec3 vel) {
-  setEulerPosition(pos);
-  setEulerVelocity(vel);
+WormHead::WormHead() {
+  setEulerPosition(glm::vec3(0.0));
+  setEulerVelocity(glm::vec3(0.0));
   
-  float angle = 0.01;
-  glm::vec3 axis(0, 0, 1);
-  glm::vec3 normalizedAxis = ((float)sin(angle/2.0)) * axis;
+  moving = false;
   turnSpeed = 0.1;
 }
 
@@ -89,6 +87,20 @@ glm::vec3 WormHead::getPosition() {
  */
 glm::vec3 WormHead::getVelocity() {
   return glm::mat3_cast(velocityQuat) * glm::vec3(1.0, 0.0, 0.0);
+}
+
+/**
+* Set position
+*/
+void WormHead::setPosition(glm::quat pos) {
+  positionQuat = pos;
+}
+
+/**
+* Set velocity
+*/
+void WormHead::setVelocity(glm::quat vel) {
+  velocityQuat = vel;
 }
 
 

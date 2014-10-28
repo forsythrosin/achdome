@@ -1,6 +1,7 @@
 #include <gamePlayer.h>
 #include <player.h>
 #include <vector>
+#include <iostream>
 
 GamePlayer::GamePlayer(Player *p) {
   player = p;

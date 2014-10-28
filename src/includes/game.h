@@ -25,6 +25,7 @@ class Game : WormEventListener, PlayerEventListener {
   std::vector<int> getKills(int playerId);
   bool start();
   bool end();
+  std::vector<int> getParticipants();
   std::string getCountry(int playerId);
   glm::vec2 getPosition(int playerId); // phi, theta
   void tick();

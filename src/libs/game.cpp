@@ -21,10 +21,12 @@ Game::Game(PlayerManager *playerManager, WormTracker *wormTracker) {
 bool Game::start() {
   time = 0;
   wormTracker->clear();
+  std::vector<int> playerIds;
   for (auto iter : gamePlayers) {
     GamePlayer *gamePlayer = iter.second;
-    wormTracker->createWormHead(gamePlayer->getId(), glm::vec3(0.0, -M_PI/2, 0.0), glm::vec3(0.0, 0.01, 0));
+    playerIds.push_back(gamePlayer->getId());
   }
+  wormTracker->setPlayers(playerIds);
   return true;
 }
 
@@ -103,23 +105,23 @@ void Game::tick() {
   wormTracker->tick(time++);
 }
 
+std::vector<int> Game::getParticipants() {
+  std::vector<int> ids;
+  for (auto iter : gamePlayers) {
+    int id = iter.first;
+    GamePlayer *gamePlayer = iter.second;
+    ids.push_back(id);
+  }
+  return ids;
+}
+
 
 std::string Game::getCountry(int playerId) {
   return "";
 }
 
 glm::vec2 Game::getPosition(int playerId) {
-  float phi = playerId + 1;
-  // phi % (3.14 * 2)
-  while (phi > 3.14 * 2) {
-    phi -= 3.14 * 2;
-  }
-  float theta = playerId + 1;
-  // theta % (3.14 / 2)
-  while (theta > 3.14 / 2) {
-    theta -= 3.14 / 2;
-  }
-  return glm::vec2(phi, theta); // phi, theta
+  return wormTracker->getSphericalPosition(playerId);
 }
 
 bool Game::startMoving(int playerId) {

@@ -9,11 +9,13 @@
 #include <map>
 #include <vector>
 #include <wormEventListener.h>
+#include <wormHeadDistributor.h>
 #include <iostream>
 
-WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace) {
+WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace, WormHeadDistributor *distributor) {
   this->collisionSpace = collisionSpace;
   this->renderSpace = renderSpace;
+  this->distributor = distributor;
 }
 
 WormTracker::~WormTracker() {
@@ -32,13 +34,30 @@ void WormTracker::removeEventListener(WormEventListener *wel) {
   }
 }
 
-bool WormTracker::createWormHead(int id, glm::vec3 eulerPosition, glm::vec3 eulerRotation) {
-  if (wormHeads.find(id) == wormHeads.end()) {
-    WormHead *wh = new WormHead(eulerPosition, eulerRotation);
-    wormHeads.insert(std::pair<int, WormHead*>(id, wh));
-    return true;
+void WormTracker::setPlayers(std::vector<int> playerIds) {
+  clearPlayers();
+  for (int id : playerIds) {
+    wormHeads.insert({id, new WormHead()});
   }
-  return false;
+  distributor->distribute(wormHeads);
+}
+
+void WormTracker::clearPlayers() {
+  for (const auto &pair : wormHeads) {
+    delete pair.second;
+  }
+  wormHeads.clear();
+}
+
+glm::vec2 WormTracker::getSphericalPosition(int playerId) {
+  if (wormHeads.count(playerId)) {
+    WormHead *wormHead = wormHeads.at(playerId);
+    glm::vec3 cartesianPos = wormHead->getPosition();
+    float phi = atan2f(cartesianPos.y, cartesianPos.x);
+    float theta = acosf(cartesianPos.z);
+    return glm::vec2(phi, theta);
+  }
+  return glm::vec2(0.0);
 }
 
 void WormTracker::tick(int time) {
