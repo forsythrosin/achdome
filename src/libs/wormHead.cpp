@@ -4,6 +4,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <cmath>
+#include <iostream>
 
 /**
  * Construct a worm head
@@ -13,6 +14,8 @@ WormHead::WormHead() {
   setEulerVelocity(glm::vec3(0.0));
   
   moving = false;
+  turningLeft = false;
+  turningRight = false;
   turnSpeed = 0.1;
 }
 
@@ -45,7 +48,7 @@ void WormHead::tick() {
     glm::vec3 newAxis = glm::mat3_cast(turnRightQuat) * axis;
     glm::vec3 normalizedNewAxis = ((float)sin(angle/2.0))*newAxis;
     
-     velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
+    velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
   if (isMoving()) {
     positionQuat = velocityQuat * positionQuat;
@@ -139,7 +142,6 @@ bool WormHead::isMoving() const {
   return moving;
 }
 
-
 void WormHead::stop() {
   moving = false;
 }
@@ -153,5 +155,5 @@ void WormHead::turnLeft(bool turn) {
 }
 
 void WormHead::turnRight(bool turn) {
-  turningRight = turn;  
+  turningRight = turn;
 }

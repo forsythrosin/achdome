@@ -146,7 +146,7 @@ enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
     std::string *message;
     boost::shared_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
     while (sessionInfo->messages->pop(message)){
-      char buf[1024] = { 0 };
+      char buf[8192] = { 0 };
       memcpy(&buf[LWS_SEND_BUFFER_PRE_PADDING], message->c_str(), message->length());
 
       libwebsocket_write(wsi, (unsigned char*)&buf[LWS_SEND_BUFFER_PRE_PADDING], message->length(), LWS_WRITE_TEXT);

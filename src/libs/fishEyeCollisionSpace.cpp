@@ -101,7 +101,7 @@ glm::vec2 FisheyeCollisionSpace::transform(glm::quat in) {
 
   double phi = atan2(pos.y, pos.x);
   double theta = acos(pos.z);
-  double fov = 2.0*M_PI;
+  double fov = 2.0 * glm::pi<float>();
 
   float x = size * (0.5 + theta/fov*2.0 * cos(phi));
   float y = size * (0.5 + theta/fov*2.0 * sin(phi));

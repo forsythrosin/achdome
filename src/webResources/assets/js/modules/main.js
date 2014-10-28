@@ -221,10 +221,10 @@ var setServerListeners = function ($container) {
             var p = res.players[key];
             var pos = p.position;
             if (pos !== undefined && pos.phi !== undefined && pos.theta !== undefined) {
-              var r = pos.theta / (Math.PI / 2), t = pos.phi;
+              var r = pos.theta / (Math.PI / 2), phi = pos.phi;
               p.position = {
-                x: (1 + r * Math.cos(t)) / 2 * 100 + '%',
-                y: (1 + r * Math.sin(t)) / 2 * 100 + '%'
+                x: (1 + r * Math.cos(phi)) / 2 * 100 + '%',
+                y: (1 + r * Math.sin(phi)) / 2 * 100 + '%'
               }
             }
             if (p.color !== undefined) {
