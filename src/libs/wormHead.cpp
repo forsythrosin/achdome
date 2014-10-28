@@ -4,6 +4,11 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <cmath>
+#include <random>
+
+const int WormHead::MIN_TIME_BETWEEN_GAPS = 80;
+const int WormHead::MAX_TIME_BETWEEN_GAPS = 100;
+const int WormHead::GAP_TIME = 5;
 
 /**
  * Construct a worm head
@@ -11,11 +16,17 @@
 WormHead::WormHead(glm::vec3 pos, glm::vec3 vel) {
   setEulerPosition(pos);
   setEulerVelocity(vel);
+
+  std::random_device rd;
+  randomGenerator = std::mt19937(rd());
+  gapDistribution = std::uniform_int_distribution<>(MIN_TIME_BETWEEN_GAPS, MAX_TIME_BETWEEN_GAPS);
   
   float angle = 0.01;
   glm::vec3 axis(0, 0, 1);
   glm::vec3 normalizedAxis = ((float)sin(angle/2.0)) * axis;
   turnSpeed = 0.1;
+
+  setGapTimer();
 }
 
 /**
@@ -49,8 +60,14 @@ void WormHead::tick() {
     
      velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
+
   if (isMoving()) {
     positionQuat = velocityQuat * positionQuat;
+    gapTimer--;
+
+    if (gapTimer < -GAP_TIME) {
+      setGapTimer();
+    }
   }
 }
 
@@ -142,4 +159,12 @@ void WormHead::turnLeft(bool turn) {
 
 void WormHead::turnRight(bool turn) {
   turningRight = turn;  
+}
+
+void WormHead::setGapTimer() {
+  gapTimer = gapDistribution(randomGenerator);
+}
+
+bool WormHead::isInGap() {
+  return gapTimer < 0;
 }

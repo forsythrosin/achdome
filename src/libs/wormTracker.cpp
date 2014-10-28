@@ -52,7 +52,9 @@ void WormTracker::tick(int time) {
       glm::quat prevPosition = wh->getQuaternionPosition();
       wh->tick();
       glm::quat position = wh->getQuaternionPosition();
-      arcs.push_back(WormArc(id, prevPosition, position, time));
+      if (!wh->isInGap()) {
+        arcs.push_back(WormArc(id, prevPosition, position, time));
+      }
     }
   }
 

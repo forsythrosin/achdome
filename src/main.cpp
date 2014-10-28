@@ -73,7 +73,7 @@ int main( int argc, char* argv[] ) {
   }
 
   if (gEngine->isMaster()){
-    FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
+    FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(500);
     renderSpace = new ClusterRenderSpace();
 
     ColorTheme *ct = new RainbowColorTheme();
