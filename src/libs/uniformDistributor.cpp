@@ -16,8 +16,8 @@ UniformDistributor::~UniformDistributor() {
 
 bool UniformDistributor::distribute(std::map<int, WormHead*> wormHeads) {
   std::uniform_real_distribution<float> phiDis(0.0, 2.0 * glm::pi<float>());
-  std::uniform_real_distribution<float> vDis(0.0, 1.0);
-  std::uniform_real_distribution<float> aDis(0.0, 2 * glm::pi<float>());
+  std::uniform_real_distribution<float> vDis(0.1, 1.0);
+  std::uniform_real_distribution<float> aDis(0.0, 2.0 * glm::pi<float>());
 
   glm::vec3 quatOrigin(1.0, 0.0, 0.0);
 
@@ -28,7 +28,7 @@ bool UniformDistributor::distribute(std::map<int, WormHead*> wormHeads) {
 
     // Uniform distribution of spherical coordinates
     float phi = phiDis(randGen); // [0, 2*pi[
-    float theta = glm::pi<float>()/2 - acosf(v);
+    float theta = acosf(v);
 
     float x = sinf(theta) * cosf(phi);
     float y = sinf(theta) * sinf(phi);
