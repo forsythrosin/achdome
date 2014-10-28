@@ -53,7 +53,7 @@ ExternalProject_Add(websocketpp
 	SOURCE_DIR ${PROJECT_EXTERNAL_DIR}/websocketpp
 CMAKE_ARGS -DENABLE_CPP11=NO ${websocketpp_CMAKE_ARGS})
 
-include_directories(${websocketpp_INSTALL_DIR}/include)
+include_directories(${PROJECT_EXTERNAL_DIR}/websocketpp)
 include_directories(${PROJECT_EXTERNAL_DIR}/picojson)
 include_directories(${PROJECT_EXTERNAL_DIR}/readerwriterqueue)
 
