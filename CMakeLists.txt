@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 SET(APP_NAME Achdome)
 include(CheckCXXCompilerFlag)
+include(ExternalProject)
 project(${APP_NAME} CXX)
 #SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "add a postfix, usually d on windows")
 #SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
@@ -45,14 +46,14 @@ ${PROJECT_SOURCE_DIR}/main.cpp)
 #)
 
 # Include external project
-set(LWS_WITH_SSL OFF CACHE BOOL "" FORCE)
-set(LWS_WITHOUT_TESTAPPS ON CACHE BOOL "" FORCE)
-set(LWS_WITHOUT_EXTENSIONS ON CACHE BOOL "" FORCE)
-set(LWS_WITHOUT_EXTENSIONS ON CACHE BOOL "" FORCE)
-set(LWS_USE_CYASSL OFF CACHE BOOL "" FORCE)
-add_subdirectory(${PROJECT_EXTERNAL_DIR}/libwebsockets)
-set(LIBWEBSOCKETS_INCLUDE_DIR ${PROJECT_EXTERNAL_DIR}/libwebsockets/lib)
-include_directories(${LIBWEBSOCKETS_INCLUDE_DIR})
+set(websocketpp_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/websocketpp")
+set(websocketpp_CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${websocketpp_INSTALL_DIR} ")
+
+ExternalProject_Add(websocketpp
+	SOURCE_DIR ${PROJECT_EXTERNAL_DIR}/websocketpp
+CMAKE_ARGS -DENABLE_CPP11=NO ${websocketpp_CMAKE_ARGS})
+
+include_directories(${websocketpp_INSTALL_DIR}/include)
 include_directories(${PROJECT_EXTERNAL_DIR}/picojson)
 include_directories(${PROJECT_EXTERNAL_DIR}/readerwriterqueue)
 
@@ -189,6 +190,8 @@ if( WIN32 OR CYGWIN )
 	endif()
 elseif( APPLE )
 	add_definitions(-D__APPLE__)
+	add_definitions(-Wno-deprecated)
+	add_definitions(-Wno-deprecated-declarations)
 	add_definitions(-std=c++11)
 else()
 	add_definitions(-D__LINUX__)
@@ -199,12 +202,10 @@ else()
 		set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 	endif()
 endif()
-#Libwebsockets exports the wrong library...
-set(LIBWEBSOCKETS_LIBRARIES_STATIC "${LIBWEBSOCKETS_LIBRARIES_STATIC}s")
 
 set(LIBS ${LIBS} INT_LIBS)
-target_link_libraries(INT_LIBS ${LIBWEBSOCKETS_LIBRARIES_STATIC})
 target_link_libraries(INT_LIBS ${Boost_LIBRARIES} )
+add_dependencies(INT_LIBS websocketpp)
 target_link_libraries(${APP_NAME} ${LIBS} )
 
 

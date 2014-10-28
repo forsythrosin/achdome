@@ -18,7 +18,7 @@ SocketGameController::~SocketGameController() {
 void SocketGameController::performActions() {
   int sessionId;
   std::string message;
-  while (webServer->read(sessionId, message)) {
+  while (webServer->readClientMessage(sessionId, message)) {
     ClientAction action;
     int playerId;
     std::string name;

@@ -4,3 +4,6 @@
 [submodule "src/external/picojson/picojson"]
 	path = src/external/picojson/picojson
 	url = https://github.com/kazuho/picojson
+[submodule "build/src/external/websocketpp"]
+	path = build/src/external/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git

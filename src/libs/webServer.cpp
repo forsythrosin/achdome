@@ -4,375 +4,116 @@ miroslav.andel@ixel.se
 All rights reserved.
 */
 
-#include "Webserver.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <libwebsockets.h> // websocket lib
 #include <webUtils.h>
 #include <iostream>
-#include <cstring>
+#include <fstream>
+#include "Webserver.h"
 
-#define SendBufferLength 32
+Webserver::Webserver(){
+  socketServer.init_asio();
 
-Webserver *Webserver::mInstance = NULL;
-char gSendBuffer[SendBufferLength];
+  socketServer.set_open_handler(bind(&Webserver::onOpen,this,::_1));
+  socketServer.set_close_handler(bind(&Webserver::onClose,this,::_1));
+  socketServer.set_message_handler(bind(&Webserver::onMessage,this,::_1,::_2));
+  socketServer.set_http_handler(bind(&Webserver::onHttp,this,::_1));
+  socketServer.set_socket_init_handler([](connection_hdl, boost::asio::ip::tcp::socket&){
 
-void mainLoop(void * arg);
-static int nullHttp(struct libwebsocket_context * context, struct libwebsocket *wsi,
-enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
-static int echoCallback(struct libwebsocket_context * context, struct libwebsocket *wsi,
-enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len);
-
-
-// protocol types for websockets
-static struct libwebsocket_protocols protocols[] = {
-    {
-      "http-only",
-      nullHttp,
-      0
-    }, {
-      "sgct",
-      echoCallback,
-      sizeof(SessionInfo)
-    }, {
-      NULL, NULL, 0
-    }
-};
-
-const char * get_mimetype(const char *file)
-{
-  int n = strlen(file);
-
-  fprintf(stderr, "File lenght: %d\n", n);
-
-  if (n < 5)
-    return NULL;
-
-  if (!strcmp(&file[n - 4], ".ico"))
-    return "image/x-icon";
-
-  if (!strcmp(&file[n - 4], ".png"))
-    return "image/png";
-
-  if (!strcmp(&file[n - 4], ".gif"))
-    return "image/gif";
-
-  if (!strcmp(&file[n - 4], ".jpg"))
-    return "image/png";
-
-  if (!strcmp(&file[n - 5], ".html"))
-    return "text/html";
-
-  if (!strcmp(&file[n - 4], ".css"))
-    return "text/css";
-
-  if (!strcmp(&file[n - 5], ".less"))
-    return "text/css";
-
-  if (!strcmp(&file[n - 3], ".js"))
-    return "text/javascript";
-
-  return NULL;
+  });
+  this->clientMessages = new boost::lockfree::queue<QueueElement*>(1000);
+}
+Webserver::~Webserver(){
+  webserverThread.join();
+  delete clientMessages;
+}
+void Webserver::start(int port){
+  webserverThread = std::thread(bind(&Webserver::startServer,this, port));
 }
 
-//callbacks
-static int nullHttp(
-struct libwebsocket_context * context,
-struct libwebsocket *wsi,
-enum libwebsocket_callback_reasons reason,
-  void *user, void *in, size_t len)
-{
-  char buf[1024];
-  memset(buf, 0, 1024);
-  const char *mimetype;
-
-  switch (reason)
-  {
-  case LWS_CALLBACK_HTTP:
-  {
-    if (len < 1)
-    {
-      libwebsockets_return_http_status(context, wsi,
-        HTTP_STATUS_BAD_REQUEST, NULL);
-      return -1;
-    }
-
-    const char * data = reinterpret_cast<const char *>(in);
-
-    /* if a legal POST URL, let it continue and accept data */
-    if (lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI))
-      return 0;
-
-    /* if not, send a file the easy way */
-    if (strcmp(data, "/"))
-    {
-      auto pathToFile = webUtils::pathToResource(data + 1);
-      strcat(buf, pathToFile.c_str());
-    }
-    else /* default file to serve */
-    {
-      //strcat(buf, "D:/Projects/ixel_tools/websocket_test/bin/");
-      strcat(buf, webUtils::pathToResource("index.html").c_str());
-    }
-    buf[sizeof(buf) - 1] = '\0';
-
-    /* refuse to serve files we don't understand */
-    mimetype = get_mimetype(buf);
-    if (!mimetype)
-    {
-      lwsl_err("Unknown mimetype for %s\n", buf);
-      libwebsockets_return_http_status(context, wsi,
-        HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE, NULL);
-      return -1;
-    }
-
-    if (libwebsockets_serve_http_file(context, wsi, buf,
-      mimetype, NULL))
-      return -1; /* through completion or error, close the socket */
-  }
-    break;
-  }
-
-
-  return 0;
-}
-
-static int echoCallback(struct libwebsocket_context * context, struct libwebsocket *wsi,
-enum libwebsocket_callback_reasons reason, void *user, void *in, size_t len){
-  // reason for callback
-  SessionInfo *sessionInfo = reinterpret_cast<SessionInfo*>(user);
-  switch (reason){
-  case LWS_CALLBACK_SERVER_WRITEABLE: {
-    std::string *message;
-    boost::shared_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
-    while (sessionInfo->messages->pop(message)){
-      char buf[1024] = { 0 };
-      memcpy(&buf[LWS_SEND_BUFFER_PRE_PADDING], message->c_str(), message->length());
-
-      libwebsocket_write(wsi, (unsigned char*)&buf[LWS_SEND_BUFFER_PRE_PADDING], message->length(), LWS_WRITE_TEXT);
-      delete message;
-    }
-  }
-    break;
-  case LWS_CALLBACK_ESTABLISHED:{
-    int sessionId = Webserver::instance()->generateSessionIndex();
-    sessionInfo->messages = new boost::lockfree::queue<std::string*>(5);
-    sessionInfo->sessionId = sessionId;
-    sessionInfo->wsi = wsi;
-    sessionInfo->mtx = new boost::shared_mutex();
-    Webserver::instance()->addSession(sessionId, sessionInfo);
-  }
-    break;
-  case LWS_CALLBACK_CLOSED:{
-    Webserver *webserver = Webserver::instance();
-    // TODO: Find out a way to push these messages (format independently)
-    std::string msg = "{\"message\":\"unregister\"}";
-    QueueElement qe2;
-    qe2.sessionId = sessionInfo->sessionId;
-    qe2.message = msg;
-    webserver->pushElement(qe2);
-      {
-        boost::unique_lock< boost::shared_mutex > lock(*sessionInfo->mtx);
-        Webserver::instance()->removeSession(sessionInfo->sessionId);
-        delete sessionInfo->messages;
-      }
-    delete sessionInfo->mtx;
-  }
-    break;
-  case LWS_CALLBACK_RECEIVE:{
-    //libwebsocket_write(wsi, reinterpret_cast<unsigned char *>(in), len, LWS_WRITE_TEXT);
-
-    // log what we recieved and what we're going to send as a response.
-    //printf("received data: %s\n", (char *)in);
-
-    Webserver *webserver = Webserver::instance();
-    const char *msg = reinterpret_cast<const char *>(in);
-    QueueElement qe1;
-    qe1.sessionId = sessionInfo->sessionId;
-    qe1.message = msg;
-    webserver->pushElement(qe1);
-  }
-    break;
-  }
-  return 0;
-}
-
-Webserver::Webserver()
-{
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
-  mInstance = this;
-  mMainThreadPtr = NULL;
-  mRunning = false;
-  mSessionIndex = 0;
-  sessionsWaitingForWrite = new boost::lockfree::queue<int>(100);
-  this->queue = new boost::lockfree::queue<QueueElement*>(100);
-}
-
-Webserver::~Webserver()
-{
-  mRunning = false;
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
-  delete sessionsWaitingForWrite;
-  if (mMainThreadPtr && mMainThreadPtr->joinable())
-  {
-    fprintf(stderr, "Waiting for websocket thread to finish...\n");
-    mMainThreadPtr->join();
-    delete mMainThreadPtr;
-    mMainThreadPtr = NULL;
-  }
-  delete queue;
-}
-
-void Webserver::start(int port, int timeout_ms)
-{
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
-  mRunning = true;
-  mPort = port;
-  mTimeout = timeout_ms;
-  mMainThreadPtr = new (std::nothrow) boost::thread(mainLoop, this);
-  memset(gSendBuffer, 0, SendBufferLength);
-}
-
-bool Webserver::isRunning()
-{
-  bool tmpBool;
-  tmpBool = mRunning;
-  return tmpBool;
-}
-
-void Webserver::setRunning(bool state)
-{
-  mRunning = state;
-}
-
-unsigned int Webserver::generateSessionIndex()
-{
-  //session index 0 is invalid all clients having an index > 0 is ok
-
-  unsigned int tmpUi;
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
-  mSessionIndex++;
-  tmpUi = mSessionIndex;
-  return tmpUi;
-}
-
-void Webserver::addBroadcast(std::string broadcast) {
-  boost::shared_lock< boost::shared_mutex > lock(serverMutex);
-  for (auto session : sessions){
-    session.second->messages->push(new std::string(broadcast));
-    sessionsWaitingForWrite->push(session.second->sessionId);
+void Webserver::startServer(int port){
+  std::cout << "Starting server on port " << port << std::endl;
+  socketServer.listen(port);
+  socketServer.start_accept();
+  try {
+      socketServer.run();
+  } catch (const std::exception & e) {
+      std::cout << e.what() << std::endl;
+  } catch (websocketpp::lib::error_code e) {
+      std::cout << e.message() << std::endl;
+  } catch (...) {
+      std::cout << "other exception" << std::endl;
   }
 }
 
-void Webserver::addMessage(int sessionId, std::string message) {
-  boost::shared_lock< boost::shared_mutex > lock(serverMutex);
-  auto sessionIt = sessions.find(sessionId);
-  if (sessionIt != this->sessions.end()){
-    sessionIt->second->messages->push(new std::string(message));
-    sessionsWaitingForWrite->push(sessionIt->second->sessionId);
+
+void Webserver::addBroadcast(std::string message){
+  for(auto sessionInfo : sessionIdToInfo){
+    auto session = sessionInfo.second->session;
+    server::connection_ptr connection = socketServer.get_con_from_hdl(session);
+    connection->send(message);
   }
 }
-
-void Webserver::addSession(int sessionId, SessionInfo *session) {
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
-  this->sessions.insert({ sessionId, session });
+void Webserver::addMessage(int sessionId, std::string message){
+  auto sessionInfo = sessionIdToInfo.at(sessionId);
+  server::connection_ptr connection = socketServer.get_con_from_hdl(sessionInfo->session);
+  connection->send(message);
 }
 
-bool Webserver::removeSession(int sessionId){
-  boost::unique_lock< boost::shared_mutex > lock(serverMutex);
-  auto sessionIt = sessions.find(sessionId);
-  if (sessionIt == this->sessions.end()){
-    return false;
+void Webserver::onOpen(connection_hdl handle){
+  std::cout << "Opened connection" << std::endl;
+  int sessionId = nextId++;
+  SessionInfo *sessionInfo = new SessionInfo();
+  sessionInfo->sessionId = sessionId;
+  sessionInfo->session = handle;
+  sessionIdToInfo.insert({sessionId, sessionInfo});
+  sessionHandleToInfo.insert({handle, sessionInfo});
+}
+
+void Webserver::onMessage(connection_hdl handle, server::message_ptr message){
+  std::cout << message->get_payload() << std::endl;
+  auto sessionInfo = sessionHandleToInfo.at(handle);
+  int sessionId = sessionInfo->sessionId;
+  auto queueElement = new QueueElement();
+  queueElement->message = message->get_payload();
+  queueElement->sessionId = sessionId;
+
+  //clientMessages->push(queueElement);
+}
+
+void Webserver::onHttp(connection_hdl handle){
+  server::connection_ptr con = socketServer.get_con_from_hdl(handle);
+
+  // Set status to 200 rather than the default error code
+  std::string path = con->get_resource().substr(1);
+  if(path.length() == 0){
+    // Default file to serve
+    path = "index.html";
   }
-  this->sessions.erase(sessionId);
-  return true;
+  auto resourcePath = webUtils::pathToResource(path);
+  std::ifstream fin(resourcePath, std::ios::in | std::ios::binary);
+  std::ostringstream oss;
+  oss << fin.rdbuf();
+  std::string fileContent =  oss.str();
+
+  con->set_status(websocketpp::http::status_code::ok);
+  con->set_body(fileContent);
 }
 
-SessionInfo* Webserver::getSession(int sessionId){
-  auto sessionIt = sessions.find(sessionId);
-  SessionInfo* result = NULL;
-  if (sessionIt != this->sessions.end()){
-    result = sessionIt->second;
-  }
-  return result;
-}
-boost::lockfree::queue<int>* Webserver::getSessionsWaitingForWrite(){
-  return sessionsWaitingForWrite;
-}
-
-void Webserver::pushElement(QueueElement element) {
-  this->queue->push(new QueueElement(element));
-}
-
-void mainLoop(void * arg)
-{
-  Webserver * parent = reinterpret_cast<Webserver *>(arg);
-
-  // server url will be ws://localhost:9000
-  const char *interface = NULL;
-  struct libwebsocket_context *context = NULL;
-
-  // we're not using ssl
-  const char *cert_path = NULL;
-  const char *key_path = NULL;
-
-  //lws_set_log_level(7, lwsl_emit_syslog);
-  //lws_set_log_level(1, lwsl_emit_syslog);
-
-  // no special options
-  int opts = 0;
-
-  // create connection struct
-  struct lws_context_creation_info info;
-  memset(&info, 0, sizeof info);
-
-  info.port = parent->getPort();
-  info.iface = interface;
-  info.protocols = protocols;
-  info.extensions = NULL;
-  info.ssl_cert_filepath = cert_path;
-  info.ssl_private_key_filepath = key_path;
-  info.options = opts;
-  info.gid = -1;
-  info.uid = -1;
-
-  // create libwebsocket context representing this server
-  context = libwebsocket_create_context(&info);
-
-  // make sure it starts
-  if (context == NULL)
-  {
-    parent->setRunning(false);
-    fprintf(stderr, "libwebsocket init failed\n");
-    return;
-  }
-  printf("starting server...\n");
-
-  // infinite loop, to end this server send SIGTERM. (CTRL+C)
-  while (parent->isRunning())
-  {
-    auto sessions = Webserver::instance()->getSessionsWaitingForWrite();
-    int sessionId;
-    while (sessions->pop(sessionId)){
-      auto sessionInfo = Webserver::instance()->getSession(sessionId);
-      if (sessionInfo){
-        libwebsocket_callback_on_writable(context, sessionInfo->wsi);
-      }
-    }
-
-    libwebsocket_service(context, parent->getTimeout()); //5 ms -> 200 samples / s
-  }
-
-  libwebsocket_context_destroy(context);
-  return;
-}
-
-bool Webserver::read(int &sessionId, std::string &message) {
+bool Webserver::readClientMessage(int &sessionId, std::string &message){
   QueueElement *elem;
-  if (queue->pop(elem)) {
+  if(clientMessages->pop(elem)){
     sessionId = elem->sessionId;
     message = elem->message;
+    delete elem;
     return true;
   }
   return false;
+}
+
+
+void Webserver::onClose(connection_hdl handle){
+  auto sessionIt = sessionHandleToInfo.find(handle);
+  SessionInfo *sessionInfo = sessionIt->second;
+  sessionHandleToInfo.erase(sessionIt);
+  sessionIdToInfo.erase(sessionInfo->sessionId);
+  delete sessionInfo;
 }
