@@ -2,6 +2,7 @@
 #include <renderablePanel.h>
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine) : ClusterState(gEngine) {
+  attached = false;
 }
 
 LobbyClusterState::~LobbyClusterState() {

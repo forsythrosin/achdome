@@ -7,15 +7,13 @@
 #include <clusterRenderSpace.h>
 #include <iostream>
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine) : ClusterState(gEngine) {
-  wormArcs = new sgct::SharedVector<WormArc>(2);
-  renderSpace = nullptr;
-}
+GameClusterState::GameClusterState(sgct::Engine *gEngine) : GameClusterState(gEngine, nullptr) {}
 
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs) : ClusterState(gEngine) {
   wormArcs = new sgct::SharedVector<WormArc>(2);
   renderSpace = rs;
+  attached = false;
 }
 
 
@@ -53,6 +51,14 @@ void GameClusterState::preSync() {
   if (renderSpace != nullptr) {
     std::vector<WormArc> arcs = renderSpace->getArcs();
     //    std::vector<WormCollision> collisions = renderSpace->getCollisions();
+
+    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()));
+    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>() + 0.000001));
+    WormArc wa(0, first, second, 0);
+    if (arcs.size() < 1) {
+      arcs.push_back(wa);
+    }
+
     wormArcs->setVal(arcs);
 
     //    std::cout << arcs.size() << std::endl;
