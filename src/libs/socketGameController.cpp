@@ -54,7 +54,13 @@ void SocketGameController::performActions() {
         if(playerIds.count( sessionId ) != 0){
           playerId = playerIds.at(sessionId);
           playerIds.erase(sessionId);
-          gameEngine->disconnectPlayer(playerId);
+          if (gameEngine->disconnectPlayer(playerId)) {
+            sendMessage =
+              dataSerializationBuilder
+              ->add("message", "register")
+              ->build();
+            webServer->addMessage(sessionId, sendMessage);
+          }
           sessionIds.erase(playerId);
           std::cout << "Unregister player " << playerId << std::endl;
         }
@@ -127,7 +133,7 @@ void SocketGameController::performActions() {
       break;
     case GameEngine::GAME:
       // The countdown should be a state on GameEngine rather than being controlled from here.
-      int time = 12;
+      int time = 0;
 
       DataSerializationBuilder *players = dataSerializationBuilder->group();
       dataSerializationBuilder

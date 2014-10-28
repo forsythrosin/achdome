@@ -5,6 +5,11 @@
 
 Renderer::Renderer(sgct::Engine *gEngine) {
   this->gEngine = gEngine;
+
+  float lineWidth[2];
+  glGetFloatv(GL_LINE_WIDTH_RANGE, lineWidth);
+  std::cout << "Line min = " << lineWidth[0] << std::endl;
+  std::cout << "Line max = " << lineWidth[1] << std::endl;
 };
 
 /**

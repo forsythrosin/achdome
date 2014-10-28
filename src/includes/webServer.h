@@ -4,6 +4,8 @@
 #include <websocketpp/server.hpp>
 #include <boost/lockfree/queue.hpp>
 #include <thread>
+#include <queue>
+#include <mutex>
 
 using websocketpp::connection_hdl;
 using websocketpp::lib::placeholders::_1;
@@ -73,6 +75,8 @@ private:
   void onClose(connection_hdl handle);
   void onMessage(connection_hdl handle, server::message_ptr message);
   void onHttp(connection_hdl handle);
+  void onSocketInit(connection_hdl, boost::asio::ip::tcp::socket& s);
+  bool validateHandler(connection_hdl hdl);
 
   std::map<int, SessionInfo*> sessionIdToInfo;
   std::map<connection_hdl, SessionInfo*> sessionHandleToInfo;
@@ -81,6 +85,7 @@ private:
   std::thread webserverThread;
 
   std::atomic_int	 nextId;
+  std::mutex messageMutex;
 
-  boost::lockfree::queue<QueueElement*> *clientMessages;
+  std::queue<QueueElement*> *clientMessages;
 };

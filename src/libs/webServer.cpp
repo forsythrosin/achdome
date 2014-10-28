@@ -11,17 +11,15 @@ All rights reserved.
 
 Webserver::Webserver(){
   socketServer.init_asio();
+  socketServer.set_reuse_addr(true);
+  socketServer.set_open_handler(bind(&Webserver::onOpen, this, ::_1));
+  socketServer.set_close_handler(bind(&Webserver::onClose, this, ::_1));
+  socketServer.set_message_handler(bind(&Webserver::onMessage, this, ::_1, ::_2));
+  socketServer.set_http_handler(bind(&Webserver::onHttp, this, ::_1));
+  socketServer.set_socket_init_handler(bind(&Webserver::onSocketInit, this, ::_1, ::_2));
+  socketServer.set_validate_handler(bind(&Webserver::validateHandler, this, ::_1));
 
-  socketServer.set_open_handler(bind(&Webserver::onOpen,this,::_1));
-  socketServer.set_close_handler(bind(&Webserver::onClose,this,::_1));
-  socketServer.set_message_handler(bind(&Webserver::onMessage,this,::_1,::_2));
-  socketServer.set_http_handler(bind(&Webserver::onHttp,this,::_1));
-  socketServer.set_socket_init_handler([](connection_hdl, boost::asio::ip::tcp::socket& s){
-    //enable no_delay
-    boost::asio::ip::tcp::no_delay option(true);
-    s.set_option(option);
-  });
-  this->clientMessages = new boost::lockfree::queue<QueueElement*>(1000);
+  this->clientMessages = new std::queue<QueueElement*>();
 }
 Webserver::~Webserver(){
   webserverThread.join();
@@ -44,6 +42,7 @@ void Webserver::startServer(int port){
   } catch (...) {
       std::cout << "other exception" << std::endl;
   }
+  socketServer.stop();
 }
 
 
@@ -61,7 +60,6 @@ void Webserver::addMessage(int sessionId, std::string message){
 }
 
 void Webserver::onOpen(connection_hdl handle){
-  std::cout << "Opened connection" << std::endl;
   int sessionId = nextId++;
   SessionInfo *sessionInfo = new SessionInfo();
   sessionInfo->sessionId = sessionId;
@@ -71,6 +69,7 @@ void Webserver::onOpen(connection_hdl handle){
 }
 
 void Webserver::onMessage(connection_hdl handle, server::message_ptr message){
+  std::cout << message->get_payload() << std::endl;
   auto sessionInfo = sessionHandleToInfo.at(handle);
   int sessionId = sessionInfo->sessionId;
   auto queueElement = new QueueElement();
@@ -104,8 +103,9 @@ void Webserver::onHttp(connection_hdl handle){
 }
 
 bool Webserver::readClientMessage(int &sessionId, std::string &message){
-  QueueElement *elem;
-  if(clientMessages->pop(elem)){
+  if(!clientMessages->empty()){
+    QueueElement *elem = clientMessages->front();
+    clientMessages->pop();
     sessionId = elem->sessionId;
     message = elem->message;
     delete elem;
@@ -121,4 +121,18 @@ void Webserver::onClose(connection_hdl handle){
   sessionHandleToInfo.erase(sessionIt);
   sessionIdToInfo.erase(sessionInfo->sessionId);
   delete sessionInfo;
+}
+
+void Webserver::onSocketInit(connection_hdl hdl, boost::asio::ip::tcp::socket &s) {
+  boost::asio::ip::tcp::no_delay option(true);
+  s.set_option(option);
+}
+
+bool Webserver::validateHandler(connection_hdl hdl) {
+  server::connection_ptr con = socketServer.get_con_from_hdl(hdl);
+  const std::vector<std::string> & subp_requests = con->get_requested_subprotocols();
+  if(subp_requests.size() > 0){
+    con->select_subprotocol(subp_requests[0]);
+  }
+  return true;
 }

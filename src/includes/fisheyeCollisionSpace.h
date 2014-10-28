@@ -24,7 +24,7 @@ class FisheyeCollisionSpace : public CollisionSpace {
   /**
    * Add arcs to this collision space.
    */
-  virtual std::vector<WormCollision> addArcs(std::vector<WormArc> arcs);
+  std::vector<WormCollision> addArcs(std::vector<WormArc> arcs);
 
   /**
    * Clear the collision space
@@ -35,7 +35,7 @@ class FisheyeCollisionSpace : public CollisionSpace {
   int size;
   Bitmap *bitmap;
   glm::vec2 transform(glm::quat in);
-  std::vector<glm::quat> getArcPoints(WormArc arc, float start = 0.0, float end = 1.0);
+  std::vector<glm::quat> getArcPoints(WormArc arc, double start = 0.0, double end = 1.0);
   static const float HALF_PIXEL;
 
 };

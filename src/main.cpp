@@ -113,7 +113,7 @@ void myInitOGLFun() {
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
-  worms = new RenderableWormGroup(2, 20);
+  worms = new RenderableWormGroup(100, 4, 0.02);
   worms->setWormArcs(wormArcs.getVal());
 
   glm::vec4 red(1.0, 0.0, 0.0, 1.0);
@@ -121,7 +121,7 @@ void myInitOGLFun() {
   std::vector<glm::vec4> colors = {red, blue};
 
   worms->setWormColors(colors);
-  wormLines = renderer->addRenderable(worms, GL_LINES, "wormShader.vert", "wormShader.frag", false);
+  wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
 }
 
 void myPreSyncFun() {
@@ -135,23 +135,17 @@ void myPreSyncFun() {
   // Update worm positions
   if( gEngine->isMaster() ) {
     glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
-    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 1.0));
+    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 0.000001));
 
-    glm::quat first2(glm::vec3(0.0, 1.0, 1.0*glm::pi<float>()*timer));
-    glm::quat second2(glm::vec3(0.0, 1.0, 1.0*glm::pi<float>()*timer + 1.0));
-
-    timer += 0.005f;
-    WormArc wa(0, first, second);
-    WormArc wa2(0, first2, second2);
+    // timer += 0.005f;
+    WormArc wa(0, first, second, 0);
 
     std::vector<WormArc> arcs = renderSpace->getArcs();
     if (arcs.size() < 1) {
-      // arcs.push_back(wa);
+      arcs.push_back(wa);
     }
-    //arcs.push_back(wa);
-    //arcs.push_back(wa2);
-
     wormArcs.setVal(arcs);
+
     renderSpace->clear();
   }
 
@@ -160,7 +154,7 @@ void myPreSyncFun() {
 }
 
 void myDrawFun() {
-  // Copy current worm positions
+  // Copy current worm positions and colors
   worms->setWormArcs(wormArcs.getVal());
 
   // render wormLines to FBO

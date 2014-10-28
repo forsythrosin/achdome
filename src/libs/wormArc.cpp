@@ -3,10 +3,11 @@
 #include <wormArc.h>
 #include <iostream>
 
-WormArc::WormArc(int id, glm::quat firstQuat, glm::quat secondQuat) {
+WormArc::WormArc(int id, glm::quat firstQuat, glm::quat secondQuat, int time) {
   this->wormId = id;
   this->firstQuat = firstQuat;
   this->secondQuat = secondQuat;
+  this->time = time;
 }
 
 int WormArc::getWormId() {

@@ -132,24 +132,57 @@ var setButtonListeners = function ($container) {
         $name.addClass('warning').attr('placeholder', 'Choose a name');
       }
     })
+    .on('click', '#unregister', function () {
+      server.unregister();
+    })
     .on('click', '#positionInfo', function () {
       server.startMoving();
     })
-    .on('touchstart', '#left', function () {
+    .on('touchstart mousedown', '#left', function () {
       $container.find('#left').addClass('active');
       server.left(true);
     })
-    .on('touchend', '#left', function () {
+    .on('touchend mouseup', '#left', function () {
       $container.find('#left').removeClass('active');
       server.left(false);
     })
-    .on('touchstart', '#right', function () {
+    .on('touchstart mousedown', '#right', function () {
       $container.find('#right').addClass('active');
       server.right(true);
     })
-    .on('touchend', '#right', function () {
+    .on('touchend mouseup', '#right', function () {
       $container.find('#right').removeClass('active');
       server.right(false);
+    })
+    .keydown(function(e) {
+        switch(e.which) {
+            case 37: // left
+                $container.find('#left').addClass('active');
+                server.left(true);
+                break;
+
+            case 39: // right
+                $container.find('#right').addClass('active');
+                server.right(true);
+                break;
+            default: return; // exit this handler for other keys
+        }
+        e.preventDefault(); // prevent the default action (scroll / move caret)
+    })
+    .keyup(function(e) {
+        switch(e.which) {
+            case 37: // left
+                $container.find('#left').removeClass('active');
+                server.left(false);
+                break;
+
+            case 39: // right
+                $container.find('#right').removeClass('active');
+                server.right(false);
+                break;
+            default: return; // exit this handler for other keys
+        }
+        e.preventDefault(); // prevent the default action (scroll / move caret)
     });
 };
 
@@ -167,6 +200,11 @@ var players = [];
 
 var setServerListeners = function ($container) {
   server.on('connected', function (err, res) {
+    if (err) console.warn(err);
+    renderRegister($container, res);
+  });
+
+  server.on('register', function (err, res) {
     if (err) console.warn(err);
     renderRegister($container, res);
   });

@@ -34,4 +34,5 @@ class Game : WormEventListener, PlayerEventListener {
   std::map<int, GamePlayer*> gamePlayers;
   void onWormCollision(WormCollision wc);
   void onPlayerDisconnect(int playerId);
+  int time = 0;
 };

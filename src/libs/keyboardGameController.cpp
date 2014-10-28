@@ -25,6 +25,10 @@ void KeyboardGameController::perform(KeyEvent e) {
   int action = e.second;
 
   switch (key) {
+  case GLFW_KEY_DOWN: {
+    connectPlayer();
+    break;
+  }
   case GLFW_KEY_ENTER:
     if (action == GLFW_PRESS) {
       startGame();
@@ -63,12 +67,16 @@ void KeyboardGameController::processKeyEvent(int key, int action) {
 
 void KeyboardGameController::startGame() {
   if (gameEngine->getGameState() != GameEngine::GAME) {
-    //playerId = gameEngine->connectPlayer();
-    gameEngine->startGame();
+      gameEngine->startGame();
     //gameEngine->startMoving(playerId);
   }
 }
 
+void KeyboardGameController::connectPlayer() {
+  if (playerId == -1) {
+    playerId = gameEngine->connectPlayer();
+  }
+}
 
 void KeyboardGameController::startMoving() {
   if (playerId != -1) {
