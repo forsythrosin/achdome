@@ -16,8 +16,10 @@ Webserver::Webserver(){
   socketServer.set_close_handler(bind(&Webserver::onClose,this,::_1));
   socketServer.set_message_handler(bind(&Webserver::onMessage,this,::_1,::_2));
   socketServer.set_http_handler(bind(&Webserver::onHttp,this,::_1));
-  socketServer.set_socket_init_handler([](connection_hdl, boost::asio::ip::tcp::socket&){
-
+  socketServer.set_socket_init_handler([](connection_hdl, boost::asio::ip::tcp::socket& s){
+    //enable no_delay
+    boost::asio::ip::tcp::no_delay option(true);
+    s.set_option(option);
   });
   this->clientMessages = new boost::lockfree::queue<QueueElement*>(1000);
 }
@@ -69,14 +71,13 @@ void Webserver::onOpen(connection_hdl handle){
 }
 
 void Webserver::onMessage(connection_hdl handle, server::message_ptr message){
-  std::cout << message->get_payload() << std::endl;
   auto sessionInfo = sessionHandleToInfo.at(handle);
   int sessionId = sessionInfo->sessionId;
   auto queueElement = new QueueElement();
   queueElement->message = message->get_payload();
   queueElement->sessionId = sessionId;
 
-  //clientMessages->push(queueElement);
+  clientMessages->push(queueElement);
 }
 
 void Webserver::onHttp(connection_hdl handle){
@@ -90,6 +91,10 @@ void Webserver::onHttp(connection_hdl handle){
   }
   auto resourcePath = webUtils::pathToResource(path);
   std::ifstream fin(resourcePath, std::ios::in | std::ios::binary);
+  if(!fin.is_open()){
+    con->set_status(websocketpp::http::status_code::not_found);
+    return;
+  }
   std::ostringstream oss;
   oss << fin.rdbuf();
   std::string fileContent =  oss.str();
