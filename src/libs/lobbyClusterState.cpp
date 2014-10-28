@@ -1,13 +1,13 @@
-#include <lobbyRenderState.h>
+#include <lobbyClusterState.h>
 #include <renderablePanel.h>
 
-LobbyRenderState::LobbyRenderState(sgct::Engine *gEngine) : RenderState(gEngine) {
+LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine) : ClusterState(gEngine) {
 }
 
-LobbyRenderState::~LobbyRenderState() {
+LobbyClusterState::~LobbyClusterState() {
 }
 
-void LobbyRenderState::init() {
+void LobbyClusterState::attach() {
   font = new sgct_text::Font("Arial", 1.0f);
   RenderablePanel *panel0 = new RenderablePanel(
     glm::vec3(-3.0, 7.5, 2.5),
@@ -27,12 +27,21 @@ void LobbyRenderState::init() {
 
   panels.push_back(panel0Id);
   panels.push_back(panel1Id);
+  attached = true;
 }
 
-void LobbyRenderState::preSync() {
+void LobbyClusterState::detach() {
+  for (auto panel : panels) {
+    renderer->removeRenderable(panel);
+  }
+  attached = false;
 }
 
-void LobbyRenderState::draw() {
+
+void LobbyClusterState::preSync() {
+}
+
+void LobbyClusterState::draw() {
   for (auto p : panels) {
     renderer->render(p);
   }
@@ -46,7 +55,7 @@ void LobbyRenderState::draw() {
   // );
 }
 
-void LobbyRenderState::encode() {
+void LobbyClusterState::encode() {
 }
-void LobbyRenderState::decode() {
+void LobbyClusterState::decode() {
 }

@@ -1,17 +1,21 @@
 #pragma once
 
-#include <renderState.h>
+#include <clusterState.h>
 #include <wormArc.h>
 
 class RenderableDome;
 class RenderableWormGroup;
+class ClusterRenderSpace;
 
-class GameRenderState : public RenderState {
+class GameClusterState : public ClusterState {
  public:
-  GameRenderState(sgct::Engine *gEngine);
-  ~GameRenderState();
+  GameClusterState(sgct::Engine *gEngine);
+  GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs);
+  ~GameClusterState();
 
-  void init();
+  void attach();
+  void detach();
+
   void preSync();
   void draw();
   void encode();
@@ -24,6 +28,7 @@ class GameRenderState : public RenderState {
   int domeGrid, domeWorms, wormLines;
   float timer = 0.0f;
   int stitchStep = 0;
+  ClusterRenderSpace *renderSpace;
 
   sgct::SharedVector<WormArc> *wormArcs;
 };

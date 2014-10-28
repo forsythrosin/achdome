@@ -1,21 +1,31 @@
-#include <gameRenderState.h>
+#include <gameClusterState.h>
 
 #include <renderable.h>
 #include <renderer.h>
 #include <renderableDome.h>
 #include <renderableWormGroup.h>
+#include <clusterRenderSpace.h>
+#include <iostream>
 
-GameRenderState::GameRenderState(sgct::Engine *gEngine) : RenderState(gEngine) {
+GameClusterState::GameClusterState(sgct::Engine *gEngine) : ClusterState(gEngine) {
   wormArcs = new sgct::SharedVector<WormArc>(2);
+  renderSpace = nullptr;
 }
 
-GameRenderState::~GameRenderState() {
+
+GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs) : ClusterState(gEngine) {
+  wormArcs = new sgct::SharedVector<WormArc>(2);
+  renderSpace = rs;
+}
+
+
+GameClusterState::~GameClusterState() {
   delete dome;
   delete worms;
   delete wormArcs;
 }
 
-void GameRenderState::init() {
+void GameClusterState::attach() {
   dome = new RenderableDome(50, 20);
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
@@ -29,39 +39,39 @@ void GameRenderState::init() {
 
   worms->setWormColors(colors);
   wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
+  attached = true;
 }
 
-void GameRenderState::preSync() {
-  // Update worm positions
-  if( gEngine->isMaster() ) {
-    glm::quat first0(glm::vec3(0.0, -0.785375, 2.0*glm::pi<float>()*timer));
-    glm::quat second0(glm::vec3(0.0, -0.785375, 2.0*glm::pi<float>()*timer + 0.1));
+void GameClusterState::detach() {
+  renderer->removeRenderable(domeWorms);
+  renderer->removeRenderable(domeGrid);
+  renderer->removeRenderable(wormLines);
+  attached = false;
+}
 
-    glm::quat first1(glm::vec3(0.0, -1.0, 2.0*glm::pi<float>()*timer));
-    glm::quat second1(glm::vec3(0.0, -1.0, 2.0*glm::pi<float>()*timer + 0.1));
-
-    timer += 0.005f;
-    WormArc wa0(0, first0, second0);
-    WormArc wa1(0, first1, second1);
-
-    std::vector<WormArc> arcs;
-    if (arcs.size() < 1) {
-      arcs.push_back(wa0);
-      arcs.push_back(wa1);
-    }
+void GameClusterState::preSync() {
+  if (renderSpace != nullptr) {
+    std::vector<WormArc> arcs = renderSpace->getArcs();
+    //    std::vector<WormCollision> collisions = renderSpace->getCollisions();
     wormArcs->setVal(arcs);
 
-    // renderSpace->clear();
+    //    std::cout << arcs.size() << std::endl;
+    //  std::vector<WormHeadIndicator> heads = renderSpace->getWormHeadIndicators();
+    //  wormHeadIndicators->setVal(heads);
+    //    wormCollisions->setVal(collisions);
+    
+    renderSpace->clear();
   }
 
   // Reset stitch step
   stitchStep = 0;
 }
 
-void GameRenderState::draw() {
+void GameClusterState::draw() {
   // Copy current worm positions and colors
-  worms->setWormArcs(wormArcs->getVal());
-
+  std::vector<WormArc> arcs = wormArcs->getVal();
+  worms->setWormArcs(arcs);
+  
   // render wormLines to FBO
   renderer->renderToFBO(wormLines, stitchStep);
   // render FBO as texture on dome
@@ -72,11 +82,11 @@ void GameRenderState::draw() {
   ++stitchStep;
 }
 
-void GameRenderState::encode() {
+void GameClusterState::encode() {
   // get things from renderSpace and send it to everyone.
   sgct::SharedData::instance()->writeVector(wormArcs);
 }
-void GameRenderState::decode() {
+void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
   sgct::SharedData::instance()->readVector(wormArcs);
 }

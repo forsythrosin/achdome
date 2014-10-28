@@ -6,7 +6,7 @@
 #include <game.h>
 
 GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm) {
-  state = State::INTRO;
+  state = State::LOBBY;
   playerManager = pm;
   currentGame = nullptr;
   nextPlayerId = 0;
@@ -73,7 +73,7 @@ void GameEngine::startLobby() {
 }
 
 /**
- * Start Lobby.
+ * Start Game.
  */
 void GameEngine::startGame() {
   currentGame = new Game(playerManager, wormTracker);

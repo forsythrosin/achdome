@@ -1,15 +1,17 @@
 #pragma once
 
-#include <renderState.h>
+#include <clusterState.h>
 #include <vector>
 class RenderablePanel;
 
-class LobbyRenderState : public RenderState {
+class LobbyClusterState : public ClusterState {
  public:
-  LobbyRenderState(sgct::Engine *gEngine);
-  ~LobbyRenderState();
+  LobbyClusterState(sgct::Engine *gEngine);
+  ~LobbyClusterState();
 
-  void init();
+  void attach();
+  void detach();
+
   void preSync();
   void draw();
   void encode();
