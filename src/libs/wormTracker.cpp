@@ -56,7 +56,7 @@ void WormTracker::tick(int time) {
     }
   }
 
-  std::vector<WormCollision> collisions;// = collisionSpace->addArcs(arcs);
+  std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
 
   renderSpace->addArcs(arcs);
   renderSpace->addCollisions(collisions);

@@ -19,7 +19,7 @@ Webserver::Webserver(){
   socketServer.set_socket_init_handler(bind(&Webserver::onSocketInit, this, ::_1, ::_2));
   socketServer.set_validate_handler(bind(&Webserver::validateHandler, this, ::_1));
 
-  this->clientMessages = new std::queue<QueueElement*>();
+  this->clientMessages = new boost::lockfree::queue<QueueElement*>(300);
 }
 Webserver::~Webserver(){
   webserverThread.join();
@@ -69,7 +69,6 @@ void Webserver::onOpen(connection_hdl handle){
 }
 
 void Webserver::onMessage(connection_hdl handle, server::message_ptr message){
-  std::cout << message->get_payload() << std::endl;
   auto sessionInfo = sessionHandleToInfo.at(handle);
   int sessionId = sessionInfo->sessionId;
   auto queueElement = new QueueElement();
@@ -103,9 +102,8 @@ void Webserver::onHttp(connection_hdl handle){
 }
 
 bool Webserver::readClientMessage(int &sessionId, std::string &message){
-  if(!clientMessages->empty()){
-    QueueElement *elem = clientMessages->front();
-    clientMessages->pop();
+  QueueElement *elem;
+  if(clientMessages->pop(elem)){
     sessionId = elem->sessionId;
     message = elem->message;
     delete elem;

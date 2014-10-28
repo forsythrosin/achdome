@@ -54,9 +54,9 @@ struct websocketConfig : public websocketpp::config::asio {
     transport_type;
 
   static const websocketpp::log::level elog_level =
-    websocketpp::log::elevel::all;
+    websocketpp::log::elevel::warn;
   static const websocketpp::log::level alog_level =
-    websocketpp::log::alevel::all;
+    websocketpp::log::alevel::none;
 };
 
 typedef websocketpp::server<websocketConfig> server;
@@ -87,5 +87,5 @@ private:
   std::atomic_int	 nextId;
   std::mutex messageMutex;
 
-  std::queue<QueueElement*> *clientMessages;
+  boost::lockfree::queue<QueueElement*> *clientMessages;
 };
