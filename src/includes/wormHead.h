@@ -93,9 +93,6 @@ class WormHead {
   float turnSpeed;
   void setGapTimer();
   int gapTimer;
-  static const int MIN_TIME_BETWEEN_GAPS;
-  static const int MAX_TIME_BETWEEN_GAPS;
-  static const int GAP_TIME;
   std::mt19937 randomGenerator;
   std::uniform_int_distribution<> gapDistribution;
 };
