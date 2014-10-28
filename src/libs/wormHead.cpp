@@ -4,7 +4,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <cmath>
-#include <iostream>
+#include <random>
 
 /**
  * Construct a worm head
@@ -12,11 +12,17 @@
 WormHead::WormHead() {
   setEulerPosition(glm::vec3(0.0));
   setEulerVelocity(glm::vec3(0.0));
+
+  std::random_device rd;
+  randomGenerator = std::mt19937(rd());
+  gapDistribution = std::uniform_int_distribution<>(MIN_TIME_BETWEEN_GAPS, MAX_TIME_BETWEEN_GAPS);
   
   moving = false;
   turningLeft = false;
   turningRight = false;
   turnSpeed = 0.1;
+
+  setGapTimer();
 }
 
 /**
@@ -50,8 +56,14 @@ void WormHead::tick() {
     
     velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
+
   if (isMoving()) {
     positionQuat = velocityQuat * positionQuat;
+    gapTimer--;
+
+    if (gapTimer < -GAP_TIME) {
+      setGapTimer();
+    }
   }
 }
 
@@ -156,4 +168,12 @@ void WormHead::turnLeft(bool turn) {
 
 void WormHead::turnRight(bool turn) {
   turningRight = turn;
+}
+
+void WormHead::setGapTimer() {
+  gapTimer = gapDistribution(randomGenerator);
+}
+
+bool WormHead::isInGap() {
+  return gapTimer < 0;
 }
