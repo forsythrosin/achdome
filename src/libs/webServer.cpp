@@ -52,6 +52,7 @@ void Webserver::addBroadcast(std::string message){
     connection->send(message);
   }
 }
+
 void Webserver::addMessage(int sessionId, std::string message){
   if (sessionIdToInfo.count(sessionId) > 0) {
     auto sessionInfo = sessionIdToInfo.at(sessionId);

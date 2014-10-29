@@ -1,5 +1,5 @@
 var handlebars = require('handlebars'),
-    server = require('./server'),
+    server = require('./playerServer'),
     logotypeAnimator = require('./logotypeAnimator'),
     $ = require('jquery');
 
@@ -31,10 +31,6 @@ $(function () {
 
   server.init();
 });
-
-
-
-
 
 // Helpers
 
