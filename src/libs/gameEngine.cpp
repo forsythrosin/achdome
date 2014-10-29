@@ -120,7 +120,7 @@ bool GameEngine::hasStartedMoving(int playerId) {
   return currentGame->hasStartedMoving(playerId);
 }
 
-glm::vec3 GameEngine::getColor(int playerId) {
+glm::vec4 GameEngine::getColor(int playerId) {
   return playerManager->getColor(playerId);
 }
 

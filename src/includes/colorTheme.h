@@ -4,6 +4,6 @@
 class ColorTheme {
 public:
   virtual ~ColorTheme() {};
-  virtual glm::vec3 playerColor(int) = 0;
-  virtual glm::vec3 baseColor(int) = 0;
+  virtual glm::vec4 playerColor(int) = 0;
+  virtual glm::vec4 baseColor(int) = 0;
 };

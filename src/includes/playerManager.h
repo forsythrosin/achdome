@@ -18,8 +18,8 @@ class PlayerManager {
   bool isConnected(int playerId);
   bool setName(int playerId, std::string name);
   std::string getName(int playerId);
-  bool setColor(int playerId, glm::vec3 color);
-  glm::vec3 getColor(int playerId);
+  bool setColor(int playerId, glm::vec4 color);
+  glm::vec4 getColor(int playerId);
 
   void addEventListener(PlayerEventListener *pm);
   void removeEventListener(PlayerEventListener *pm);

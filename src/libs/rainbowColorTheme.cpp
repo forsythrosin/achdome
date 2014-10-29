@@ -11,24 +11,24 @@ RainbowColorTheme::~RainbowColorTheme() {
 
 }
 
-glm::vec3 RainbowColorTheme::playerColor(int i) {
+glm::vec4 RainbowColorTheme::playerColor(int i) {
   // Generate color in HSV space and convert to RGB
   std::uniform_real_distribution<float> vDis(0.0, 0.1);
   float v = 0.9f + vDis(randGen); // [0.9,1.0[
   float s = 0.4f + (1 - v) * 0.3f; // [0.4,0.7[ : Linearly dependent on v
   int h = hues[i % 16];
 
-  return glm::rgbColor(glm::vec3(h, s, v));
+  return glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
 }
 
-glm::vec3 RainbowColorTheme::baseColor(int i) {
+glm::vec4 RainbowColorTheme::baseColor(int i) {
   switch (i) {
   case 0:
-    return glm::vec3(0.0, 0.0, 0.0);
+    return glm::vec4(0.0, 0.0, 0.0, 1.0);
   case 1:
-    return glm::vec3(0.3, 0.3, 0.3);
+    return glm::vec4(0.3, 0.3, 0.3, 1.0);
   }
-  return glm::vec3(0.0, 0.0, 0.0);
+  return glm::vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 void RainbowColorTheme::setupHues() {

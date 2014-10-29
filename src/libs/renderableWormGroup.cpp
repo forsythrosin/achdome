@@ -22,19 +22,14 @@ RenderableWormGroup::~RenderableWormGroup() {};
 
 void RenderableWormGroup::setWormArcs(std::vector<WormArc> wormArcs) {
   this->wormArcs = wormArcs;
+  std::vector<glm::vec4> colors;
+  for (WormArc wa : wormArcs) {
+    colors.push_back(wa.getColor());
+  }
+  setWormColors(colors);
   createVertices();
   createElements();
   update = true;
-};
-
-void RenderableWormGroup::setWormColors(std::vector<glm::vec3> wormColors) {
-  std::vector<glm::vec4> colors(wormColors.size());
-
-  for (int i = 0; i < wormColors.size(); ++i) {
-    colors.push_back(glm::vec4(wormColors.at(i), 0.0));
-  }
-
-  setWormColors(colors);
 };
 
 void RenderableWormGroup::setWormColors(std::vector<glm::vec4> wormColors) {

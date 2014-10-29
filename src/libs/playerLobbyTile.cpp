@@ -13,7 +13,7 @@ PlayerLobbyTile::PlayerLobbyTile(Player *player, int offset, Renderer *renderer)
     6.0,
     0.5
   );
-  panel->setColor(glm::vec4(player->getColor(), 1.0));
+  panel->setColor(player->getColor());
   panelId = renderer->addRenderable(panel, GL_TRIANGLES, "uiPanelShader.vert", "uiPanelShader.frag", false);
 
   glm::mat4 mvp = renderer->getMVP();
@@ -38,7 +38,7 @@ void PlayerLobbyTile::render() {
   sgct_text::print3d(
     sgct_text::FontManager::instance()->getFont("Comfortaa", 50),
     textPos,
-    glm::vec4(player->getColor(), 1.0),
+    player->getColor(),
     playerName.c_str()
   );
 }

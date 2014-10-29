@@ -18,9 +18,12 @@ int GamePlayer::getKiller() {
   return killer;
 }
 
-
 int GamePlayer::getId() {
   return player->getId();
+}
+
+glm::vec4 GamePlayer::getColor() {
+  return player->getColor();
 }
 
 bool GamePlayer::isAlive() {

@@ -15,6 +15,11 @@ DataSerializationBuilder* DataSerializationBuilder::add(std::string key, glm::ve
   return this;
 }
 
+DataSerializationBuilder* DataSerializationBuilder::add(std::string key, glm::vec4 value) {
+  vec4s.insert({ key, value });
+  return this;
+}
+
 DataSerializationBuilder* DataSerializationBuilder::add(std::string key, float value) {
   floats.insert({ key, value });
   return this;
@@ -36,6 +41,10 @@ std::string DataSerializationBuilder::build() {
   for (std::pair<std::string, glm::vec3> v : vec3s) {
     if (sep || !(sep = true)) str += separator();
     str += formatKeyValue(v.first, formatVec3(v.second));
+  }
+  for (std::pair<std::string, glm::vec4> v : vec4s) {
+    if (sep || !(sep = true)) str += separator();
+    str += formatKeyValue(v.first, formatVec4(v.second));
   }
   for (std::pair<std::string, std::string> s : strings) {
     if (sep || !(sep = true)) str += separator();
