@@ -1,40 +1,38 @@
 #include <lobbyClusterState.h>
-#include <renderablePanel.h>
+#include <player.h>
+#include <playerLobbyTile.h>
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine) : ClusterState(gEngine) {
   attached = false;
 }
 
 LobbyClusterState::~LobbyClusterState() {
+  for (auto p : cachedPlayers) {
+    delete p;
+  }
+  for (auto t : tiles) {
+    delete t;
+  }
 }
 
 void LobbyClusterState::attach() {
-  font = new sgct_text::Font("Arial", 1.0f);
-  RenderablePanel *panel0 = new RenderablePanel(
-    glm::vec3(-3.0, 7.5, 2.5),
-    6.0,
-    1.0
-  );
-  panel0->setColor(glm::vec4(0.5, 0.5, 0.5, 1.0));
-  int panel0Id = renderer->addRenderable(panel0, GL_TRIANGLES, "uiPanelShader.vert", "uiPanelShader.frag", false);
+  cachedPlayers.push_back(new Player(0, glm::vec3(0.5, 0.5, 0.3), "Jonas"));
+  cachedPlayers.push_back(new Player(1, glm::vec3(0.3, 0.5, 0.5), "Tomas"));
+  cachedPlayers.push_back(new Player(2, glm::vec3(0.5, 0.3, 0.5), "Kalle"));
+  cachedPlayers.push_back(new Player(3, glm::vec3(0.3, 0.3, 0.5), "Emil"));
 
-  RenderablePanel *panel1 = new RenderablePanel(
-    glm::vec3(-3.0, 7.5, 1.0),
-    6.0,
-    1.0
-  );
-  panel1->setColor(glm::vec4(0.5, 0.5, 0.5, 1.0));
-  int panel1Id = renderer->addRenderable(panel1, GL_TRIANGLES, "uiPanelShader.vert", "uiPanelShader.frag", false);
+  for (int i = 0; i < cachedPlayers.size(); ++i) {
+    tiles.push_back(new PlayerLobbyTile(cachedPlayers.at(i), i, renderer));
+  }
 
-  panels.push_back(panel0Id);
-  panels.push_back(panel1Id);
   attached = true;
 }
 
 void LobbyClusterState::detach() {
-  for (auto panel : panels) {
-    renderer->removeRenderable(panel);
+  for (auto t : tiles) {
+    delete t;
   }
+  tiles.clear();
   attached = false;
 }
 
@@ -43,20 +41,13 @@ void LobbyClusterState::preSync() {
 }
 
 void LobbyClusterState::draw() {
-  for (auto p : panels) {
-    renderer->render(p);
+  for (auto t : tiles) {
+    t->render();
   }
-
-  // sgct_text::print(
-  //   font,
-  //   1.0f,
-  //   1.0f,
-  //   "Ach %s",
-  //   "Dome"
-  // );
 }
 
 void LobbyClusterState::encode() {
 }
+
 void LobbyClusterState::decode() {
 }

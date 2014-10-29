@@ -1,3 +1,5 @@
+#pragma once
+
 class WormCollision;
 
 class WormEventListener {

@@ -3,6 +3,8 @@
 #include <clusterState.h>
 #include <vector>
 class RenderablePanel;
+class Player;
+class PlayerLobbyTile;
 
 class LobbyClusterState : public ClusterState {
  public:
@@ -18,6 +20,7 @@ class LobbyClusterState : public ClusterState {
   void decode();
 
  private:
-  sgct_text::Font *font;
-  std::vector<int> panels;
+  std::vector<Player*> cachedPlayers;
+  sgct::SharedVector<Player*> players;
+  std::vector<PlayerLobbyTile*> tiles;
 };

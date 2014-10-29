@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gameController.h>
 #include <gameEngine.h>
 #include <webserver.h>

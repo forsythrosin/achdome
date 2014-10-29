@@ -19,7 +19,7 @@ Webserver::Webserver(){
   socketServer.set_socket_init_handler(bind(&Webserver::onSocketInit, this, ::_1, ::_2));
   socketServer.set_validate_handler(bind(&Webserver::validateHandler, this, ::_1));
 
-  this->clientMessages = new boost::lockfree::queue<QueueElement*>(300);
+  this->clientMessages = new boost::lockfree::queue<ClientMessage *>(300);
 }
 Webserver::~Webserver(){
   webserverThread.join();
@@ -59,28 +59,31 @@ void Webserver::addMessage(int sessionId, std::string message){
 }
 
 void Webserver::onOpen(connection_hdl handle){
-  int sessionId = nextId++;
+  auto con = socketServer.get_con_from_hdl(handle);
+
   SessionInfo *sessionInfo = new SessionInfo();
-  sessionInfo->sessionId = sessionId;
+  sessionInfo->sessionId = nextId++;
   sessionInfo->session = handle;
-  sessionIdToInfo.insert({sessionId, sessionInfo});
-  sessionHandleToInfo.insert({handle, sessionInfo});
+
+  boost::shared_lock<boost::shared_mutex> serverLock(serverMutex);
+
+  con->sessionInfo = sessionInfo;
+  sessionIdToInfo.insert({sessionInfo->sessionId, sessionInfo});
 }
 
 void Webserver::onMessage(connection_hdl handle, server::message_ptr message){
-  auto sessionInfo = sessionHandleToInfo.at(handle);
-  int sessionId = sessionInfo->sessionId;
-  auto queueElement = new QueueElement();
+  auto con = socketServer.get_con_from_hdl(handle);
+
+  int sessionId = con->sessionInfo->sessionId;
+  auto queueElement = new ClientMessage();
   queueElement->message = message->get_payload();
   queueElement->sessionId = sessionId;
-
   clientMessages->push(queueElement);
 }
 
 void Webserver::onHttp(connection_hdl handle){
-  server::connection_ptr con = socketServer.get_con_from_hdl(handle);
+  auto con = socketServer.get_con_from_hdl(handle);
 
-  // Set status to 200 rather than the default error code
   std::string path = con->get_resource().substr(1);
   if(path.length() == 0){
     // Default file to serve
@@ -101,7 +104,7 @@ void Webserver::onHttp(connection_hdl handle){
 }
 
 bool Webserver::readClientMessage(int &sessionId, std::string &message){
-  QueueElement *elem;
+  ClientMessage *elem;
   if(clientMessages->pop(elem)){
     sessionId = elem->sessionId;
     message = elem->message;
@@ -113,9 +116,9 @@ bool Webserver::readClientMessage(int &sessionId, std::string &message){
 
 
 void Webserver::onClose(connection_hdl handle){
-  auto sessionIt = sessionHandleToInfo.find(handle);
-  SessionInfo *sessionInfo = sessionIt->second;
-  sessionHandleToInfo.erase(sessionIt);
+  boost::unique_lock<boost::shared_mutex> lock(serverMutex);
+  auto con = socketServer.get_con_from_hdl(handle);
+  SessionInfo *sessionInfo = con->sessionInfo;
   sessionIdToInfo.erase(sessionInfo->sessionId);
   delete sessionInfo;
 }

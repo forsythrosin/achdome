@@ -9,13 +9,11 @@
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine) : GameClusterState(gEngine, nullptr) {}
 
-
 GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs) : ClusterState(gEngine) {
   wormArcs = new sgct::SharedVector<WormArc>(100);
   renderSpace = rs;
   attached = false;
 }
-
 
 GameClusterState::~GameClusterState() {
   delete dome;
@@ -61,7 +59,7 @@ void GameClusterState::preSync() {
     //  std::vector<WormHeadIndicator> heads = renderSpace->getWormHeadIndicators();
     //  wormHeadIndicators->setVal(heads);
     //    wormCollisions->setVal(collisions);
-    
+
     renderSpace->clear();
   }
 
@@ -73,7 +71,7 @@ void GameClusterState::draw() {
   // Copy current worm positions and colors
   std::vector<WormArc> arcs = wormArcs->getVal();
   worms->setWormArcs(arcs);
-  
+
   // render wormLines to FBO
   renderer->renderToFBO(wormLines, stitchStep);
   // render FBO as texture on dome

@@ -4,8 +4,8 @@ RenderableDome::RenderableDome(int as, int is) {
   azmSegs = as;
   inclSegs = is;
 
-  vertexCount = azmSegs*inclSegs;
-  elementCount = azmSegs*(inclSegs-1)*2;
+  vertexCount = azmSegs*(inclSegs+1); // e.g. 4 verts needed to draw 3 segs
+  elementCount = azmSegs*inclSegs*2;
 
   sphericalVertexData = new GLfloat[vertexCount*2];
   cartesianVertexData = new GLfloat[vertexCount*3];
@@ -22,7 +22,7 @@ RenderableDome::~RenderableDome() {};
  * Vertex placement
  */
 void RenderableDome::createVertices() {
-  for (int j = 0; j < inclSegs; ++j) {
+  for (int j = 0; j <= inclSegs; ++j) {
     float theta = glm::half_pi<float>()*(float)j/inclSegs;
     for (int i = 0; i < azmSegs; ++i) {
       float phi = 2.0*glm::pi<float>()*(float)i/azmSegs;
@@ -47,7 +47,7 @@ void RenderableDome::createVertices() {
  * Tessellation of the dome
  */
 void RenderableDome::createElements() {
-  for (int i = 0; i < azmSegs*(inclSegs-1); ++i) {
+  for (int i = 0; i < azmSegs*inclSegs; ++i) {
     int idx = i*6;
     int rowIndex = i%azmSegs;
 
