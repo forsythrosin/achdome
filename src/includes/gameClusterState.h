@@ -11,8 +11,8 @@ class ClusterRenderSpace;
 
 class GameClusterState : public ClusterState {
  public:
-  GameClusterState(sgct::Engine *gEngine);
-  GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs);
+  GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig);
+  GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs);
   ~GameClusterState();
 
   void attach();

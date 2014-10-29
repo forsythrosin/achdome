@@ -7,13 +7,12 @@
 #include <clusterRenderSpace.h>
 #include <iostream>
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine) : GameClusterState(gEngine, nullptr) {}
+GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr) {}
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs) : ClusterState(gEngine) {
+GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs) : ClusterState(gEngine, gameConfig) {
   wormArcs = new sgct::SharedVector<WormArc>(MAX_NUMBER_OF_WORMS);
   wormCollisions = new sgct::SharedVector<WormCollision>(MAX_NUMBER_OF_WORMS);
   wormHeads = new sgct::SharedVector<WormHead>(MAX_NUMBER_OF_WORMS);
-
   renderSpace = rs;
   attached = false;
 }
@@ -29,7 +28,7 @@ void GameClusterState::attach() {
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
-  worms = new RenderableWormGroup(2, 4, 0.05);
+  worms = new RenderableWormGroup(2, 4, gameConfig->lineWidth);
   worms->setWormArcs(wormArcs->getVal());
 
   wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
@@ -57,7 +56,6 @@ void GameClusterState::preSync() {
       glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()));
       glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>() + 0.000001));
       WormArc wa(0, first, second, 0);
->>>>>>> Stashed changes
       arcs.push_back(wa);
     }*/
 

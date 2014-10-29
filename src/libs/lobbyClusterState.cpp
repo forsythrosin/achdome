@@ -4,11 +4,12 @@
 #include <playerManager.h>
 #include <algorithm>
 
-LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine) : LobbyClusterState(gEngine, nullptr) {
+
+LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : LobbyClusterState(gEngine, gameConfig, nullptr) {
   attached = false;
 }
 
-LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, PlayerManager *playerManager) : ClusterState(gEngine) {
+LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, PlayerManager *playerManager) : ClusterState(gEngine, gameConfig) {
   this->playerManager = playerManager;
   sharedPlayers = new sgct::SharedVector<Player*>(100);
   attached = false;

@@ -8,8 +8,8 @@ class PlayerManager;
 
 class LobbyClusterState : public ClusterState {
  public:
-  LobbyClusterState(sgct::Engine *gEngine);
-  LobbyClusterState(sgct::Engine *gEngine, PlayerManager *playerManager);
+  LobbyClusterState(sgct::Engine *gEngine,  GameConfig *gameConfig, PlayerManager *playerManager);
+  LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig);
   ~LobbyClusterState();
 
   void attach();
