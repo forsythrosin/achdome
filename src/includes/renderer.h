@@ -47,12 +47,16 @@ public:
   void render(int configId, int configWithFBOId = -1, int stitchStep = 0);
   void renderToFBO(int configId, int stitchStep = 0);
 
+  glm::mat4 getMVP();
+
 private:
   void init(RenderConfig &renderConfig);
   void loadToGPU(RenderConfig &renderConfig);
+
   std::map<int, RenderConfig> renderConfigs;
   const float DOME_ROTATION = -90.0;
   float rot = 0.0f;
   sgct::Engine *gEngine;
   int nextId = 0;
+  const glm::mat4 ROT_STAT = glm::rotate(glm::mat4(1.0f), DOME_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
 };

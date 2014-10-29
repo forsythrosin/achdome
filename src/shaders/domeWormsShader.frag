@@ -9,5 +9,9 @@ void main() {
   float sampleX = (gl_FragCoord.s)/fboTexSize.x;
   float sampleY = (gl_FragCoord.t)/fboTexSize.y;
   vec2 sampleCoord = vec2(sampleX, sampleY);
-  color = texture(fboTex, sampleCoord);
+  vec4 sampleColor = texture(fboTex, sampleCoord);
+  if (sampleColor.x < 0.9) {
+    sampleColor.a = 0.1;
+  }
+  color = sampleColor;
 }
