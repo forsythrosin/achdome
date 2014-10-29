@@ -27,7 +27,7 @@ function get_appropriate_ws_url() {
   return pcol + u[0] + "/xxx";
 }
 
-function setupSocket() {
+function setupSocket(subProtocol) {
   function onopen() {
     connected = true;
     emit('connected', null, null);
@@ -52,9 +52,9 @@ function setupSocket() {
   function createSocket() {
     console.log('Connecting to server');
     if (typeof MozWebSocket != "undefined") {
-      socket = new MozWebSocket(get_appropriate_ws_url(), "sgct");
+      socket = new MozWebSocket(get_appropriate_ws_url(), subProtocol);
     } else {
-      socket = new WebSocket(get_appropriate_ws_url(), "sgct");
+      socket = new WebSocket(get_appropriate_ws_url(), subProtocol);
     }
     socket.onopen = onopen;
     socket.onclose = onclose;
@@ -92,23 +92,12 @@ function emit(message, err, data) {
 }
 
 var server = {
-  init: function () {
-    setupSocket();
+  init: function (subProtocol) {
+    subProtocol = subProtocol || "ach"; // Or whatever
+    setupSocket(subProtocol);
   },
-  register: function (name) {
-    sendToServer('register', {name: name});
-  },
-  unregister: function () {
-    sendToServer('unregister');
-  },
-  startMoving: function () {
-    sendToServer('start_moving');
-  },
-  left: function (down) {
-    sendToServer('left_' + (down ? 'down' : 'up'));
-  },
-  right: function (down) {
-    sendToServer('right_' + (down ? 'down' : 'up'));
+  sendToServer: function(message, data) {
+    sendToServer(message, data);
   },
   on: function (message, callback) {
     if (!callbacks[message]) {

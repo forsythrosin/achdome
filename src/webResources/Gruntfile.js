@@ -14,7 +14,7 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         files: {
-          'assets/js/achdome.js': ['assets/js/modules/main.js'],
+          'assets/js/achdomePlayer.js': ['assets/js/modules/player.js'],
         },
         options: {
           transform: ['browserify-handlebars']

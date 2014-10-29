@@ -25,8 +25,13 @@ struct connection_data {
 };
 
 struct ClientMessage {
+  enum Type {
+    MESSAGE,
+    CLOSED
+  };
   int sessionId;
   std::string message;
+  Type type;
 };
 
 struct websocketConfig : public websocketpp::config::asio {
@@ -74,7 +79,7 @@ public:
   Webserver();
   ~Webserver();
   void start(int port);
-  bool readClientMessage(int &sessionId, std::string &message);
+  bool readClientMessage(std::string subProtocol, ClientMessage &clientMessage);
   void addBroadcast(std::string message);
   void addMessage(int sessionId, std::string message);
 private:
@@ -94,5 +99,5 @@ private:
   std::atomic_int	 nextId;
   boost::shared_mutex serverMutex;
 
-  boost::lockfree::queue<ClientMessage*> *clientMessages;
+  std::map<std::string, boost::lockfree::queue<ClientMessage*>*> clientMessages;
 };
