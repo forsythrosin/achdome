@@ -16,10 +16,10 @@ LobbyClusterState::~LobbyClusterState() {
 }
 
 void LobbyClusterState::attach() {
-  cachedPlayers.push_back(new Player(0, glm::vec3(0.5, 0.5, 0.3), "Jonas"));
-  cachedPlayers.push_back(new Player(1, glm::vec3(0.3, 0.5, 0.5), "Tomas"));
-  cachedPlayers.push_back(new Player(2, glm::vec3(0.5, 0.3, 0.5), "Kalle"));
-  cachedPlayers.push_back(new Player(3, glm::vec3(0.3, 0.3, 0.5), "Emil"));
+  cachedPlayers.push_back(new Player(0, glm::vec4(0.5, 0.5, 0.3, 1.0), "Jonas"));
+  cachedPlayers.push_back(new Player(1, glm::vec4(0.3, 0.5, 0.5, 1.0), "Tomas"));
+  cachedPlayers.push_back(new Player(2, glm::vec4(0.5, 0.3, 0.5, 1.0), "Kalle"));
+  cachedPlayers.push_back(new Player(3, glm::vec4(0.3, 0.3, 0.5, 1.0), "Emil"));
 
   for (int i = 0; i < cachedPlayers.size(); ++i) {
     tiles.push_back(new PlayerLobbyTile(cachedPlayers.at(i), i, renderer));
