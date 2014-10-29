@@ -1,3 +1,5 @@
+#pragma once
+
 #include <wormArc.h>
 #include <wormCollision.h>
 

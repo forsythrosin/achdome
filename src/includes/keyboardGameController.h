@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gameController.h>
 #include <utility>
 #include <queue>

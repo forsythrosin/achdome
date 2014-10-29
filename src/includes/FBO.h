@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <texture2D.h>
 
