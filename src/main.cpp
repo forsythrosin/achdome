@@ -58,6 +58,11 @@ LobbyClusterState *lcs;
 GameClusterState *gcs;
 
 int main( int argc, char* argv[] ) {
+  // BAE, load the AchDome fonts!
+  sgct_text::FontManager::instance()->addFont("Comfortaa", "fonts/Comfortaa-Regular.ttf", sgct_text::FontManager::FontPath_Local);
+  sgct_text::FontManager::instance()->addFont("Comfortaa-Bold", "fonts/Comfortaa-Bold.ttf", sgct_text::FontManager::FontPath_Local);
+  sgct_text::FontManager::instance()->addFont("Comfortaa-Light", "fonts/Comfortaa-Light.ttf", sgct_text::FontManager::FontPath_Local);
+
   gEngine = new sgct::Engine( argc, argv );
 
   gEngine->setInitOGLFunction( myInitOGLFun );
@@ -69,7 +74,7 @@ int main( int argc, char* argv[] ) {
 
   sgct::SharedData::instance()->setEncodeFunction( myEncodeFun );
   sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
-  gEngine->setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  gEngine->setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   if (!gEngine->init( sgct::Engine::OpenGL_3_3_Core_Profile )) {
       delete gEngine;
@@ -100,9 +105,10 @@ int main( int argc, char* argv[] ) {
     gameControllers.push_back(sgc);
 
     // ics = new IntroClusterState();
-    lcs = new LobbyClusterState(gEngine, gameConfig);
-    gcs = new GameClusterState(gEngine, renderSpace, gameConfig);
-    
+
+    lcs = new LobbyClusterState(gEngine, gameConfig, pm);
+    gcs = new GameClusterState(gEngine, gameConfig, renderSpace);
+
     keyboardGameController = new KeyboardGameController(gameEngine);
     gameControllers.push_back(keyboardGameController);
   } else {
@@ -158,10 +164,6 @@ void keyCallback(int key, int action) {
   if (gEngine->isMaster()){
     keyboardGameController->processKeyEvent(key, action);
   }
-  /*  
-  delete renderState;
-  renderState = new GameRenderState(gEngine);
-  renderState->init();*/
 }
 
 void mouseButtonCallback(int button, int action) {

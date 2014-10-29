@@ -1,62 +1,70 @@
 #include <lobbyClusterState.h>
-#include <renderablePanel.h>
+#include <player.h>
+#include <playerLobbyTile.h>
+#include <playerManager.h>
+#include <algorithm>
 
-LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : ClusterState(gEngine, gameConfig) {
+
+LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : LobbyClusterState(gEngine, gameConfig, nullptr) {
+  attached = false;
+}
+
+LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, PlayerManager *playerManager) : ClusterState(gEngine, gameConfig) {
+  this->playerManager = playerManager;
+  sharedPlayers = new sgct::SharedVector<Player*>(100);
   attached = false;
 }
 
 LobbyClusterState::~LobbyClusterState() {
+  delete sharedPlayers;
 }
 
 void LobbyClusterState::attach() {
-  font = new sgct_text::Font("Arial", 1.0f);
-  RenderablePanel *panel0 = new RenderablePanel(
-    glm::vec3(-3.0, 7.5, 2.5),
-    6.0,
-    1.0
-  );
-  panel0->setColor(glm::vec4(0.5, 0.5, 0.5, 1.0));
-  int panel0Id = renderer->addRenderable(panel0, GL_TRIANGLES, "uiPanelShader.vert", "uiPanelShader.frag", false);
-
-  RenderablePanel *panel1 = new RenderablePanel(
-    glm::vec3(-3.0, 7.5, 1.0),
-    6.0,
-    1.0
-  );
-  panel1->setColor(glm::vec4(0.5, 0.5, 0.5, 1.0));
-  int panel1Id = renderer->addRenderable(panel1, GL_TRIANGLES, "uiPanelShader.vert", "uiPanelShader.frag", false);
-
-  panels.push_back(panel0Id);
-  panels.push_back(panel1Id);
   attached = true;
 }
 
 void LobbyClusterState::detach() {
-  for (auto panel : panels) {
-    renderer->removeRenderable(panel);
-  }
   attached = false;
 }
 
-
 void LobbyClusterState::preSync() {
+  if (playerManager != nullptr) {
+    sharedPlayers->setVal(playerManager->getConnectedPlayers());
+  }
 }
 
 void LobbyClusterState::draw() {
-  for (auto p : panels) {
-    renderer->render(p);
-  }
+  std::vector<Player*> players = sharedPlayers->getVal();
 
-  // sgct_text::print(
-  //   font,
-  //   1.0f,
-  //   1.0f,
-  //   "Ach %s",
-  //   "Dome"
-  // );
+  for (int offset = 0; offset < players.size(); ++offset) {
+    Player *player = players.at(offset);
+    std::string playerName = player->getName();
+    std::transform(playerName.begin(), playerName.end(), playerName.begin(), ::toupper);
+
+    sgct_text::print3d(
+      sgct_text::FontManager::instance()->getFont("Comfortaa", 50),
+      getMVP(offset),
+      player->getColor(),
+      playerName.c_str()
+    );
+  }
+}
+
+glm::mat4 LobbyClusterState::getMVP(int offset) {
+  glm::mat4 mvp = renderer->getMVP();
+  glm::mat4 translate = glm::translate(
+    glm::mat4(1.0f),
+    LIST_UPPER_LEFT_ANCHOR - glm::vec3(0.0, 0.0, offset)
+  );
+  glm::mat4 rot_back = glm::rotate(glm::mat4(1.0f), 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+  return mvp*translate*rot_back*scale;
 }
 
 void LobbyClusterState::encode() {
+  sgct::SharedData::instance()->writeVector(sharedPlayers);
 }
+
 void LobbyClusterState::decode() {
+  sgct::SharedData::instance()->readVector(sharedPlayers);
 }

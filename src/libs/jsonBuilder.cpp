@@ -34,6 +34,12 @@ std::string JsonBuilder::formatVec3(glm::vec3 v) {
   return ss.str();
 }
 
+std::string JsonBuilder::formatVec4(glm::vec4 v) {
+  std::stringstream ss;
+  ss << "[" << v.x << separator() << v.y << separator() << v.z << separator() << v.w << "]";
+  return ss.str();
+}
+
 std::string JsonBuilder::formatString(std::string s) {
   return "\"" + s + "\"";
 }

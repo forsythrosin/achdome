@@ -13,7 +13,7 @@ PlayerManager::PlayerManager(ColorTheme* ct) {
 int PlayerManager::connectPlayer() {
   int id = nextPlayerId++;
   std::string playerName = generatePlayerName();
-  glm::vec3 color = colorTheme->playerColor(id);
+  glm::vec4 color = colorTheme->playerColor(id);
 
   Player *p = new Player(players.size(), color, playerName);
   players[id] = p;
@@ -78,17 +78,14 @@ std::string PlayerManager::getName(int playerId) {
 }
 
 
-glm::vec3 PlayerManager::getColor(int playerId) {
+glm::vec4 PlayerManager::getColor(int playerId) {
   if (players.find(playerId) == players.end()) {
-    return glm::vec3(0.0);
+    return glm::vec4(0.0);
   }
   return players[playerId]->getColor();
 }
 
-
-
-
-bool PlayerManager::setColor(int playerId, glm::vec3 color) {
+bool PlayerManager::setColor(int playerId, glm::vec4 color) {
   if (players.find(playerId) == players.end()) {
     return false;
   }

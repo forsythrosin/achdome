@@ -41,7 +41,7 @@ class GameEngine {
   int getKiller(int playerId);
   std::vector<int> getKills(int playerId);
   bool hasStartedMoving(int playerId);
-  glm::vec3 getColor(int playerId);
+  glm::vec4 getColor(int playerId);
 
   std::string getCountry(int playerId);
   glm::vec2 getPosition(int playerId); // phi, theta

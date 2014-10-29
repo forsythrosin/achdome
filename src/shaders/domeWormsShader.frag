@@ -9,5 +9,6 @@ void main() {
   float sampleX = (gl_FragCoord.s)/fboTexSize.x;
   float sampleY = (gl_FragCoord.t)/fboTexSize.y;
   vec2 sampleCoord = vec2(sampleX, sampleY);
-  color = texture(fboTex, sampleCoord);
+  vec4 sampleColor = texture(fboTex, sampleCoord);
+  color = sampleColor;
 }

@@ -24,6 +24,7 @@ set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/includes)
 set(PROJECT_LIBS_DIR ${PROJECT_SOURCE_DIR}/libs)
 set(PROJECT_EXTERNAL_DIR ${PROJECT_SOURCE_DIR}/external)
 set(PROJECT_SHADERS_DIR ${PROJECT_SOURCE_DIR}/shaders)
+set(PROJECT_FONTS_DIR ${PROJECT_SOURCE_DIR}/fonts)
 set(PROJECT_WEBRESOURCES_DIR ${PROJECT_SOURCE_DIR}/webResources)
 
 # First for the generic no-config case (e.g. with mingw)
@@ -35,6 +36,7 @@ add_library(INT_LIBS
 )
 
 add_definitions(-DSHADER_PATH=${PROJECT_SHADERS_DIR})
+add_definitions(-DFONTS_PATH=${PROJECT_FONTS_DIR})
 add_definitions(-DWEBRESOURCES_PATH=${PROJECT_WEBRESOURCES_DIR})
 
 add_executable(${APP_NAME}
@@ -231,6 +233,11 @@ add_custom_target(resources)
 add_custom_command(TARGET resources PRE_BUILD
 										COMMAND ${CMAKE_COMMAND} -E copy_directory
 										${PROJECT_SHADERS_DIR} "${exec_location}/shaders"
+										)
+
+add_custom_command(TARGET resources PRE_BUILD
+										COMMAND ${CMAKE_COMMAND} -E copy_directory
+										${PROJECT_FONTS_DIR} "${exec_location}/fonts"
 										)
 
 set(PROJECT_CONFIG_DIR ${CMAKE_SOURCE_DIR}/configs)

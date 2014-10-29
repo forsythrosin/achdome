@@ -2,7 +2,7 @@
 #include <player.h>
 
 
-Player::Player(int id, glm::vec3 color, std::string name) {
+Player::Player(int id, glm::vec4 color, std::string name) {
   this->id = id;
   this->color = color;
   this->name = name;
@@ -22,11 +22,11 @@ std::string Player::getName() {
   return this->name;
 }
 
-void Player::setColor(glm::vec3 color) {
+void Player::setColor(glm::vec4 color) {
   this->color = color;
 }
 
-glm::vec3 Player::getColor() {
+glm::vec4 Player::getColor() {
   return this->color;
 }
 

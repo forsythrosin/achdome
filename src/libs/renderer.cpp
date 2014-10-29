@@ -157,6 +157,7 @@ void Renderer::loadToGPU(RenderConfig &renderConfig) {
  * @param stitchStep (optional) sgct stitch step. Default 0
  */
 void Renderer::renderToFBO(int configId, int stitchStep) {
+
   RenderConfig &renderConfig = renderConfigs.at(configId);
 
   // Generate FBOs
@@ -181,6 +182,10 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
  * @param stitchStep      (optional) sgct stitch step. Default 0
  */
 void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
   RenderConfig renderConfig = renderConfigs.at(configId);
   Renderable *renderable = renderConfig.renderable;
 
@@ -191,11 +196,10 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   }
 
   // Define MVP matrix
-  rot += 0.04f;
-  glm::mat4 rot_stat = glm::rotate(glm::mat4(1.0f), DOME_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
-  glm::mat4 rot_mat = glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 0.0f, 1.0f));
-  glm::mat4 scene_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, -1.0, -25.0))*rot_stat*rot_mat;
-  glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix()*rot_stat;
+  glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix()*ROT_STAT;
+  // rot += 0.04f;
+  // glm::mat4 rot_mat = glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 0.0f, 1.0f));
+  // glm::mat4 scene_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, -1.0, -25.0))*rot_stat*rot_mat;
 
   // Upload uniforms
   sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
@@ -237,4 +241,9 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   glDisableVertexAttribArray(0);
   glBindVertexArray(0);
   sgct::ShaderManager::instance()->unBindShaderProgram();
+  glDisable(GL_BLEND);
 };
+
+glm::mat4 Renderer::getMVP() {
+  return gEngine->getActiveModelViewProjectionMatrix()*ROT_STAT;
+}

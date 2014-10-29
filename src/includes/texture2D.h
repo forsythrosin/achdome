@@ -17,7 +17,7 @@ public:
         data[indexTranslation(i,j,0)] = 0.0f;
         data[indexTranslation(i,j,1)] = 0.0f;
         data[indexTranslation(i,j,2)] = 0.0f;
-        data[indexTranslation(i,j,3)] = 1.0f;
+        data[indexTranslation(i,j,3)] = 0.0f;
       }
     }
 
