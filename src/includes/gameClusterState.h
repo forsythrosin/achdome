@@ -2,6 +2,8 @@
 
 #include <clusterState.h>
 #include <wormArc.h>
+#include <wormCollision.h>
+#include <wormHead.h>
 
 class RenderableDome;
 class RenderableWormGroup;
@@ -31,4 +33,8 @@ class GameClusterState : public ClusterState {
   ClusterRenderSpace *renderSpace;
 
   sgct::SharedVector<WormArc> *wormArcs;
+  sgct::SharedVector<WormCollision> *wormCollisions;
+  sgct::SharedVector<WormHead> *wormHeads;
+
+  static const int MAX_NUMBER_OF_WORMS = 200;
 };
