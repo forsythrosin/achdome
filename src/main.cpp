@@ -102,7 +102,7 @@ int main( int argc, char* argv[] ) {
     gameControllers.push_back(sgc);
 
     // ics = new IntroClusterState();
-    lcs = new LobbyClusterState(gEngine);
+    lcs = new LobbyClusterState(gEngine, pm);
     gcs = new GameClusterState(gEngine, renderSpace);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
