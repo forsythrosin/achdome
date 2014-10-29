@@ -5,8 +5,6 @@
 
 Renderer::Renderer(sgct::Engine *gEngine) {
   this->gEngine = gEngine;
-  glEnable (GL_BLEND);
-  glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 };
 
 Renderer::~Renderer() {
@@ -159,6 +157,7 @@ void Renderer::loadToGPU(RenderConfig &renderConfig) {
  * @param stitchStep (optional) sgct stitch step. Default 0
  */
 void Renderer::renderToFBO(int configId, int stitchStep) {
+
   RenderConfig &renderConfig = renderConfigs.at(configId);
 
   // Generate FBOs
@@ -183,6 +182,10 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
  * @param stitchStep      (optional) sgct stitch step. Default 0
  */
 void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
   RenderConfig renderConfig = renderConfigs.at(configId);
   Renderable *renderable = renderConfig.renderable;
 
@@ -238,6 +241,7 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   glDisableVertexAttribArray(0);
   glBindVertexArray(0);
   sgct::ShaderManager::instance()->unBindShaderProgram();
+  glDisable(GL_BLEND);
 };
 
 glm::mat4 Renderer::getMVP() {

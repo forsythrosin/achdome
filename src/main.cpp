@@ -74,7 +74,7 @@ int main( int argc, char* argv[] ) {
 
   sgct::SharedData::instance()->setEncodeFunction( myEncodeFun );
   sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
-  gEngine->setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  gEngine->setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   if (!gEngine->init( sgct::Engine::OpenGL_3_3_Core_Profile )) {
       delete gEngine;
