@@ -9,7 +9,8 @@
 /**
  * Construct a worm head
  */
-WormHead::WormHead() {
+WormHead::WormHead(glm::vec4 c) {
+  color = c;
   setEulerPosition(glm::vec3(0.0));
   setEulerVelocity(glm::vec3(0.0));
 
@@ -88,6 +89,13 @@ std::string WormHead::toString() {
     velocityQuat.z << ")}";
 
   return ss.str();
+}
+
+/**
+* Get color
+*/
+glm::vec4 WormHead::getColor() {
+  return color;
 }
 
 /**

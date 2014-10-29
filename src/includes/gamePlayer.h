@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <glm/glm.hpp>
 
 class Player;
 
@@ -10,6 +11,7 @@ class GamePlayer {
   std::vector<int> getKillIds();
   int getKiller();
   int getId();
+  glm::vec4 getColor();
   bool isAlive();
   bool startMoving();
   bool kill(int killerId);

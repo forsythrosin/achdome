@@ -11,7 +11,7 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine) : GameClusterState(gEn
 
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs) : ClusterState(gEngine) {
-  wormArcs = new sgct::SharedVector<WormArc>(2);
+  wormArcs = new sgct::SharedVector<WormArc>(100);
   renderSpace = rs;
   attached = false;
 }
@@ -31,11 +31,6 @@ void GameClusterState::attach() {
   worms = new RenderableWormGroup(2, 4, 0.05);
   worms->setWormArcs(wormArcs->getVal());
 
-  glm::vec4 red(1.0, 0.0, 0.0, 1.0);
-  glm::vec4 blue(0.0, 0.0, 1.0, 1.0);
-  std::vector<glm::vec4> colors = {red, blue};
-
-  worms->setWormColors(colors);
   wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
   attached = true;
 }
@@ -54,7 +49,8 @@ void GameClusterState::preSync() {
 
     glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()));
     glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>() + 0.000001));
-    WormArc wa(0, first, second, 0);
+    glm::vec4 c(1.0, 1.0, 0.0, 1.0);
+    WormArc wa(0, first, second, 0, c);
     if (arcs.size() < 1) {
       arcs.push_back(wa);
     }

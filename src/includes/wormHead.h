@@ -7,7 +7,7 @@
 
 class WormHead {
  public:
-  WormHead();
+  WormHead(glm::vec4 color);
   void tick();
   std::string toString();
 
@@ -20,6 +20,11 @@ class WormHead {
    * Set velocity using an Euler Angle vector (x, y, z)
    */
   void setEulerVelocity(glm::vec3 pos);
+
+  /**
+  * Get color
+  */
+  glm::vec4 getColor();
 
   /**
    * Get position in cartesian coordinates
@@ -82,6 +87,7 @@ class WormHead {
   bool isInGap();
 
  private:
+  glm::vec4 color;
   const int MIN_TIME_BETWEEN_GAPS = 80;
   const int MAX_TIME_BETWEEN_GAPS = 100;
   const int GAP_TIME = 5;

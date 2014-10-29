@@ -7,6 +7,7 @@ class RenderSpace;
 class WormHead;
 class WormEventListener;
 class WormHeadDistributor;
+class GamePlayer;
 
 class WormTracker {
  public:
@@ -20,7 +21,7 @@ class WormTracker {
   bool turnRight(int id, bool turn);
   void addEventListener(WormEventListener *we);
   void removeEventListener(WormEventListener *we);
-  void setPlayers(std::vector<int> playerIds);
+  void setPlayers(std::vector<GamePlayer*> players);
   glm::vec2 getSphericalPosition(int playerId);
   void clearPlayers();
  private:

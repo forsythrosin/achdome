@@ -22,7 +22,7 @@ void SocketGameController::performActions() {
     ClientAction action;
     int playerId;
     std::string name;
-    glm::vec3 color;
+    glm::vec4 color;
     std::string sendMessage;
     if (actionResolver->resolve(message, action)) {
       switch (action.type) {
@@ -101,7 +101,7 @@ void SocketGameController::performActions() {
     int sessionId;
     int playerId;
     std::string name;
-    glm::vec3 color;
+    glm::vec4 color;
     std::string sendMessage;
     switch (currentState) {
     case GameEngine::INTRO:
@@ -145,7 +145,7 @@ void SocketGameController::performActions() {
       // Gets poitions only of players using this controller
       std::vector<int> activeIds = gameEngine->getCurrentGameParticipants();
       for (int id : activeIds) {
-        glm::vec3 color = gameEngine->getColor(id);
+        glm::vec4 color = gameEngine->getColor(id);
         glm::vec2 position = gameEngine->getPosition(id);
         players
           ->add(std::to_string(id), dataSerializationBuilder->group()

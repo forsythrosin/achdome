@@ -21,12 +21,11 @@ Game::Game(PlayerManager *playerManager, WormTracker *wormTracker) {
 bool Game::start() {
   time = 0;
   wormTracker->clear();
-  std::vector<int> playerIds;
+  std::vector<GamePlayer*> gps;
   for (auto iter : gamePlayers) {
-    GamePlayer *gamePlayer = iter.second;
-    playerIds.push_back(gamePlayer->getId());
+    gps.push_back(iter.second);
   }
-  wormTracker->setPlayers(playerIds);
+  wormTracker->setPlayers(gps);
   return true;
 }
 

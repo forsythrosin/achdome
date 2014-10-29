@@ -11,6 +11,7 @@
 #include <wormEventListener.h>
 #include <wormHeadDistributor.h>
 #include <iostream>
+#include <gamePlayer.h>
 
 WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace, WormHeadDistributor *distributor) {
   this->collisionSpace = collisionSpace;
@@ -34,10 +35,10 @@ void WormTracker::removeEventListener(WormEventListener *wel) {
   }
 }
 
-void WormTracker::setPlayers(std::vector<int> playerIds) {
+void WormTracker::setPlayers(std::vector<GamePlayer*> gamePlayers) {
   clearPlayers();
-  for (int id : playerIds) {
-    wormHeads.insert({id, new WormHead()});
+  for (GamePlayer *gp : gamePlayers) {
+    wormHeads.insert({gp->getId(), new WormHead(gp->getColor())});
   }
   distributor->distribute(wormHeads);
 }
@@ -72,7 +73,7 @@ void WormTracker::tick(int time) {
       wh->tick();
       glm::quat position = wh->getQuaternionPosition();
       if (!wh->isInGap()) {
-        arcs.push_back(WormArc(id, prevPosition, position, time));
+        arcs.push_back(WormArc(id, prevPosition, position, time, wh->getColor()));
       }
     }
   }
