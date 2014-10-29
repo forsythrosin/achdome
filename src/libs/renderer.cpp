@@ -91,6 +91,7 @@ void Renderer::init(RenderConfig &renderConfig) {
   renderConfig.matrixLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("MVP");
   renderConfig.textureLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTex");
   renderConfig.fboTexSizeLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTexSize");
+  renderConfig.timeLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("time");
 
   sgct::ShaderManager::instance()->unBindShaderProgram();
 };
@@ -204,6 +205,10 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   // Upload uniforms
   sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
   glUniformMatrix4fv(renderConfig.matrixLocation, 1, GL_FALSE, &MVP[0][0]);
+
+  if (renderConfig.timeLocation != -1) {
+    glUniform1f(renderConfig.timeLocation, sgct::Engine::getTime());
+  }
 
   if (configWithFBOId > -1 && configWithFBOId < renderConfigs.size()) {
     int fboWidth, fboHeight;

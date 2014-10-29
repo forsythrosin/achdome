@@ -25,10 +25,11 @@ class GameClusterState : public ClusterState {
   // Renderer + renderables
   RenderableDome *dome;
   RenderableWormGroup *worms;
-  int domeGrid, domeWorms, wormLines;
+  int domeGrid, domeWorms, wormLines, collision;
   float timer = 0.0f;
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;
 
   sgct::SharedVector<WormArc> *wormArcs;
+  sgct::SharedVector<WormArc> *wormCollisions;
 };

@@ -109,6 +109,12 @@ int main( int argc, char* argv[] ) {
     lcs = new LobbyClusterState(gEngine, gameConfig, pm);
     gcs = new GameClusterState(gEngine, gameConfig, renderSpace);
 
+    std::map<GameEngine::State, ClusterState*> stateMap;
+    stateMap[GameEngine::LOBBY] = lcs;
+    stateMap[GameEngine::GAME] = gcs;
+
+    syncMaster = new SyncMaster(gameEngine, stateMap);
+
     keyboardGameController = new KeyboardGameController(gameEngine);
     gameControllers.push_back(keyboardGameController);
   } else {
@@ -116,13 +122,13 @@ int main( int argc, char* argv[] ) {
     // ics = new IntroClusterState();
     lcs = new LobbyClusterState(gEngine, gameConfig);
     gcs = new GameClusterState(gEngine, gameConfig);
-  }
 
-  std::map<GameEngine::State, ClusterState*> stateMap;
-  //    stateMap[GameEngine::Intro] = ics;
-  stateMap[GameEngine::LOBBY] = lcs;
-  stateMap[GameEngine::GAME] = gcs;
-  syncMaster = new SyncMaster(gameEngine, stateMap);
+    std::map<GameEngine::State, ClusterState*> stateMap;
+    stateMap[GameEngine::LOBBY] = lcs;
+    stateMap[GameEngine::GAME] = gcs;
+
+    syncMaster = new SyncMaster(nullptr, stateMap);
+  }
 
   // Main loop
   gEngine->render();

@@ -26,17 +26,20 @@ void GameClusterState::attach() {
   dome = new RenderableDome(50, 20);
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
+  collision = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "collisionShader.frag", true);
 
   worms = new RenderableWormGroup(2, 4, gameConfig->lineWidth);
   worms->setWormArcs(wormArcs->getVal());
-
   wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
+
+
   attached = true;
 }
 
 void GameClusterState::detach() {
   renderer->removeRenderable(domeWorms);
   renderer->removeRenderable(domeGrid);
+  renderer->removeRenderable(collision);
   renderer->removeRenderable(wormLines);
   attached = false;
 }
@@ -79,6 +82,8 @@ void GameClusterState::draw() {
   renderer->render(domeGrid);
   // render FBO as texture on dome
   renderer->render(domeWorms, wormLines, stitchStep);
+
+  renderer->render(collision);
 
   ++stitchStep;
 }

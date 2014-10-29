@@ -30,12 +30,14 @@ struct RenderConfig {
   GLuint indexBuffer = GL_FALSE;
   GLuint vertexArray = GL_FALSE;
   GLuint colorBuffer = GL_FALSE;
+
+  // uniform
   GLint matrixLocation = -1;
   GLint textureLocation = -1;
   GLint fboTexSizeLocation = -1;
+  GLint timeLocation = -1;
 
   std::vector<FBO*> framebuffers;
-
 };
 
 class Renderer {

@@ -11,7 +11,7 @@ class Game;
 
 
 class GameEngine {
- public: 
+ public:
 
   enum State {
     INTRO,
@@ -45,7 +45,7 @@ class GameEngine {
 
   std::string getCountry(int playerId);
   glm::vec2 getPosition(int playerId); // phi, theta
-  
+
   void tick();
 
   /* TODO: get spawn position */
