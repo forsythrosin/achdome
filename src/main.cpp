@@ -55,6 +55,10 @@ RenderState *renderState;
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
 
+  // init render state
+  // renderState = new GameRenderState(gEngine);
+  renderState = new LobbyRenderState(gEngine);
+
   gEngine->setInitOGLFunction( myInitOGLFun );
   gEngine->setDrawFunction( myDrawFun );
   gEngine->setPreSyncFunction( myPreSyncFun );
@@ -69,6 +73,7 @@ int main( int argc, char* argv[] ) {
       delete gEngine;
       return EXIT_FAILURE;
   }
+  renderState->init();
 
   if (gEngine->isMaster()){
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
@@ -93,6 +98,8 @@ int main( int argc, char* argv[] ) {
     gameControllers.push_back(keyboardGameController);
   }
 
+  sgct_text::FontManager::instance()->addFont("Comfortaa", "fonts/Comfortaa-Bold.ttf", sgct_text::FontManager::FontPath_Local);
+
   // Main loop
   gEngine->render();
 
@@ -104,9 +111,6 @@ int main( int argc, char* argv[] ) {
 }
 
 void myInitOGLFun() {
-  // renderState = new GameRenderState(gEngine);
-  renderState = new LobbyRenderState(gEngine);
-  renderState->init();
 }
 
 void myPreSyncFun() {
@@ -136,9 +140,9 @@ void keyCallback(int key, int action) {
     keyboardGameController->processKeyEvent(key, action);
   }
 
-  delete renderState;
-  renderState = new GameRenderState(gEngine);
-  renderState->init();
+  // delete renderState;
+  // renderState = new GameRenderState(gEngine);
+  // renderState->init();
 }
 
 void mouseButtonCallback(int button, int action) {

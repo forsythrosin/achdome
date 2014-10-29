@@ -3,6 +3,8 @@
 #include <renderState.h>
 #include <vector>
 class RenderablePanel;
+class Player;
+class PlayerLobbyTile;
 
 class LobbyRenderState : public RenderState {
  public:
@@ -18,4 +20,7 @@ class LobbyRenderState : public RenderState {
  private:
   sgct_text::Font *font;
   std::vector<int> panels;
+  std::vector<Player*> cachedPlayers;
+  sgct::SharedVector<Player*> players;
+  std::vector<PlayerLobbyTile*> tiles;
 };

@@ -34,8 +34,8 @@ void GameRenderState::init() {
 void GameRenderState::preSync() {
   // Update worm positions
   if( gEngine->isMaster() ) {
-    glm::quat first0(glm::vec3(0.0, -0.785375, 2.0*glm::pi<float>()*timer));
-    glm::quat second0(glm::vec3(0.0, -0.785375, 2.0*glm::pi<float>()*timer + 0.1));
+    glm::quat first0(glm::vec3(0.0, -0.1, 2.0*glm::pi<float>()*timer));
+    glm::quat second0(glm::vec3(0.0, -0.1, 2.0*glm::pi<float>()*timer + 0.1));
 
     glm::quat first1(glm::vec3(0.0, -1.0, 2.0*glm::pi<float>()*timer));
     glm::quat second1(glm::vec3(0.0, -1.0, 2.0*glm::pi<float>()*timer + 0.1));
@@ -73,10 +73,8 @@ void GameRenderState::draw() {
 }
 
 void GameRenderState::encode() {
-  // get things from renderSpace and send it to everyone.
   sgct::SharedData::instance()->writeVector(wormArcs);
 }
 void GameRenderState::decode() {
-  // read from buffer and insert data to GameRenderers.
   sgct::SharedData::instance()->readVector(wormArcs);
 }
