@@ -12,12 +12,18 @@ using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
 
-struct SessionInfo{
+
+struct SessionInfo {
   int sessionId;
   connection_hdl session;
+  boost::shared_mutex sessionMutex;
 };
 
-struct QueueElement{
+struct connection_data {
+  SessionInfo *sessionInfo;
+};
+
+struct ClientMessage {
   int sessionId;
   std::string message;
 };
@@ -52,6 +58,7 @@ struct websocketConfig : public websocketpp::config::asio {
 
   typedef websocketpp::transport::asio::endpoint<transport_config>
     transport_type;
+  typedef connection_data connection_base;
 
   static const websocketpp::log::level elog_level =
     websocketpp::log::elevel::warn;
@@ -79,13 +86,12 @@ private:
   bool validateHandler(connection_hdl hdl);
 
   std::map<int, SessionInfo*> sessionIdToInfo;
-  std::map<connection_hdl, SessionInfo*> sessionHandleToInfo;
   server socketServer;
 
   std::thread webserverThread;
 
   std::atomic_int	 nextId;
-  std::mutex messageMutex;
+  boost::shared_mutex serverMutex;
 
-  boost::lockfree::queue<QueueElement*> *clientMessages;
+  boost::lockfree::queue<ClientMessage*> *clientMessages;
 };
