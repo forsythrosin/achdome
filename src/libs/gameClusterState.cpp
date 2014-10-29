@@ -7,10 +7,10 @@
 #include <clusterRenderSpace.h>
 #include <iostream>
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine) : GameClusterState(gEngine, nullptr) {}
+GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, nullptr, gameConfig) {}
 
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs) : ClusterState(gEngine) {
+GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs, GameConfig *gameConfig) : ClusterState(gEngine, gameConfig) {
   wormArcs = new sgct::SharedVector<WormArc>(2);
   renderSpace = rs;
   attached = false;
@@ -28,7 +28,7 @@ void GameClusterState::attach() {
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
-  worms = new RenderableWormGroup(2, 4, 0.05);
+  worms = new RenderableWormGroup(2, 4, gameConfig->lineWidth);
   worms->setWormArcs(wormArcs->getVal());
 
   glm::vec4 red(1.0, 0.0, 0.0, 1.0);

@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <playerManager.h>
+#include "gameConfig.h"
 
 class WormTracker;
 class Game;
@@ -18,7 +19,7 @@ class GameEngine {
     GAME
   };
 
-  GameEngine(WormTracker *wt, PlayerManager *pm);
+  GameEngine(WormTracker *wt, PlayerManager *pm, GameConfig *gameConfig);
   int connectPlayer();
   bool disconnectPlayer(int playerId);
   void disconnectAll();
@@ -49,11 +50,12 @@ class GameEngine {
 
   /* TODO: get spawn position */
   State getGameState();
-    
- private:
+
+  private:
   int nextPlayerId;
   State state;
   Game *currentGame;
   PlayerManager *playerManager;
   WormTracker *wormTracker;
+  GameConfig *gameConfig;
 };

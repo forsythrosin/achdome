@@ -6,7 +6,7 @@ class RenderablePanel;
 
 class LobbyClusterState : public ClusterState {
  public:
-  LobbyClusterState(sgct::Engine *gEngine);
+  LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig);
   ~LobbyClusterState();
 
   void attach();

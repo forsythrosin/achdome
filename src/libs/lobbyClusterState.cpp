@@ -1,7 +1,7 @@
 #include <lobbyClusterState.h>
 #include <renderablePanel.h>
 
-LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine) : ClusterState(gEngine) {
+LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : ClusterState(gEngine, gameConfig) {
   attached = false;
 }
 

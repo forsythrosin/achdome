@@ -4,7 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/constants.hpp>
-
+#include <gameConfig.h>
 // #include <shaderUtils.h>
 #include <wormHead.h>
 #include <Webserver.h>
@@ -76,7 +76,9 @@ int main( int argc, char* argv[] ) {
       return EXIT_FAILURE;
   }
 
+  GameConfig *gameConfig = new GameConfig("gameTest.json");
   if (gEngine->isMaster()){
+
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(500);
     renderSpace = new ClusterRenderSpace();
     UniformDistributor *distributor = new UniformDistributor();
@@ -85,7 +87,8 @@ int main( int argc, char* argv[] ) {
 
     WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace, distributor);
     PlayerManager *pm = new PlayerManager(ct);
-    gameEngine = new GameEngine(wt, pm);
+
+    gameEngine = new GameEngine(wt, pm, gameConfig);
 
     Webserver *webServer = new Webserver();
     webServer->start(8000);
@@ -97,16 +100,16 @@ int main( int argc, char* argv[] ) {
     gameControllers.push_back(sgc);
 
     // ics = new IntroClusterState();
-    lcs = new LobbyClusterState(gEngine);
-    gcs = new GameClusterState(gEngine, renderSpace);
+    lcs = new LobbyClusterState(gEngine, gameConfig);
+    gcs = new GameClusterState(gEngine, renderSpace, gameConfig);
     
     keyboardGameController = new KeyboardGameController(gameEngine);
     gameControllers.push_back(keyboardGameController);
   } else {
     // isSlave:
     // ics = new IntroClusterState();
-    lcs = new LobbyClusterState(gEngine);
-    gcs = new GameClusterState(gEngine);
+    lcs = new LobbyClusterState(gEngine, gameConfig);
+    gcs = new GameClusterState(gEngine, gameConfig);
   }
 
   std::map<GameEngine::State, ClusterState*> stateMap;

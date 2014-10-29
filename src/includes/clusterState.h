@@ -2,10 +2,11 @@
 
 #include "sgct.h"
 #include <renderer.h>
+#include <gameConfig.h>
 
 class ClusterState {
  public:
-  ClusterState(sgct::Engine *gEngine) : gEngine(gEngine){
+  ClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : gEngine(gEngine), gameConfig(gameConfig){
     renderer = new Renderer(gEngine);
   };
   virtual ~ClusterState() {
@@ -27,4 +28,5 @@ class ClusterState {
   bool attached;
   Renderer *renderer;
   sgct::Engine *gEngine;
+  GameConfig *gameConfig;
 };

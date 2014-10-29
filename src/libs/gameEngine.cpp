@@ -4,13 +4,15 @@
 #include <vector>
 #include <wormTracker.h>
 #include <game.h>
+#include <gameConfig.h>
 
-GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm) {
+GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm, GameConfig *gameConfig) {
   state = State::LOBBY;
   playerManager = pm;
   currentGame = nullptr;
   nextPlayerId = 0;
   wormTracker = wt;
+  this->gameConfig = gameConfig;
 }
 
 /**
