@@ -26,6 +26,12 @@
 #include <renderer.h>
 #include <cmath>
 
+// Render states
+#include <clusterState.h>
+#include <gameClusterState.h>
+#include <lobbyClusterState.h>
+#include <syncMaster.h>
+
 sgct::Engine * gEngine;
 
 void myDrawFun();
@@ -45,15 +51,11 @@ GameEngine *gameEngine;
 ClusterRenderSpace *renderSpace;
 std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
+SyncMaster *syncMaster;
 
-// Renderer + renderables
-sgct::SharedVector<WormArc> wormArcs(100);
-Renderer *renderer;
-RenderableDome *dome;
-RenderableWormGroup *worms;
-int domeGrid, domeWorms, wormLines;
-float timer = 0.0f;
-int stitchStep = 0;
+//IntroClusterState *ics;
+LobbyClusterState *lcs;
+GameClusterState *gcs;
 
 int main( int argc, char* argv[] ) {
   gEngine = new sgct::Engine( argc, argv );
@@ -64,6 +66,7 @@ int main( int argc, char* argv[] ) {
   gEngine->setKeyboardCallbackFunction( keyCallback );
   gEngine->setMouseButtonCallbackFunction( mouseButtonCallback );
   gEngine->setCleanUpFunction( myCleanUpFun );
+
   sgct::SharedData::instance()->setEncodeFunction( myEncodeFun );
   sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
   gEngine->setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -93,9 +96,24 @@ int main( int argc, char* argv[] ) {
     SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder);
     gameControllers.push_back(sgc);
 
+    // ics = new IntroClusterState();
+    lcs = new LobbyClusterState(gEngine);
+    gcs = new GameClusterState(gEngine, renderSpace);
+    
     keyboardGameController = new KeyboardGameController(gameEngine);
     gameControllers.push_back(keyboardGameController);
+  } else {
+    // isSlave:
+    // ics = new IntroClusterState();
+    lcs = new LobbyClusterState(gEngine);
+    gcs = new GameClusterState(gEngine);
   }
+
+  std::map<GameEngine::State, ClusterState*> stateMap;
+  //    stateMap[GameEngine::Intro] = ics;
+  stateMap[GameEngine::LOBBY] = lcs;
+  stateMap[GameEngine::GAME] = gcs;
+  syncMaster = new SyncMaster(gameEngine, stateMap);
 
   // Main loop
   gEngine->render();
@@ -107,89 +125,44 @@ int main( int argc, char* argv[] ) {
   exit( EXIT_SUCCESS );
 }
 
+
 void myInitOGLFun() {
-  // Define renderer + renderables
-  renderer = new Renderer(gEngine);
-
-  dome = new RenderableDome(50, 20);
-  domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
-  domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
-
-  worms = new RenderableWormGroup(100, 4, 0.02);
-  worms->setWormArcs(wormArcs.getVal());
-
-  glm::vec4 red(1.0, 0.0, 0.0, 1.0);
-  glm::vec4 blue(0.0, 0.0, 1.0, 1.0);
-  std::vector<glm::vec4> colors = {red, blue};
-
-  worms->setWormColors(colors);
-  wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
 }
 
 void myPreSyncFun() {
   if(gEngine->isMaster()){
-    for (GameController *ge : gameControllers) {
-      ge->performActions();
+    for (GameController *gc : gameControllers) {
+      gc->performActions();
     }
     gameEngine->tick();
+    syncMaster->preSync();
   }
-
-  // Update worm positions
-  if( gEngine->isMaster() ) {
-    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer));
-    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()*timer + 0.000001));
-
-    // timer += 0.005f;
-    WormArc wa(0, first, second, 0);
-
-    std::vector<WormArc> arcs = renderSpace->getArcs();
-    if (arcs.size() < 1) {
-      arcs.push_back(wa);
-    }
-    wormArcs.setVal(arcs);
-
-    renderSpace->clear();
-  }
-
-  // Reset stitch step
-  stitchStep = 0;
 }
 
 void myDrawFun() {
-  // Copy current worm positions and colors
-  worms->setWormArcs(wormArcs.getVal());
-
-  // render wormLines to FBO
-  renderer->renderToFBO(wormLines, stitchStep);
-  // render FBO as texture on dome
-  renderer->render(domeWorms, wormLines, stitchStep);
-  // render grid lines
-  renderer->render(domeGrid);
-
-  ++stitchStep;
+  syncMaster->draw();
 }
 
 void myEncodeFun() {
-  // get things from renderSpace and send it to everyone.
-  sgct::SharedData::instance()->writeVector(&wormArcs);
+  syncMaster->encode();
 }
 
 void myDecodeFun() {
-  // read from buffer and insert data to GameRenderers.
-  sgct::SharedData::instance()->readVector(&wormArcs);
+  syncMaster->decode();
 }
 
 void keyCallback(int key, int action) {
   if (gEngine->isMaster()){
     keyboardGameController->processKeyEvent(key, action);
   }
+  /*  
+  delete renderState;
+  renderState = new GameRenderState(gEngine);
+  renderState->init();*/
 }
 
 void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
-  delete dome;
-  delete worms;
-  delete renderer;
 }

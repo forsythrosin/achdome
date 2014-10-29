@@ -1,11 +1,12 @@
 #pragma once
 
 #include "sgct.h"
-#include <renderable.h>
 #include <string>
 #include <vector>
-#include <FBO.h>
+#include <map>
 #include <texture2D.h>
+#include <renderable.h>
+#include <FBO.h>
 
 struct RenderConfig {
   RenderConfig(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool sphericalCoords) {
@@ -23,6 +24,7 @@ struct RenderConfig {
   bool sphericalCoords;
 
   int id;
+  bool hidden = false;
 
   GLuint positionBuffer = GL_FALSE;
   GLuint indexBuffer = GL_FALSE;
@@ -33,21 +35,24 @@ struct RenderConfig {
   GLint fboTexSizeLocation = -1;
 
   std::vector<FBO*> framebuffers;
+
 };
 
 class Renderer {
 public:
   Renderer(sgct::Engine *gEngine);
-  ~Renderer() = default;
+  ~Renderer();
   int addRenderable(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical);
+  void removeRenderable(int configId);
   void render(int configId, int configWithFBOId = -1, int stitchStep = 0);
   void renderToFBO(int configId, int stitchStep = 0);
 
 private:
   void init(RenderConfig &renderConfig);
   void loadToGPU(RenderConfig &renderConfig);
-  std::vector<RenderConfig> renderConfigs;
+  std::map<int, RenderConfig> renderConfigs;
   const float DOME_ROTATION = -90.0;
   float rot = 0.0f;
   sgct::Engine *gEngine;
+  int nextId = 0;
 };
