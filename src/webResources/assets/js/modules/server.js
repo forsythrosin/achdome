@@ -52,9 +52,9 @@ function setupSocket() {
   function createSocket() {
     console.log('Connecting to server');
     if (typeof MozWebSocket != "undefined") {
-      socket = new MozWebSocket(get_appropriate_ws_url(), "sgct");
+      socket = new MozWebSocket(get_appropriate_ws_url(), "player");
     } else {
-      socket = new WebSocket(get_appropriate_ws_url(), "sgct");
+      socket = new WebSocket(get_appropriate_ws_url(), "player");
     }
     socket.onopen = onopen;
     socket.onclose = onclose;

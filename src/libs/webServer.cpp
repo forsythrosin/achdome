@@ -18,12 +18,12 @@ Webserver::Webserver(){
   socketServer.set_http_handler(bind(&Webserver::onHttp, this, ::_1));
   socketServer.set_socket_init_handler(bind(&Webserver::onSocketInit, this, ::_1, ::_2));
   socketServer.set_validate_handler(bind(&Webserver::validateHandler, this, ::_1));
-
-  this->clientMessages = new boost::lockfree::queue<ClientMessage *>(300);
 }
 Webserver::~Webserver(){
   webserverThread.join();
-  delete clientMessages;
+  for (auto cm : clientMessages) {
+    delete cm.second;
+  }
 }
 void Webserver::start(int port){
   webserverThread = std::thread(bind(&Webserver::startServer,this, port));
@@ -74,11 +74,20 @@ void Webserver::onOpen(connection_hdl handle){
 void Webserver::onMessage(connection_hdl handle, server::message_ptr message){
   auto con = socketServer.get_con_from_hdl(handle);
 
+  std::string subp = con->get_subprotocol();
+  if (clientMessages.count(subp) == 0) {
+    // Create queue for subprotocol
+    boost::unique_lock<boost::shared_mutex> lock(serverMutex);
+    clientMessages.insert({subp, new boost::lockfree::queue<ClientMessage *>(300)});
+  }
+  boost::shared_lock<boost::shared_mutex> lock(serverMutex);
+  auto messages = clientMessages.at(subp);
+
   int sessionId = con->sessionInfo->sessionId;
   auto queueElement = new ClientMessage();
   queueElement->message = message->get_payload();
   queueElement->sessionId = sessionId;
-  clientMessages->push(queueElement);
+  messages->push(queueElement);
 }
 
 void Webserver::onHttp(connection_hdl handle){
@@ -103,13 +112,17 @@ void Webserver::onHttp(connection_hdl handle){
   con->set_body(fileContent);
 }
 
-bool Webserver::readClientMessage(int &sessionId, std::string &message){
-  ClientMessage *elem;
-  if(clientMessages->pop(elem)){
-    sessionId = elem->sessionId;
-    message = elem->message;
-    delete elem;
-    return true;
+bool Webserver::readClientMessage(std::string subProtocol, int &sessionId, std::string &message){
+  if (clientMessages.count(subProtocol) > 0) {
+    boost::shared_lock<boost::shared_mutex> lock(serverMutex);
+    auto messages = clientMessages.at(subProtocol);
+    ClientMessage *elem;
+    if (messages->pop(elem)){
+      sessionId = elem->sessionId;
+      message = elem->message;
+      delete elem;
+      return true;
+    }
   }
   return false;
 }
