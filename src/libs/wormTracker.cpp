@@ -89,8 +89,6 @@ void WormTracker::tick(int time) {
   }
 
   std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
-
-
   
   renderSpace->addHeads(heads);
   renderSpace->addArcs(arcs);
@@ -108,6 +106,8 @@ void WormTracker::clear() {
     delete it.second;
   }
   wormHeads.clear();
+  collisionSpace->clear();
+  renderSpace->clear();
 }
 
 bool WormTracker::startWormHead(int id) {
