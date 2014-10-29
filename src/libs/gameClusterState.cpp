@@ -10,7 +10,10 @@
 GameClusterState::GameClusterState(sgct::Engine *gEngine) : GameClusterState(gEngine, nullptr) {}
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, ClusterRenderSpace *rs) : ClusterState(gEngine) {
-  wormArcs = new sgct::SharedVector<WormArc>(100);
+  wormArcs = new sgct::SharedVector<WormArc>(MAX_NUMBER_OF_WORMS);
+  wormCollisions = new sgct::SharedVector<WormCollision>(MAX_NUMBER_OF_WORMS);
+  wormHeads = new sgct::SharedVector<WormHead>(MAX_NUMBER_OF_WORMS);
+
   renderSpace = rs;
   attached = false;
 }
@@ -43,21 +46,26 @@ void GameClusterState::detach() {
 void GameClusterState::preSync() {
   if (renderSpace != nullptr) {
     std::vector<WormArc> arcs = renderSpace->getArcs();
+    std::vector<WormCollision> collisions = renderSpace->getCollisions();
+    std::vector<WormHead> heads = renderSpace->getHeads();
     //    std::vector<WormCollision> collisions = renderSpace->getCollisions();
 
-    glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()));
-    glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>() + 0.000001));
-    glm::vec4 c(1.0, 1.0, 0.0, 1.0);
-    WormArc wa(0, first, second, 0, c);
-    if (arcs.size() < 1) {
+    /*
+      THIS FIXES A BUG THAT ONLY HAPPENS ON WINDOWS? (Same has to be done for collisions and arcs)
+      if (arcs.size() < 1) {
+      // create a default worm arc
+      glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()));
+      glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>() + 0.000001));
+      WormArc wa(0, first, second, 0);
+>>>>>>> Stashed changes
       arcs.push_back(wa);
-    }
+    }*/
 
     wormArcs->setVal(arcs);
+    wormCollisions->setVal(collisions);
+    wormHeads->setVal(heads);
 
     //    std::cout << arcs.size() << std::endl;
-    //  std::vector<WormHeadIndicator> heads = renderSpace->getWormHeadIndicators();
-    //  wormHeadIndicators->setVal(heads);
     //    wormCollisions->setVal(collisions);
 
     renderSpace->clear();
@@ -84,9 +92,17 @@ void GameClusterState::draw() {
 
 void GameClusterState::encode() {
   // get things from renderSpace and send it to everyone.
-  sgct::SharedData::instance()->writeVector(wormArcs);
+  sgct::SharedData *data = sgct::SharedData::instance();
+  
+  data->writeVector(wormArcs);
+  data->writeVector(wormCollisions);
+  data->writeVector(wormHeads);
 }
 void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
-  sgct::SharedData::instance()->readVector(wormArcs);
+  sgct::SharedData *data = sgct::SharedData::instance();
+
+  data->readVector(wormArcs);
+  data->readVector(wormCollisions);
+  data->readVector(wormHeads);
 }

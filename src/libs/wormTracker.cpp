@@ -17,6 +17,9 @@ WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpac
   this->collisionSpace = collisionSpace;
   this->renderSpace = renderSpace;
   this->distributor = distributor;
+
+  std::random_device rd;
+  randomGenerator = std::mt19937(rd());
 }
 
 WormTracker::~WormTracker() {
@@ -38,7 +41,9 @@ void WormTracker::removeEventListener(WormEventListener *wel) {
 void WormTracker::setPlayers(std::vector<GamePlayer*> gamePlayers) {
   clearPlayers();
   for (GamePlayer *gp : gamePlayers) {
-    wormHeads.insert({gp->getId(), new WormHead(gp->getColor())});
+    int id = gp->getId();
+    wormHeads.insert({id, new WormHead(gp->getColor())});
+    setNewRandomGapTimer(id);
   }
   distributor->distribute(wormHeads);
 }
@@ -64,6 +69,7 @@ glm::vec2 WormTracker::getSphericalPosition(int playerId) {
 void WormTracker::tick(int time) {
 
   std::vector<WormArc> arcs;
+  std::vector<WormHead> heads;
 
   for (const auto &pair : wormHeads) {
     int id = pair.first;
@@ -75,11 +81,18 @@ void WormTracker::tick(int time) {
       if (!wh->isInGap()) {
         arcs.push_back(WormArc(id, prevPosition, position, time, wh->getColor()));
       }
+      if (wh->needsNewGapTimer()) {
+        setNewRandomGapTimer(id);
+      }
     }
+    heads.push_back(*wh);
   }
 
   std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
 
+
+  
+  renderSpace->addHeads(heads);
   renderSpace->addArcs(arcs);
   renderSpace->addCollisions(collisions);
 
@@ -130,5 +143,26 @@ bool WormTracker::turnRight(int id, bool turn) {
     it->second->turnRight(turn);
     return true;
   }
+  return false;
+}
+
+
+bool WormTracker::setNewRandomGapTimer(int id) {
+
+  std::uniform_real_distribution<> timeBetweenGapsDistribution(MIN_TIME_BETWEEN_GAPS, MAX_TIME_BETWEEN_GAPS);
+  std::uniform_real_distribution<> timeInGapDistribution(MIN_TIME_IN_GAP, MAX_TIME_IN_GAP);
+
+  int ticksBetweenGaps = timeBetweenGapsDistribution(randomGenerator);
+  int ticksInGap = timeInGapDistribution(randomGenerator);
+  return setNewGapTimer(id, ticksBetweenGaps, ticksInGap);
+}
+
+
+bool WormTracker::setNewGapTimer(int id, int ticksBetweenGaps, int ticksInGap) {
+  auto it = wormHeads.find(id);
+  if (it != wormHeads.end()) {
+    it->second->setGapTimer(ticksBetweenGaps, ticksInGap);
+    return true;
+  }  
   return false;
 }

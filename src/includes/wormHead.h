@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <string>
-#include <random>
 
 class WormHead {
  public:
@@ -86,19 +85,24 @@ class WormHead {
    */
   bool isInGap();
 
+  /**
+   * Needs new gap timer
+   */
+  bool needsNewGapTimer();
+
+  /**
+   * Set gap timer.
+   */
+  void setGapTimer(int ticksBetweenGaps, int ticksInGap);
+  
  private:
   glm::vec4 color;
-  const int MIN_TIME_BETWEEN_GAPS = 80;
-  const int MAX_TIME_BETWEEN_GAPS = 100;
-  const int GAP_TIME = 5;
   bool moving;
   bool turningLeft;
   bool turningRight;
   glm::quat positionQuat;
   glm::quat velocityQuat;
   float turnSpeed;
-  void setGapTimer();
-  int gapTimer;
-  std::mt19937 randomGenerator;
-  std::uniform_int_distribution<> gapDistribution;
+  int timeLeftBetweenGaps;
+  int timeLeftInGap;
 };

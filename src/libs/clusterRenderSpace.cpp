@@ -3,6 +3,7 @@
 #include <clusterRenderSpace.h>
 #include <wormArc.h>
 #include <wormCollision.h>
+#include <wormHead.h>
 #include <iostream>
 ClusterRenderSpace::ClusterRenderSpace() {
   
@@ -18,8 +19,16 @@ void ClusterRenderSpace::addArcs(std::vector<WormArc> arcs) {
   }
 }
 
-void ClusterRenderSpace::addCollisions(std::vector<WormCollision> arcs) {
+void ClusterRenderSpace::addCollisions(std::vector<WormCollision> collisions) {
+  for (auto collision : collisions) {
+    this->collisions.push_back(collision);
+  }
+}
 
+void ClusterRenderSpace::addHeads(std::vector<WormHead> heads) {
+  for (auto head : heads) {
+    this->heads.push_back(head);
+  }
 }
 
 void ClusterRenderSpace::clear() {
@@ -28,4 +37,12 @@ void ClusterRenderSpace::clear() {
 
 std::vector<WormArc> ClusterRenderSpace::getArcs() {
   return this->arcs;
+}
+
+std::vector<WormCollision> ClusterRenderSpace::getCollisions() {
+  return this->collisions;
+}
+
+std::vector<WormHead> ClusterRenderSpace::getHeads() {
+  return this->heads;
 }
