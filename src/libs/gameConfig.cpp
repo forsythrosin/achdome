@@ -21,7 +21,11 @@ std::string GameConfig::toString() {
 }
 
 void GameConfig::save(std::string configName){
-  std::ofstream out(pathToGameConfig(configName));
+  std::ofstream out(configName);
+  if(!out){
+    std::cerr << "Couldn't open file" << std::endl;
+    return;
+  }
   out << toString();
   out.close();
 }
@@ -55,6 +59,5 @@ void GameConfig::load(std::string configName){
     entity->configFromJson(v);
     delete entity;
   }
-
 }
 
