@@ -16,12 +16,24 @@ SocketGameController::~SocketGameController() {
 }
 
 void SocketGameController::performActions() {
-  int sessionId;
-  std::string message;
-  while (webServer->readClientMessage(subProtocol, sessionId, message)) {
+  ClientMessage cm;
+  while (webServer->readClientMessage(subProtocol, cm)) {
     ClientAction action;
-    if (actionResolver->resolve(message, action)) {
-      handleAction(sessionId, action);
+    switch (cm.type) {
+    case ClientMessage::Type::MESSAGE:
+      if (actionResolver->resolve(cm.message, action)) {
+        handleAction(cm.sessionId, action);
+      }
+      break;
+    case ClientMessage::Type::CLOSED:
+      onClose(cm.sessionId);
+      break;
     }
   }
+}
+
+void SocketGameController::onClose(int sessionId) {
+  ClientAction ca;
+  ca.type = ClientAction::Type::UNREGISTER;
+  handleAction(sessionId, ca);
 }

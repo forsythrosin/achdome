@@ -17,5 +17,6 @@ protected:
   ActionResolver *actionResolver;
   DataSerializationBuilder *dataSerializationBuilder;
   std::string subProtocol;
+  void onClose(int sessionId);
   virtual void handleAction(int sessionId, ClientAction action) = 0;
 };
