@@ -20,11 +20,14 @@ class LobbyClusterState : public ClusterState {
   void encode();
   void decode();
 
+  void setPlayerListAnchor(glm::vec3 anchor);
+
  private:
   glm::mat4 getMVP(int offset);
 
   PlayerManager *playerManager;
   sgct::SharedVector<Player*> *sharedPlayers;
 
-  const glm::vec3 LIST_UPPER_LEFT_ANCHOR = glm::vec3(-2.8f, 7.5f, 2.15f);
+  glm::vec3 playerListAnchor;
+  const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(-2.8f, 7.5f, 2.15f);
 };
