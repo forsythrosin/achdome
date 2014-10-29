@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <picojson/picojson.h>
 #include <jsonBuilder.h>
 
 GameConfig::GameConfig() {
@@ -22,7 +21,11 @@ std::string GameConfig::toString() {
 }
 
 void GameConfig::save(std::string configName){
-  std::ofstream out(pathToGameConfig(configName));
+  std::ofstream out(configName);
+  if(!out){
+    std::cerr << "Couldn't open file" << std::endl;
+    return;
+  }
   out << toString();
   out.close();
 }
@@ -47,14 +50,14 @@ void GameConfig::load(std::string configName){
     std::cerr << "Couldn't parse to JSON Object" << std::endl;
     return;
   }
+  std::vector<AbstractConfigEntity*> entities = {
+    new ConfigEntity<double, float>("lineWidth", lineWidth),
+    new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
+  };
 
-  if(v.contains("lineWidth")){
-    lineWidth = (float)v.get("lineWidth").get<double>();
+  for(auto entity : entities){
+    entity->configFromJson(v);
+    delete entity;
   }
-
-  if(v.contains("maximumPlayers")){
-    maximumPlayers = (int)v.get("maximumPlayers").get<double>();
-  }
-
 }
 
