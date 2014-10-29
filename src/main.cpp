@@ -26,9 +26,10 @@
 #include <cmath>
 
 // Render states
-#include <renderState.h>
-#include <gameRenderState.h>
-#include <lobbyRenderState.h>
+#include <clusterState.h>
+#include <gameClusterState.h>
+#include <lobbyClusterState.h>
+#include <syncMaster.h>
 
 sgct::Engine * gEngine;
 
@@ -49,31 +50,33 @@ GameEngine *gameEngine;
 ClusterRenderSpace *renderSpace;
 std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
+SyncMaster *syncMaster;
 
-RenderState *renderState;
+//IntroClusterState *ics;
+LobbyClusterState *lcs;
+GameClusterState *gcs;
 
 int main( int argc, char* argv[] ) {
+  // BAE, load the AchDome font!
+  sgct_text::FontManager::instance()->addFont("Comfortaa", "fonts/Comfortaa-Bold.ttf", sgct_text::FontManager::FontPath_Local);
+
   gEngine = new sgct::Engine( argc, argv );
 
-  // init render state
-  // renderState = new GameRenderState(gEngine);
-  renderState = new LobbyRenderState(gEngine);
+  gEngine->setInitOGLFunction(myInitOGLFun);
+  gEngine->setDrawFunction(myDrawFun);
+  gEngine->setPreSyncFunction(myPreSyncFun);
+  gEngine->setKeyboardCallbackFunction(keyCallback);
+  gEngine->setMouseButtonCallbackFunction(mouseButtonCallback);
+  gEngine->setCleanUpFunction(myCleanUpFun);
 
-  gEngine->setInitOGLFunction( myInitOGLFun );
-  gEngine->setDrawFunction( myDrawFun );
-  gEngine->setPreSyncFunction( myPreSyncFun );
-  gEngine->setKeyboardCallbackFunction( keyCallback );
-  gEngine->setMouseButtonCallbackFunction( mouseButtonCallback );
-  gEngine->setCleanUpFunction( myCleanUpFun );
-  sgct::SharedData::instance()->setEncodeFunction( myEncodeFun );
-  sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
+  sgct::SharedData::instance()->setEncodeFunction(myEncodeFun);
+  sgct::SharedData::instance()->setDecodeFunction(myDecodeFun);
   gEngine->setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
   if (!gEngine->init( sgct::Engine::OpenGL_3_3_Core_Profile )) {
       delete gEngine;
       return EXIT_FAILURE;
   }
-  renderState->init();
 
   if (gEngine->isMaster()){
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
@@ -83,6 +86,7 @@ int main( int argc, char* argv[] ) {
 
     WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace);
     PlayerManager *pm = new PlayerManager(ct);
+
     gameEngine = new GameEngine(wt, pm);
 
     Webserver *webServer = new Webserver();
@@ -94,11 +98,25 @@ int main( int argc, char* argv[] ) {
     SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder);
     gameControllers.push_back(sgc);
 
+    // ics = new IntroClusterState();
+    lcs = new LobbyClusterState(gEngine);
+    gcs = new GameClusterState(gEngine, renderSpace);
+
     keyboardGameController = new KeyboardGameController(gameEngine);
     gameControllers.push_back(keyboardGameController);
+  } else {
+    // isSlave:
+    // ics = new IntroClusterState();
+    lcs = new LobbyClusterState(gEngine);
+    gcs = new GameClusterState(gEngine);
   }
 
-  sgct_text::FontManager::instance()->addFont("Comfortaa", "fonts/Comfortaa-Bold.ttf", sgct_text::FontManager::FontPath_Local);
+  // Setup states
+  std::map<GameEngine::State, ClusterState*> stateMap;
+  //    stateMap[GameEngine::Intro] = ics;
+  stateMap[GameEngine::LOBBY] = lcs;
+  stateMap[GameEngine::GAME] = gcs;
+  syncMaster = new SyncMaster(gameEngine, stateMap);
 
   // Main loop
   gEngine->render();
@@ -115,34 +133,30 @@ void myInitOGLFun() {
 
 void myPreSyncFun() {
   if(gEngine->isMaster()){
-    for (GameController *ge : gameControllers) {
-      ge->performActions();
+    for (GameController *gc : gameControllers) {
+      gc->performActions();
     }
     gameEngine->tick();
+    syncMaster->preSync();
   }
-  renderState->preSync();
 }
 
 void myDrawFun() {
-  renderState->draw();
+  syncMaster->draw();
 }
 
 void myEncodeFun() {
-  renderState->encode();
+  syncMaster->encode();
 }
 
 void myDecodeFun() {
-  renderState->decode();
+  syncMaster->decode();
 }
 
 void keyCallback(int key, int action) {
   if (gEngine->isMaster()){
     keyboardGameController->processKeyEvent(key, action);
   }
-
-  // delete renderState;
-  // renderState = new GameRenderState(gEngine);
-  // renderState->init();
 }
 
 void mouseButtonCallback(int button, int action) {
