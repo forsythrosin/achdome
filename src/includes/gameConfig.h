@@ -2,6 +2,7 @@
 
 #include <string>
 #include <picojson/picojson.h>
+#include <jsonBuilder.h>
 
 struct GameConfig{
 
@@ -20,8 +21,10 @@ struct GameConfig{
   int maximumPlayers;
 
   private:
+
   struct AbstractConfigEntity{
     virtual void configFromJson(picojson::value) = 0;
+    virtual void addConfigToJson(JsonBuilder*) = 0;
   };
 
   template<typename T, typename U = T>
@@ -36,10 +39,16 @@ struct GameConfig{
         value = (U) obj.get(key).get<type>();
       }
     }
+
+    void addConfigToJson(JsonBuilder *builder){
+      builder->add(key, value);
+    }
+
     private:
     std::string key;
     U &value;
   };
 
+  std::vector< AbstractConfigEntity* > configEntities;
 
 };
