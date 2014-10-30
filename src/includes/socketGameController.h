@@ -19,4 +19,6 @@ protected:
   std::string subProtocol;
   void onClose(int sessionId);
   virtual void handleAction(int sessionId, ClientAction action) = 0;
+  GameEngine::State currentState;
+  GameEngine::State prevState;
 };

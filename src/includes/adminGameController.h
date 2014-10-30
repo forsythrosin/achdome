@@ -5,6 +5,7 @@
 class AdminGameController : public SocketGameController {
 public:
   AdminGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb, std::string subProtocol) : SocketGameController(ge, ws, ar, dsb, subProtocol) {};
+  void performActions();
 protected:
   void handleAction(int sessionId, ClientAction action);
 };

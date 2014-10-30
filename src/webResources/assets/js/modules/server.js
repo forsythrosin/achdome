@@ -49,6 +49,10 @@ function setupSocket(subProtocol) {
     emit(e.message, null, e.data);
   }
 
+  function onerror(error) {
+    console.warn("Websocket error", error);
+  }
+
   function createSocket() {
     console.log('Connecting to server');
     if (typeof MozWebSocket != "undefined") {
@@ -59,6 +63,7 @@ function setupSocket(subProtocol) {
     socket.onopen = onopen;
     socket.onclose = onclose;
     socket.onmessage = onmessage;
+    socket.onerror = onerror;
   }
 
   createSocket();
@@ -91,7 +96,9 @@ function emit(message, err, data) {
   return true;
 }
 
-var server = {
+var server;
+
+server = {
   init: function (subProtocol) {
     subProtocol = subProtocol || "ach"; // Or whatever
     setupSocket(subProtocol);
@@ -100,10 +107,15 @@ var server = {
     sendToServer(message, data);
   },
   on: function (message, callback) {
-    if (!callbacks[message]) {
-      callbacks[message] = [];
-    }
-    callbacks[message].push(callback);
+    var messages = message.split(" ");
+    messages.forEach(function (m) {
+      console.log('Register ', m);
+      if (!callbacks[m]) {
+        callbacks[m] = [];
+      }
+      callbacks[m].push(callback);
+    });
+    return server;
   }
 };
 

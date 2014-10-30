@@ -45,11 +45,13 @@ void Webserver::startServer(int port){
   socketServer.stop();
 }
 
-void Webserver::addBroadcast(std::string message){
-  for(auto sessionInfo : sessionIdToInfo){
+void Webserver::addBroadcast(std::string message, std::string subProtocol) {
+  for (auto sessionInfo : sessionIdToInfo) {
     auto session = sessionInfo.second->session;
     server::connection_ptr connection = socketServer.get_con_from_hdl(session);
-    connection->send(message);
+    if (subProtocol.empty() || connection->get_subprotocol() == subProtocol) {
+      connection->send(message);
+    }
   }
 }
 

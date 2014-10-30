@@ -10,29 +10,42 @@ JsonActionResolver::~JsonActionResolver() {
 }
 
 bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) {
-	const char *json = jsonMessage.c_str();
-	picojson::value v;
-	std::string err;
-	picojson::parse(v, json, json + strlen(json), &err);
-	if (!err.empty()) {
-		std::cout << "Error while parsing json: " << err << std::endl;
-		return false;
-	}
-	if (!v.is<picojson::object>()) {
-		std::cout << "JSON is not an object" << jsonMessage << std::endl;
-		return false;
-	}
+  const char *json = jsonMessage.c_str();
+  picojson::value v;
+  std::string err;
+  picojson::parse(v, json, json + strlen(json), &err);
+  if (!err.empty()) {
+    std::cout << "Error while parsing json: " << err << std::endl;
+    return false;
+  }
+  if (!v.is<picojson::object>()) {
+    std::cout << "JSON is not an object" << jsonMessage << std::endl;
+    return false;
+  }
 
-	std::string message;
-	if (!getString(v, "message", message)) {
-		return false;
-	}
+  std::string message;
+  if (!getString(v, "message", message)) {
+    return false;
+  }
 
   std::transform(message.begin(), message.end(), message.begin(), ::tolower);
   if (message == "start_game") {
+    // Requires password
+    if (!requireDataString(v, "password", action)) return false;
     action.type = ClientAction::START_GAME;
     return true;
+  } else if (message == "end_game") {
+    // Requires password
+    if (!requireDataString(v, "password", action)) return false;
+    action.type = ClientAction::END_GAME;
+    return true;
+  } else if (message == "authenticate_admin") {
+    // Requires password
+    if (!requireDataString(v, "password", action)) return false;
+    action.type = ClientAction::AUTHENTICATE_ADMIN;
+    return true;
   } else if (message == "register") {
+    // Requires name
 		picojson::value data;
 		if (!getObject(v, "data", data)) {
 			return false;
@@ -65,6 +78,19 @@ bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) 
 	}
 	std::cout << "Message not recognized: " << message << std::endl;
 	return false;
+}
+
+bool JsonActionResolver::requireDataString(picojson::value v, std::string key, ClientAction &action) {
+  picojson::value data;
+  if (!getObject(v, "data", data)) {
+    return false;
+  }
+  std::string value;
+  if (!getString(data, key, value)) {
+    return false;
+  }
+  action.data.insert(std::pair<std::string, std::string>(key, value));
+  return true;
 }
 
 bool JsonActionResolver::getString(picojson::value v, std::string key, std::string &value) {

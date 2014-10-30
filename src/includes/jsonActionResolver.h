@@ -10,5 +10,6 @@ public:
   bool resolve(std::string json, ClientAction &action);
 private:
 	bool getString(picojson::value, std::string, std::string&);
-	bool getObject(picojson::value, std::string, picojson::value&);
+  bool getObject(picojson::value, std::string, picojson::value&);
+  bool requireDataString(picojson::value, std::string, ClientAction&);
 };

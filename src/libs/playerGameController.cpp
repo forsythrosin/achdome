@@ -1,14 +1,8 @@
 #include <playerGameController.h>
 
-PlayerGameController::PlayerGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb, std::string subProtocol) : SocketGameController(ge, ws, ar, dsb, subProtocol) {
-  currentState = gameEngine->getGameState();
-}
-
 void PlayerGameController::performActions() {
   SocketGameController::performActions();
 
-  GameEngine::State prevState = currentState;
-  currentState = gameEngine->getGameState();
   if (currentState != prevState) {
     // Game state changed
     int sessionId;
@@ -125,10 +119,6 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
   glm::vec4 color;
   std::string sendMessage;
   switch (action.type) {
-  case ClientAction::START_GAME:
-    gameEngine->startGame();
-    std::cout << "Game started" << std::endl;
-    break;
   case ClientAction::REGISTER:
     playerId = gameEngine->connectPlayer();
     if (action.data.count("name") > 0) {

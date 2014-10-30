@@ -9,6 +9,7 @@ SocketGameController::SocketGameController(GameEngine *ge, Webserver *ws, Action
   actionResolver = ar;
   dataSerializationBuilder = dsb;
   this->subProtocol = subProtocol;
+  currentState = gameEngine->getGameState();
 }
 
 SocketGameController::~SocketGameController() {
@@ -16,6 +17,8 @@ SocketGameController::~SocketGameController() {
 }
 
 void SocketGameController::performActions() {
+  prevState = currentState;
+  currentState = gameEngine->getGameState();
   ClientMessage cm;
   while (webServer->readClientMessage(subProtocol, cm)) {
     ClientAction action;
