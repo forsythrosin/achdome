@@ -8,16 +8,17 @@
 
 class SocketGameController : public GameController {
 public:
-  SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb);
-  ~SocketGameController();
-  void performActions();
-private:
+  SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb, std::string subProtocol);
+  virtual ~SocketGameController();
+  virtual void performActions();
+protected:
   GameEngine *gameEngine;
   Webserver *webServer;
   ActionResolver *actionResolver;
   DataSerializationBuilder *dataSerializationBuilder;
-  std::map<int, int> sessionIds;
-  std::map<int, int> playerIds;
-  std::map<int, bool> lives;
+  std::string subProtocol;
+  void onClose(int sessionId);
+  virtual void handleAction(int sessionId, ClientAction action) = 0;
   GameEngine::State currentState;
+  GameEngine::State prevState;
 };

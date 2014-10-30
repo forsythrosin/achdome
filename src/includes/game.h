@@ -6,15 +6,14 @@
 #include <map>
 #include <vector>
 
-
-
 class PlayerManager;
 class WormTracker;
 class GamePlayer;
 
 class Game : WormEventListener, PlayerEventListener {
  public:
-  Game(PlayerManager *pm, WormTracker *wt);
+  Game(int gameId, PlayerManager *pm, WormTracker *wt);
+  ~Game();
   bool turnLeft(int playerId, bool turn);
   bool turnRight(int playerId, bool turn);
   bool startMoving(int playerId);
@@ -28,12 +27,20 @@ class Game : WormEventListener, PlayerEventListener {
   std::vector<int> getParticipants();
   std::string getCountry(int playerId);
   glm::vec2 getPosition(int playerId); // phi, theta
+  int getNumberOfPlayers();
+  int getNumberOfPlayersAlive();
+  int getNumberOfPlayersStartedMoving();
+  int getNumberOfPlayersMoving();
   void tick();
-  
+  bool isOver();
  private:
   WormTracker *wormTracker;
+  PlayerManager *playerManager;
   std::map<int, GamePlayer*> gamePlayers;
   void onWormCollision(WormCollision wc);
   void onPlayerDisconnect(int playerId);
   int time = 0;
+  int gameId;
+  bool gameOver = false;
+  void updateGameOver();
 };

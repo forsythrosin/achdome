@@ -27,7 +27,7 @@ function get_appropriate_ws_url() {
   return pcol + u[0] + "/xxx";
 }
 
-function setupSocket() {
+function setupSocket(subProtocol) {
   function onopen() {
     connected = true;
     emit('connected', null, null);
@@ -49,16 +49,21 @@ function setupSocket() {
     emit(e.message, null, e.data);
   }
 
+  function onerror(error) {
+    console.warn("Websocket error", error);
+  }
+
   function createSocket() {
     console.log('Connecting to server');
     if (typeof MozWebSocket != "undefined") {
-      socket = new MozWebSocket(get_appropriate_ws_url(), "sgct");
+      socket = new MozWebSocket(get_appropriate_ws_url(), subProtocol);
     } else {
-      socket = new WebSocket(get_appropriate_ws_url(), "sgct");
+      socket = new WebSocket(get_appropriate_ws_url(), subProtocol);
     }
     socket.onopen = onopen;
     socket.onclose = onclose;
     socket.onmessage = onmessage;
+    socket.onerror = onerror;
   }
 
   createSocket();
@@ -91,30 +96,26 @@ function emit(message, err, data) {
   return true;
 }
 
-var server = {
-  init: function () {
-    setupSocket();
+var server;
+
+server = {
+  init: function (subProtocol) {
+    subProtocol = subProtocol || "ach"; // Or whatever
+    setupSocket(subProtocol);
   },
-  register: function (name) {
-    sendToServer('register', {name: name});
-  },
-  unregister: function () {
-    sendToServer('unregister');
-  },
-  startMoving: function () {
-    sendToServer('start_moving');
-  },
-  left: function (down) {
-    sendToServer('left_' + (down ? 'down' : 'up'));
-  },
-  right: function (down) {
-    sendToServer('right_' + (down ? 'down' : 'up'));
+  sendToServer: function(message, data) {
+    sendToServer(message, data);
   },
   on: function (message, callback) {
-    if (!callbacks[message]) {
-      callbacks[message] = [];
-    }
-    callbacks[message].push(callback);
+    var messages = message.split(" ");
+    messages.forEach(function (m) {
+      console.log('Register ', m);
+      if (!callbacks[m]) {
+        callbacks[m] = [];
+      }
+      callbacks[m].push(callback);
+    });
+    return server;
   }
 };
 

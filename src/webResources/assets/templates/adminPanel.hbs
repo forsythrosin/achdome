@@ -1,0 +1,14 @@
+<div id="currentState">
+
+</div>
+<div id="controls">
+  <button id="changeGameState"{{#if ready}} class="start"{{else}}{{#if started}} class="end"{{/if}}{{/if}}>
+    {{#if ready}}
+      Start game
+    {{else}}
+      {{#if started}}
+        End game
+      {{/if}}
+    {{/if}}
+  </button>
+</div>

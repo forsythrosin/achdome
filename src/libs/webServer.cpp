@@ -18,12 +18,12 @@ Webserver::Webserver(){
   socketServer.set_http_handler(bind(&Webserver::onHttp, this, ::_1));
   socketServer.set_socket_init_handler(bind(&Webserver::onSocketInit, this, ::_1, ::_2));
   socketServer.set_validate_handler(bind(&Webserver::validateHandler, this, ::_1));
-
-  this->clientMessages = new boost::lockfree::queue<ClientMessage *>(300);
 }
 Webserver::~Webserver(){
   webserverThread.join();
-  delete clientMessages;
+  for (auto cm : clientMessages) {
+    delete cm.second;
+  }
 }
 void Webserver::start(int port){
   webserverThread = std::thread(bind(&Webserver::startServer,this, port));
@@ -45,20 +45,25 @@ void Webserver::startServer(int port){
   socketServer.stop();
 }
 
-void Webserver::addBroadcast(std::string message){
-  for(auto sessionInfo : sessionIdToInfo){
+void Webserver::addBroadcast(std::string message, std::string subProtocol) {
+  for (auto sessionInfo : sessionIdToInfo) {
     auto session = sessionInfo.second->session;
     server::connection_ptr connection = socketServer.get_con_from_hdl(session);
+    if (subProtocol.empty() || connection->get_subprotocol() == subProtocol) {
+      connection->send(message);
+    }
+  }
+}
+
+void Webserver::addMessage(int sessionId, std::string message){
+  if (sessionIdToInfo.count(sessionId) > 0) {
+    auto sessionInfo = sessionIdToInfo.at(sessionId);
+    server::connection_ptr connection = socketServer.get_con_from_hdl(sessionInfo->session);
     connection->send(message);
   }
 }
-void Webserver::addMessage(int sessionId, std::string message){
-  auto sessionInfo = sessionIdToInfo.at(sessionId);
-  server::connection_ptr connection = socketServer.get_con_from_hdl(sessionInfo->session);
-  connection->send(message);
-}
 
-void Webserver::onOpen(connection_hdl handle){
+void Webserver::onOpen(connection_hdl handle) {
   auto con = socketServer.get_con_from_hdl(handle);
 
   SessionInfo *sessionInfo = new SessionInfo();
@@ -74,11 +79,21 @@ void Webserver::onOpen(connection_hdl handle){
 void Webserver::onMessage(connection_hdl handle, server::message_ptr message){
   auto con = socketServer.get_con_from_hdl(handle);
 
+  std::string subp = con->get_subprotocol();
+  if (clientMessages.count(subp) == 0) {
+    // Create queue for subprotocol
+    boost::unique_lock<boost::shared_mutex> lock(serverMutex);
+    clientMessages.insert({subp, new boost::lockfree::queue<ClientMessage *>(300)});
+  }
+  boost::shared_lock<boost::shared_mutex> lock(serverMutex);
+  auto messages = clientMessages.at(subp);
+
   int sessionId = con->sessionInfo->sessionId;
   auto queueElement = new ClientMessage();
+  queueElement->type = ClientMessage::Type::MESSAGE;
   queueElement->message = message->get_payload();
   queueElement->sessionId = sessionId;
-  clientMessages->push(queueElement);
+  messages->push(queueElement);
 }
 
 void Webserver::onHttp(connection_hdl handle){
@@ -103,22 +118,42 @@ void Webserver::onHttp(connection_hdl handle){
   con->set_body(fileContent);
 }
 
-bool Webserver::readClientMessage(int &sessionId, std::string &message){
-  ClientMessage *elem;
-  if(clientMessages->pop(elem)){
-    sessionId = elem->sessionId;
-    message = elem->message;
-    delete elem;
-    return true;
+bool Webserver::readClientMessage(std::string subProtocol, ClientMessage &clientMessage){
+  if (clientMessages.count(subProtocol) > 0) {
+    boost::shared_lock<boost::shared_mutex> lock(serverMutex);
+    auto messages = clientMessages.at(subProtocol);
+    ClientMessage *elem;
+    if (messages->pop(elem)){
+      clientMessage.sessionId = elem->sessionId;
+      clientMessage.message = elem->message;
+      clientMessage.type = elem->type;
+      delete elem;
+      return true;
+    }
   }
   return false;
 }
 
 
 void Webserver::onClose(connection_hdl handle){
-  boost::unique_lock<boost::shared_mutex> lock(serverMutex);
   auto con = socketServer.get_con_from_hdl(handle);
   SessionInfo *sessionInfo = con->sessionInfo;
+
+  // Add closed message to queue
+  std::string subp = con->get_subprotocol();
+  if (clientMessages.count(subp) == 0) {
+    // Create queue for subprotocol
+    boost::unique_lock<boost::shared_mutex> lock(serverMutex);
+    clientMessages.insert({subp, new boost::lockfree::queue<ClientMessage *>(300)});
+  }
+  boost::shared_lock<boost::shared_mutex> slock(serverMutex);
+  auto messages = clientMessages.at(subp);
+  int sessionId = sessionInfo->sessionId;
+  auto cm = new ClientMessage();
+  cm->type = ClientMessage::Type::CLOSED;
+  cm->sessionId = sessionId;
+  messages->push(cm);
+
   sessionIdToInfo.erase(sessionInfo->sessionId);
   delete sessionInfo;
 }

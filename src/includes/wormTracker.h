@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <map>
+#include <random>
 
 class CollisionSpace;
 class RenderSpace;
@@ -32,4 +33,12 @@ class WormTracker {
   RenderSpace *renderSpace;
   WormHeadDistributor *distributor;
   std::vector<WormEventListener*> eventListeners;
+  bool setNewRandomGapTimer(int id);
+  bool setNewGapTimer(int id, int ticksBetweenGaps, int ticksInGap);
+  std::mt19937 randomGenerator;
+  
+  const int MIN_TIME_BETWEEN_GAPS = 100;
+  const int MAX_TIME_BETWEEN_GAPS = 200;
+  const int MIN_TIME_IN_GAP = 5;
+  const int MAX_TIME_IN_GAP = 8;
 };

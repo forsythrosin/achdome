@@ -15,7 +15,8 @@
 #include <jsonBuilder.h>
 #include <gameEngine.h>
 #include <gameController.h>
-#include <socketGameController.h>
+#include <playerGameController.h>
+#include <adminGameController.h>
 #include <keyboardGameController.h>
 #include <rainbowColorTheme.h>
 #include <uniformDistributor.h>
@@ -31,6 +32,7 @@
 #include <gameClusterState.h>
 #include <lobbyClusterState.h>
 #include <syncMaster.h>
+#include <tweener.h>
 
 sgct::Engine * gEngine;
 
@@ -101,8 +103,10 @@ int main( int argc, char* argv[] ) {
     JsonActionResolver *actionResolver = new JsonActionResolver();
     JsonBuilder *dataSerializationBuilder = new JsonBuilder();
 
-    SocketGameController *sgc = new SocketGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder);
-    gameControllers.push_back(sgc);
+    PlayerGameController* pgc = new PlayerGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "player");
+    AdminGameController* agc = new AdminGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "admin");
+    gameControllers.push_back(pgc);
+    gameControllers.push_back(agc);
 
     // ics = new IntroClusterState();
 
@@ -146,6 +150,7 @@ void myPreSyncFun() {
     gameEngine->tick();
     syncMaster->preSync();
   }
+  Tweener::getInstance()->tick();
 }
 
 void myDrawFun() {

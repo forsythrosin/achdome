@@ -11,6 +11,7 @@ GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm, GameConfig *gameConfi
   playerManager = pm;
   currentGame = nullptr;
   nextPlayerId = 0;
+  nextGameId = 0;
   wormTracker = wt;
   this->gameConfig = gameConfig;
 }
@@ -82,7 +83,8 @@ void GameEngine::startLobby() {
  * Start Game.
  */
 void GameEngine::startGame() {
-  currentGame = new Game(playerManager, wormTracker);
+  wormTracker->clear();
+  currentGame = new Game(nextGameId++, playerManager, wormTracker);
   currentGame->start();
   state = State::GAME;
 }
@@ -94,6 +96,7 @@ void GameEngine::endGame() {
   currentGame->end();
   delete currentGame;
   currentGame = nullptr;
+  state = State::LOBBY;
 }
 
 
@@ -137,6 +140,9 @@ glm::vec2 GameEngine::getPosition(int playerId) {
 void GameEngine::tick() {
   if (state == State::GAME && currentGame != nullptr) {
     currentGame->tick();
+    if (currentGame->isOver()) {
+      endGame();
+    }
   }
 }
 

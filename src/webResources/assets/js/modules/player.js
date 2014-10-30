@@ -1,5 +1,5 @@
 var handlebars = require('handlebars'),
-    server = require('./server'),
+    server = require('./playerServer'),
     logotypeAnimator = require('./logotypeAnimator'),
     $ = require('jquery');
 
@@ -14,6 +14,7 @@ var register = require('../../templates/register.hbs'),
 // Partials
 var _color = require('../../templates/partials/color.hbs'),
     _player = require('../../templates/partials/player.hbs'),
+    _identifier = require('../../templates/partials/identifier.hbs'),
     _logotype = require('../../templates/partials/logotype.hbs');
 
 var waitForCountdown = 2; // seconds
@@ -25,16 +26,12 @@ $(function () {
   setServerListeners($body);
 
   $(window).resize(function () {
-    setTimeout(function() { resizeDome($body); }, 0);
+    setTimeout(function () { resizeDome($body); }, 0);
     setTimeout(logotypeAnimator.resize, 0);
   });
 
   server.init();
 });
-
-
-
-
 
 // Helpers
 
@@ -42,7 +39,8 @@ var options = {
   partials: {
     color: _color,
     player: _player,
-    logotype: _logotype
+    identifier: _identifier,
+    logotype: _logotype,
   }
 };
 
@@ -204,108 +202,98 @@ var me = {
 var players = [];
 
 var setServerListeners = function ($container) {
-  server.on('connected', function (err, res) {
-    if (err) console.warn(err);
-    renderRegister($container, res);
-  });
-
-  server.on('register', function (err, res) {
-    if (err) console.warn(err);
-    renderRegister($container, res);
-  });
-
-  server.on('disconnected', function(err, res) {
-    if (err) console.warn(err);
-    renderDisconnected($container, res);
-  });
-
-  server.on('registered', function (err, res) {
-    if (err) {
-      console.warn(err);
-    } else {
-      if (res !== undefined) {
-        if (res.id !== undefined) me.id = res.id;
-        if (res.name !== undefined) me.name = res.name;
-        if (res.color !== undefined) me.color = transformColor(res.color);
-      }
-      renderRegistered($container, {player: me});
-      $container.find('#logotypeText').show();
-      logotypeAnimator.animateLoader(1000, 0);
-    }
-  });
-
-  server.on('countdown', function (err, res) {
-    if (err) {
-      console.warn(err);
-    } else {
-      var data = {
-        time: 0
-      };
-      if (res !== undefined) {
-        if (res.time !== undefined) {
-          data.time = res.time;
+  server
+    .on('connected register', function (err, res) {
+      if (err) console.warn(err);
+      renderRegister($container, res);
+    })
+    .on('disconnected', function(err, res) {
+      if (err) console.warn(err);
+      renderDisconnected($container, res);
+    })
+    .on('registered', function (err, res) {
+      if (err) {
+        console.warn(err);
+      } else {
+        if (res !== undefined) {
+          if (res.id !== undefined) me.id = res.id;
+          if (res.name !== undefined) me.name = res.name;
+          if (res.color !== undefined) me.color = transformColor(res.color);
         }
-        if (res.players !== undefined) {
-          players = [];
-          Object.keys(res.players).forEach(function(key) {
-            var p = res.players[key];
-            var pos = p.position;
-            if (pos !== undefined && pos.phi !== undefined && pos.theta !== undefined) {
-              var r = pos.theta / (Math.PI / 2), phi = pos.phi;
-              p.position = {
-                x: (1 + r * Math.cos(phi)) / 2 * 100 + '%',
-                y: (1 + r * Math.sin(phi)) / 2 * 100 + '%'
+        renderRegistered($container, {player: me});
+        $container.find('#logotypeText').show();
+        logotypeAnimator.animateLoader(1000, 0);
+      }
+    })
+    .on('countdown', function (err, res) {
+      if (err) {
+        console.warn(err);
+      } else {
+        var data = {
+          time: 0
+        };
+        if (res !== undefined) {
+          if (res.time !== undefined) {
+            data.time = res.time;
+          }
+          if (res.players !== undefined) {
+            players = [];
+            Object.keys(res.players).forEach(function(key) {
+              var p = res.players[key];
+              var pos = p.position;
+              if (pos !== undefined && pos.phi !== undefined && pos.theta !== undefined) {
+                var r = pos.theta / (Math.PI / 2), phi = pos.phi;
+                p.position = {
+                  x: (1 + r * Math.cos(phi)) / 2 * 100 + '%',
+                  y: (1 + r * Math.sin(phi)) / 2 * 100 + '%'
+                }
               }
-            }
-            if (p.color !== undefined) {
-              p.color = transformColor(p.color);
-            }
-            if (key == me.id) {
-              p.me = true;
-              data.player = p;
-            }
-            p.id = key;
-            players.push(p);
-          });
-          data.players = players;
-          console.log('players', players);
+              if (p.color !== undefined) {
+                p.color = transformColor(p.color);
+              }
+              if (key == me.id) {
+                p.me = true;
+                data.player = p;
+              }
+              p.id = key;
+              players.push(p);
+            });
+            data.players = players;
+            console.log('players', players);
+          }
         }
+        startCountdown($container, data);
       }
-      startCountdown($container, data);
-    }
-  });
-
-  server.on('notMoving', function(err, res) {
-    if (err) {
-      console.warn(err);
-    } else {
-      enableMoving($container);
-    }
-  });
-
-  server.on('moving', function (err, res) {
-    if (err) {
-      console.warn(err);
-    } else {
-      renderMoving($container, {player: me});
-    }
-  });
-
-  server.on('died', function (err, res) {
-    if (err) {
-      console.warn(err);
-    } else {
-      var data = {};
-      if (res !== undefined) {
-        if (res.killer !== undefined) {
-          data.killer = res.killer;
-          data.killer.color = transformColor(res.killer.color);
-        }
-        if (res.points !== undefined) {
-          data.points = res.points;
-        }
+    })
+    .on('notMoving', function(err, res) {
+      if (err) {
+        console.warn(err);
+      } else {
+        enableMoving($container);
       }
-      renderDied($container, data);
-    }
-  });
+    })
+    .on('moving', function (err, res) {
+      if (err) {
+        console.warn(err);
+      } else {
+        renderMoving($container, {player: me});
+      }
+    })
+    .on('died', function (err, res) {
+      if (err) {
+        console.warn(err);
+      } else {
+        var data = {};
+        if (res !== undefined) {
+          if (res.killer !== undefined) {
+            data.killer = res.killer;
+            data.killer.color = transformColor(res.killer.color);
+          }
+          if (res.points !== undefined) {
+            data.points = res.points;
+          }
+        }
+        renderDied($container, data);
+      }
+    });
 };

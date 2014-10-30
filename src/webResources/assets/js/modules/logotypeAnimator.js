@@ -117,7 +117,7 @@ function animateLogotype(length, delay, ease, loader, callback) {
     var iv = setInterval(function() {
       calcParams();
       newPath = document.getElementById('logotypePath');
-      if (path != newPath) {
+      if (!newPath || path != newPath) {
         clearInterval(iv);
         return;
       }

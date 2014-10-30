@@ -14,16 +14,14 @@ WormHead::WormHead(glm::vec4 c) {
   setEulerPosition(glm::vec3(0.0));
   setEulerVelocity(glm::vec3(0.0));
 
-  std::random_device rd;
-  randomGenerator = std::mt19937(rd());
-  gapDistribution = std::uniform_int_distribution<>(MIN_TIME_BETWEEN_GAPS, MAX_TIME_BETWEEN_GAPS);
   
   moving = false;
   turningLeft = false;
   turningRight = false;
   turnSpeed = 0.1;
 
-  setGapTimer();
+  timeLeftInGap = 0;
+  timeLeftBetweenGaps = 0;
 }
 
 /**
@@ -60,10 +58,10 @@ void WormHead::tick() {
 
   if (isMoving()) {
     positionQuat = velocityQuat * positionQuat;
-    gapTimer--;
-
-    if (gapTimer < -GAP_TIME) {
-      setGapTimer();
+    if (isInGap()) {
+      timeLeftInGap--;
+    } else {
+      timeLeftBetweenGaps--;
     }
   }
 }
@@ -178,10 +176,16 @@ void WormHead::turnRight(bool turn) {
   turningRight = turn;
 }
 
-void WormHead::setGapTimer() {
-  gapTimer = gapDistribution(randomGenerator);
+bool WormHead::isInGap() {
+  return timeLeftBetweenGaps <= 0;
 }
 
-bool WormHead::isInGap() {
-  return gapTimer < 0;
+bool WormHead::needsNewGapTimer() {
+  return timeLeftBetweenGaps <= 0 && timeLeftInGap <= 0;
+}
+
+
+void WormHead::setGapTimer(int ticksBetweenGaps, int ticksInGap) {
+  timeLeftBetweenGaps = ticksBetweenGaps;
+  timeLeftInGap = ticksInGap;
 }

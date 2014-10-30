@@ -32,7 +32,7 @@ class GameEngine {
   void startLobby();
   void startGame();
   void endGame();
-
+  
   std::vector<int> getCurrentGameParticipants();
 
   std::string getName(int playerId);
@@ -51,8 +51,9 @@ class GameEngine {
   /* TODO: get spawn position */
   State getGameState();
 
-  private:
+ private:
   int nextPlayerId;
+  int nextGameId;
   State state;
   Game *currentGame;
   PlayerManager *playerManager;

@@ -6,6 +6,7 @@
 
 class WormArc;
 class WormCollision;
+class WormHead;
 
 // Render space interface
 
@@ -22,6 +23,11 @@ class RenderSpace {
    * Add worm arcs.
    */
   virtual void addArcs(std::vector<WormArc>) = 0;
+
+  /**
+   * Add worm arcs.
+   */
+  virtual void addHeads(std::vector<WormHead>) = 0;
 
   /**
    * Add collisions.

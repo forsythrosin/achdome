@@ -5,6 +5,8 @@
 struct ClientAction {
   enum Type {
     START_GAME,
+    END_GAME,
+    AUTHENTICATE_ADMIN,
     REGISTER,
     UNREGISTER,
     START_MOVING,

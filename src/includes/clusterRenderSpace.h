@@ -5,6 +5,7 @@
 
 class WormArc;
 class WormCollision;
+class WormHead;
 
 // Render space interface
 
@@ -28,6 +29,11 @@ class ClusterRenderSpace : public RenderSpace {
   void addArcs(std::vector<WormArc>);
 
   /**
+   * Add worm arcs.
+   */
+  void addHeads(std::vector<WormHead>);
+
+  /**
    * Add collisions.
    */
   void addCollisions(std::vector<WormCollision>);
@@ -42,6 +48,18 @@ class ClusterRenderSpace : public RenderSpace {
    */
   std::vector<WormArc> getArcs();
 
+  /**
+   * Get collisions
+   */
+  std::vector<WormCollision> getCollisions();
+
+  /**
+   * Get heads
+   */
+  std::vector<WormHead> getHeads();
+
  private:
-  std::vector<WormArc>arcs;
+  std::vector<WormArc> arcs;
+  std::vector<WormCollision> collisions;
+  std::vector<WormHead> heads;
 };
