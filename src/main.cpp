@@ -32,6 +32,7 @@
 #include <gameClusterState.h>
 #include <lobbyClusterState.h>
 #include <syncMaster.h>
+#include <tweener.h>
 
 sgct::Engine * gEngine;
 
@@ -149,6 +150,7 @@ void myPreSyncFun() {
     gameEngine->tick();
     syncMaster->preSync();
   }
+  Tweener::getInstance()->tick();
 }
 
 void myDrawFun() {
