@@ -51,6 +51,9 @@ void PlayerGameController::performActions() {
               ->add("time", time)
               ->add("players", players)
               );
+
+
+
       // Gets poitions only of players using this controller
       std::vector<int> activeIds = gameEngine->getCurrentGameParticipants();
       for (int id : activeIds) {

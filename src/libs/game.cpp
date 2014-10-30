@@ -19,30 +19,29 @@ Game::Game(int gameId, PlayerManager *playerManager, WormTracker *wormTracker) {
   wormTracker->addEventListener(this);
   this->playerManager = playerManager;
   this->wormTracker = wormTracker;
-}
 
-
-Game::~Game() {
-  playerManager->removeEventListener(this);
-  wormTracker->removeEventListener(this);
-} 
-
-bool Game::start() {
-  time = 0;
   wormTracker->clear();
   std::vector<GamePlayer*> gps;
   for (auto iter : gamePlayers) {
     gps.push_back(iter.second);
   }
   wormTracker->setPlayers(gps);
-  return true;
 }
 
+Game::~Game() {
+  playerManager->removeEventListener(this);
+  wormTracker->removeEventListener(this);
+} 
+
+
+bool Game::start() {
+  time = 0;
+  return true;
+}
 
 bool Game::end() {
   return true;
 }
-
 
 bool Game::turnLeft(int playerId, bool turn) {
   if (gamePlayers.find(playerId) == gamePlayers.end()) {
@@ -53,8 +52,6 @@ bool Game::turnLeft(int playerId, bool turn) {
   }
   return wormTracker->turnLeft(playerId, turn);
 }
-
-
 
 bool Game::turnRight(int playerId, bool turn) {
   if (gamePlayers.find(playerId) == gamePlayers.end()) {
@@ -196,11 +193,7 @@ bool Game::startMoving(int playerId) {
   }
   gamePlayers[playerId]->startMoving();
   return wormTracker->startWormHead(playerId);
-  
-  
-  return true;
 }
-
 
 bool Game::isOver() {
   return gameOver;
