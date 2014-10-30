@@ -76,6 +76,7 @@ int main( int argc, char* argv[] ) {
   sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
   gEngine->setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+  syncMaster = new SyncMaster();
   if (!gEngine->init( sgct::Engine::OpenGL_3_3_Core_Profile )) {
       delete gEngine;
       return EXIT_FAILURE;
@@ -105,31 +106,27 @@ int main( int argc, char* argv[] ) {
     gameControllers.push_back(sgc);
 
     // ics = new IntroClusterState();
-
     lcs = new LobbyClusterState(gEngine, gameConfig, pm);
     gcs = new GameClusterState(gEngine, gameConfig, renderSpace);
-
-    std::map<GameEngine::State, ClusterState*> stateMap;
-    stateMap[GameEngine::LOBBY] = lcs;
-    stateMap[GameEngine::GAME] = gcs;
-
-    syncMaster = new SyncMaster(gameEngine, stateMap);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
     gameControllers.push_back(keyboardGameController);
   } else {
     // isSlave:
     // ics = new IntroClusterState();
+    gameEngine = nullptr;
     lcs = new LobbyClusterState(gEngine, gameConfig);
     gcs = new GameClusterState(gEngine, gameConfig);
-
-    std::map<GameEngine::State, ClusterState*> stateMap;
-    stateMap[GameEngine::LOBBY] = lcs;
-    stateMap[GameEngine::GAME] = gcs;
-
-    syncMaster = new SyncMaster(nullptr, stateMap);
   }
 
+  std::map<GameEngine::State, ClusterState*> stateMap;
+  stateMap[GameEngine::LOBBY] = lcs;
+  stateMap[GameEngine::GAME] = gcs;
+
+  syncMaster->setGameEngine(gameEngine);
+  syncMaster->setStateMap(stateMap);
+
+  syncMaster->setInitDone();
   // Main loop
   gEngine->render();
 

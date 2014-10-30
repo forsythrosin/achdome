@@ -3,14 +3,30 @@
 #include <clusterState.h>
 
 
-SyncMaster::SyncMaster(GameEngine *ge, std::map<GameEngine::State, ClusterState*> map) {
+SyncMaster::SyncMaster(GameEngine *ge, std::map<GameEngine::State, ClusterState*> map) : SyncMaster() {
   gameEngine = ge;
   stateMap = map;
-  state.setVal(GameEngine::INTRO);
+}
+
+SyncMaster::SyncMaster() {
+  state.setVal(1);
+  initDone = false;
 }
 
 SyncMaster::~SyncMaster() {
   // Nothing to destroy.
+}
+
+void SyncMaster::setInitDone() {
+  initDone = true;
+}
+
+void SyncMaster::setGameEngine(GameEngine *ge) {
+  gameEngine = ge;
+}
+
+void SyncMaster::setStateMap(std::map<GameEngine::State, ClusterState*> map) {
+  stateMap = map;
 }
 
 ClusterState* SyncMaster::getClusterState() {
@@ -38,6 +54,7 @@ void SyncMaster::attachState(ClusterState *cs) {
 }
 
 void SyncMaster::preSync() {
+  if (!initDone) return;
 
   if (ClusterState *cs = getClusterState()) {
     cs->preSync();
@@ -45,6 +62,8 @@ void SyncMaster::preSync() {
 }
 
 void SyncMaster::encode() {
+  if (!initDone) return;
+
   GameEngine::State gameEngineState = gameEngine->getGameState();
   state.setVal(gameEngineState);
 
@@ -57,9 +76,9 @@ void SyncMaster::encode() {
 }
 
 void SyncMaster::decode() {
-  std::cout << "before" << std::endl;
+  if (!initDone) return;
+
   sgct::SharedData::instance()->readInt(&state);
-  std::cout << "after" << std::endl;
 
   if (ClusterState *cs = getClusterState()) {
     attachState(cs);
@@ -68,6 +87,8 @@ void SyncMaster::decode() {
 }
 
 void SyncMaster::draw() {
+  if (!initDone) return;
+
   if (ClusterState *cs = getClusterState()) {
     attachState(cs);
     cs->draw();

@@ -3,7 +3,8 @@
 #include <playerLobbyTile.h>
 #include <playerManager.h>
 #include <algorithm>
-
+#include <renderableDome.h>
+#include <syncablePlayer.h>
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : LobbyClusterState(gEngine, gameConfig, nullptr) {
   attached = false;
@@ -11,42 +12,55 @@ LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConf
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, PlayerManager *playerManager) : ClusterState(gEngine, gameConfig) {
   this->playerManager = playerManager;
-  sharedPlayers = new sgct::SharedVector<Player*>(100);
+  sharedPlayers = new sgct::SharedVector<SyncablePlayer>(100);
   setPlayerListAnchor(DEFAULT_PLAYER_LIST_ANCHOR);
+  playerName.setVal("");
 
   attached = false;
 }
 
 LobbyClusterState::~LobbyClusterState() {
+  delete dome;
   delete sharedPlayers;
 }
 
 void LobbyClusterState::attach() {
+  dome = new RenderableDome(50, 20);
+  domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   attached = true;
 }
 
 void LobbyClusterState::detach() {
+  renderer->removeRenderable(domeGrid);
   attached = false;
 }
 
 void LobbyClusterState::preSync() {
   if (playerManager != nullptr) {
-    sharedPlayers->setVal(playerManager->getConnectedPlayers());
+    players.clear();
+    std::vector<SyncablePlayer> syncablePlayers;
+    for (Player *p : playerManager->getConnectedPlayers()) {
+      players.push_back(*p);
+      SyncablePlayer sp(p->getId(), p->getColor());
+      syncablePlayers.push_back(sp);
+    }
+    sharedPlayers->setVal(syncablePlayers);
   }
 }
 
 void LobbyClusterState::draw() {
-  std::vector<Player*> players = sharedPlayers->getVal();
+  // render grid lines
+  renderer->render(domeGrid);
 
   for (int offset = 0; offset < players.size(); ++offset) {
-    Player *player = players.at(offset);
-    std::string playerName = player->getName();
+    Player &player = players.at(offset);
+    std::string playerName = player.getName();
     std::transform(playerName.begin(), playerName.end(), playerName.begin(), ::toupper);
 
     sgct_text::print3d(
       sgct_text::FontManager::instance()->getFont("Comfortaa", 50),
       getMVP(offset),
-      player->getColor(),
+      player.getColor(),
       playerName.c_str()
     );
   }
@@ -68,9 +82,22 @@ glm::mat4 LobbyClusterState::getMVP(int offset) {
 }
 
 void LobbyClusterState::encode() {
+  std::cout << "Shared players size: " << sharedPlayers->getVal().size() << std::endl;
   sgct::SharedData::instance()->writeVector(sharedPlayers);
+  for (auto p : players) {
+    playerName.setVal(p.getName());
+    sgct::SharedData::instance()->writeString(&playerName);
+  }
 }
 
 void LobbyClusterState::decode() {
   sgct::SharedData::instance()->readVector(sharedPlayers);
+  players.clear();
+  for (auto sp : sharedPlayers->getVal()) {
+    sgct::SharedData::instance()->readString(&playerName);
+    std::string name = playerName.getVal();
+    Player p(sp.getId(), sp.getColor(), name);
+    players.push_back(p);
+  }
+  std::cout << "Shared players size: " << sharedPlayers->getVal().size() << std::endl;
 }
