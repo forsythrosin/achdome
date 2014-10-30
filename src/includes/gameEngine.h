@@ -11,14 +11,14 @@ class Game;
 class Tween;
 
 class GameEngine {
- public: 
+ public:
 
   enum State {
-    INTRO,
-    LOBBY,
-    COUNTDOWN,
-    GAME,
-    GAME_OVER
+    INTRO = 0,
+    LOBBY = 1,
+    COUNTDOWN = 2,
+    GAME = 3,
+    GAME_OVER = 4
   };
 
   GameEngine(WormTracker *wt, PlayerManager *pm, GameConfig *gameConfig);

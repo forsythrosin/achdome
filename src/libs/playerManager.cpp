@@ -18,8 +18,8 @@ int PlayerManager::connectPlayer() {
   Player *p = new Player(players.size(), color, playerName);
   players[id] = p;
 
-  std::cout << '"' << playerName << '"' << " connected with id = " << id << std::endl; 
-  
+  std::cout << '"' << playerName << '"' << " connected with id = " << id << std::endl;
+
   return id;
 }
 
