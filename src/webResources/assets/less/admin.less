@@ -1,0 +1,27 @@
+@import "globals";
+@import "common";
+
+#currentState {
+  .top;
+}
+
+#connectedPlayers {
+
+}
+
+#controls {
+  .bottom;
+
+  #changeGameState.start {
+    background: @positive;
+    color: @positive-dark;
+  }
+
+  #changeGameState.end {
+    background: @negative;
+    color: @negative-dark;
+  }
+}
+
+@import "portrait";
+@import "landscape";

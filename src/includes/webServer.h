@@ -80,7 +80,7 @@ public:
   ~Webserver();
   void start(int port);
   bool readClientMessage(std::string subProtocol, ClientMessage &clientMessage);
-  void addBroadcast(std::string message);
+  void addBroadcast(std::string message, std::string subProtocol = "");
   void addMessage(int sessionId, std::string message);
 private:
   void startServer(int port);

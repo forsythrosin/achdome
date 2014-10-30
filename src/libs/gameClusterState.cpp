@@ -49,16 +49,6 @@ void GameClusterState::preSync() {
     std::vector<WormHead> heads = renderSpace->getHeads();
     //    std::vector<WormCollision> collisions = renderSpace->getCollisions();
 
-    /*
-      THIS FIXES A BUG THAT ONLY HAPPENS ON WINDOWS? (Same has to be done for collisions and arcs)
-      if (arcs.size() < 1) {
-      // create a default worm arc
-      glm::quat first(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>()));
-      glm::quat second(glm::vec3(0.0, -0.5, 2.0*glm::pi<float>() + 0.000001));
-      WormArc wa(0, first, second, 0);
-      arcs.push_back(wa);
-    }*/
-
     wormArcs->setVal(arcs);
     wormCollisions->setVal(collisions);
     wormHeads->setVal(heads);
@@ -76,6 +66,7 @@ void GameClusterState::preSync() {
 void GameClusterState::draw() {
   // Copy current worm positions and colors
   std::vector<WormArc> arcs = wormArcs->getVal();
+
   worms->setWormArcs(arcs);
 
   // render wormLines to FBO
@@ -96,6 +87,7 @@ void GameClusterState::encode() {
   data->writeVector(wormCollisions);
   data->writeVector(wormHeads);
 }
+
 void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
   sgct::SharedData *data = sgct::SharedData::instance();
