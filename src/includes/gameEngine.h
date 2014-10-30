@@ -14,9 +14,9 @@ class GameEngine {
  public:
 
   enum State {
-    INTRO,
-    LOBBY,
-    GAME
+    INTRO = 0,
+    LOBBY = 1,
+    GAME = 2
   };
 
   GameEngine(WormTracker *wt, PlayerManager *pm, GameConfig *gameConfig);

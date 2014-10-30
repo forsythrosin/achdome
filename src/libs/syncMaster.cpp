@@ -9,7 +9,7 @@ SyncMaster::SyncMaster(GameEngine *ge, std::map<GameEngine::State, ClusterState*
 }
 
 SyncMaster::SyncMaster() {
-  state.setVal(1);
+  state.setVal(-1);
   initDone = false;
 }
 
@@ -67,10 +67,11 @@ void SyncMaster::encode() {
   GameEngine::State gameEngineState = gameEngine->getGameState();
   state.setVal(gameEngineState);
 
+  int s = state.getVal();
   sgct::SharedData::instance()->writeInt(&state);
+  if (s != state.getVal()) return;
 
   if (ClusterState *cs = getClusterState()) {
-    attachState(cs);
     cs->encode();
   }
 }
@@ -78,10 +79,11 @@ void SyncMaster::encode() {
 void SyncMaster::decode() {
   if (!initDone) return;
 
+  int s = state.getVal();
   sgct::SharedData::instance()->readInt(&state);
+  if (s != state.getVal()) return;
 
   if (ClusterState *cs = getClusterState()) {
-    attachState(cs);
     cs->decode();
   }
 }

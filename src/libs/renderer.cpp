@@ -59,8 +59,6 @@ void Renderer::removeRenderable(int configId) {
   std::cout << "remove: " << rc.id << " = " << configId << " shader exists = "
             << sgct::ShaderManager::instance()->shaderProgramExists(std::to_string(rc.id)) << std::endl;
 
-  sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(rc.id));
-  sgct::ShaderManager::instance()->unBindShaderProgram();
   sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
 
   // delete buffers + VAO

@@ -10,8 +10,10 @@
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr) {}
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs) : ClusterState(gEngine, gameConfig) {
-  wormArcs = new sgct::SharedVector<WormArc>(2);
-  wormArcs = new sgct::SharedVector<WormArc>(100);
+  wormArcs = new sgct::SharedVector<WormArc>(gameConfig->maximumPlayers);
+  dome = new RenderableDome(50, 20);
+  worms = new RenderableWormGroup(gameConfig->maximumPlayers, 4, gameConfig->lineWidth);
+
   renderSpace = rs;
   attached = false;
 }
@@ -23,22 +25,19 @@ GameClusterState::~GameClusterState() {
 }
 
 void GameClusterState::attach() {
-  dome = new RenderableDome(50, 20);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   collision = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "collisionShader.frag", true);
 
-  worms = new RenderableWormGroup(2, 4, gameConfig->lineWidth);
   worms->setWormArcs(wormArcs->getVal());
   wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
-
 
   attached = true;
 }
 
 void GameClusterState::detach() {
-  renderer->removeRenderable(domeWorms);
   renderer->removeRenderable(domeGrid);
+  renderer->removeRenderable(domeWorms);
   renderer->removeRenderable(collision);
   renderer->removeRenderable(wormLines);
   attached = false;

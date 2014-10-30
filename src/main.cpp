@@ -127,6 +127,7 @@ int main( int argc, char* argv[] ) {
   syncMaster->setStateMap(stateMap);
 
   syncMaster->setInitDone();
+
   // Main loop
   gEngine->render();
 
@@ -147,8 +148,8 @@ void myPreSyncFun() {
       gc->performActions();
     }
     gameEngine->tick();
-    syncMaster->preSync();
   }
+  syncMaster->preSync();
 }
 
 void myDrawFun() {
