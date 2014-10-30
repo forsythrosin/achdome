@@ -11,12 +11,14 @@ void PlayerGameController::performActions() {
     glm::vec4 color;
     std::string sendMessage;
     switch (currentState) {
-    case GameEngine::INTRO:
+    case GameEngine::INTRO: {
       sendMessage = dataSerializationBuilder->add("message", "register")->build();
       webServer->addBroadcast(sendMessage);
       std::cout << "State changed to Intro" << std::endl;
       break;
-    case GameEngine::LOBBY:
+    }
+
+    case GameEngine::LOBBY: {
       if (prevState == GameEngine::GAME) {
         // If coming from game, loop through players already registered and send "registered" message
         for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
@@ -28,27 +30,27 @@ void PlayerGameController::performActions() {
             dataSerializationBuilder
             ->add("message", "registered")
             ->add("data", dataSerializationBuilder->group()
-            ->add("id", playerId)
-            ->add("name", name)
-            ->add("color", color)
-            )
+                  ->add("id", playerId)
+                  ->add("name", name)
+                  ->add("color", color)
+                  )
             ->build();
           webServer->addMessage(sessionId, sendMessage);
         }
       }
       std::cout << "State changed to Lobby" << std::endl;
       break;
-    case GameEngine::GAME:
-      // The countdown should be a state on GameEngine rather than being controlled from here.
-      int time = 5;
+    }
 
+    case GameEngine::COUNTDOWN: {
+      float time = gameEngine->getCountdownSecondsLeft();
       DataSerializationBuilder *players = dataSerializationBuilder->group();
       dataSerializationBuilder
         ->add("message", "countdown")
         ->add("data", dataSerializationBuilder->group()
-        ->add("time", time)
-        ->add("players", players)
-        );
+              ->add("time", time)
+              ->add("players", players)
+              );
       // Gets poitions only of players using this controller
       std::vector<int> activeIds = gameEngine->getCurrentGameParticipants();
       for (int id : activeIds) {
@@ -56,12 +58,12 @@ void PlayerGameController::performActions() {
         glm::vec2 position = gameEngine->getPosition(id);
         players
           ->add(std::to_string(id), dataSerializationBuilder->group()
-          ->add("color", color)
-          ->add("position", dataSerializationBuilder->group()
-          ->add("phi", position.x)
-          ->add("theta", position.y)
-          )
-          );
+                ->add("color", color)
+                ->add("position", dataSerializationBuilder->group()
+                      ->add("phi", position.x)
+                      ->add("theta", position.y)
+                      )
+                );
       }
       sendMessage = dataSerializationBuilder->build();
       for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
@@ -71,14 +73,10 @@ void PlayerGameController::performActions() {
           webServer->addMessage(sessionId, sendMessage);
         }
       }
-      std::cout << "Countdown started";
+      break;
+    }
 
-      while (time > 0) {
-        std::cout << " " << time--;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-      }
-      std::cout << std::endl;
-
+    case GameEngine::GAME: {
       sendMessage = dataSerializationBuilder->add("message", "notMoving")->build();
       for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
         sessionId = it->first;
@@ -90,6 +88,7 @@ void PlayerGameController::performActions() {
 
       std::cout << "State changed to Game" << std::endl;
       break;
+    }
     }
   }
 
@@ -111,6 +110,7 @@ void PlayerGameController::performActions() {
       }
     }
   }
+
 }
 
 void PlayerGameController::handleAction(int sessionId, ClientAction action) {
@@ -132,10 +132,10 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
       dataSerializationBuilder
       ->add("message", "registered")
       ->add("data", dataSerializationBuilder->group()
-      ->add("id", playerId)
-      ->add("name", name)
-      ->add("color", color)
-      )
+            ->add("id", playerId)
+            ->add("name", name)
+            ->add("color", color)
+            )
       ->build();
     webServer->addMessage(sessionId, sendMessage);
     break;

@@ -8,7 +8,7 @@ class Tween {
   void tick(double t);
   void done();
  private:
-  double duration;
+  const double duration;
   std::function<void (float t)> onTick;
   std::function<void ()> onDone;
 };

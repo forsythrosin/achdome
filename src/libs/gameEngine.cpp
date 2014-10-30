@@ -5,11 +5,14 @@
 #include <wormTracker.h>
 #include <game.h>
 #include <gameConfig.h>
+#include <tween.h>
+#include <tweener.h>
 
 GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm, GameConfig *gameConfig) {
   state = State::LOBBY;
   playerManager = pm;
   currentGame = nullptr;
+  countdownSecondsLeft = 0;
   nextPlayerId = 0;
   nextGameId = 0;
   wormTracker = wt;
@@ -79,12 +82,38 @@ void GameEngine::startLobby() {
   state = State::LOBBY;
 }
 
+
+/**
+ * Start Countdown.
+ */
+void GameEngine::startCountdown() {
+  float duration = 5;
+  createNewGame();
+  state = State::COUNTDOWN;
+
+  countdownSecondsLeft = duration;
+  Tween countdownTween(countdownSecondsLeft, [this, duration](double t) {
+      this->countdownSecondsLeft = duration - t*duration;
+    }, [this]() {
+      this->startGame();
+    });
+  
+  Tweener::getInstance()->startTween(countdownTween);
+}
+
+
+void GameEngine::createNewGame() {
+  wormTracker->clear();
+  currentGame = new Game(nextGameId++, playerManager, wormTracker);
+}
+
 /**
  * Start Game.
  */
 void GameEngine::startGame() {
-  wormTracker->clear();
-  currentGame = new Game(nextGameId++, playerManager, wormTracker);
+  if (currentGame == nullptr) {
+    createNewGame();
+  }
   currentGame->start();
   state = State::GAME;
 }
@@ -135,6 +164,10 @@ std::string GameEngine::getCountry(int playerId) {
 
 glm::vec2 GameEngine::getPosition(int playerId) {
   return currentGame->getPosition(playerId);
+}
+
+float GameEngine::getCountdownSecondsLeft() {
+  return countdownSecondsLeft;
 }
 
 void GameEngine::tick() {

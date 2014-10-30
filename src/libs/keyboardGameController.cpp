@@ -31,7 +31,7 @@ void KeyboardGameController::perform(KeyEvent e) {
   }
   case GLFW_KEY_ENTER:
     if (action == GLFW_PRESS) {
-      startGame();
+      startCountdown();
       break;
     }
   case GLFW_KEY_UP:
@@ -65,10 +65,10 @@ void KeyboardGameController::processKeyEvent(int key, int action) {
 }
 
 
-void KeyboardGameController::startGame() {
-  if (gameEngine->getGameState() != GameEngine::GAME) {
-      gameEngine->startGame();
-    //gameEngine->startMoving(playerId);
+void KeyboardGameController::startCountdown() {
+  GameEngine::State s = gameEngine->getGameState();
+  if (s != GameEngine::GAME && s != GameEngine::COUNTDOWN) {
+      gameEngine->startCountdown();
   }
 }
 

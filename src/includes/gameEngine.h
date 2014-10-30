@@ -8,7 +8,7 @@
 
 class WormTracker;
 class Game;
-
+class Tween;
 
 class GameEngine {
  public: 
@@ -16,7 +16,9 @@ class GameEngine {
   enum State {
     INTRO,
     LOBBY,
-    GAME
+    COUNTDOWN,
+    GAME,
+    GAME_OVER
   };
 
   GameEngine(WormTracker *wt, PlayerManager *pm, GameConfig *gameConfig);
@@ -30,6 +32,7 @@ class GameEngine {
   bool setName(int playerId, std::string name);
 
   void startLobby();
+  void startCountdown();
   void startGame();
   void endGame();
   
@@ -45,13 +48,15 @@ class GameEngine {
 
   std::string getCountry(int playerId);
   glm::vec2 getPosition(int playerId); // phi, theta
-  
+  float getCountdownSecondsLeft();
+
   void tick();
 
   /* TODO: get spawn position */
   State getGameState();
 
  private:
+  void createNewGame();
   int nextPlayerId;
   int nextGameId;
   State state;
@@ -59,4 +64,6 @@ class GameEngine {
   PlayerManager *playerManager;
   WormTracker *wormTracker;
   GameConfig *gameConfig;
+  Tween *countdownTween;
+  float countdownSecondsLeft;
 };

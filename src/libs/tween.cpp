@@ -1,6 +1,6 @@
 #include <tween.h>
 
-Tween::Tween(double duration, const std::function<void (float t)> onTick, const std::function<void ()> onDone) :
+Tween::Tween(const double duration, const std::function<void (float t)> onTick, const std::function<void ()> onDone) :
   duration(duration), onTick(onTick), onDone(onDone) {
 }
 

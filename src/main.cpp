@@ -125,7 +125,9 @@ int main( int argc, char* argv[] ) {
   std::map<GameEngine::State, ClusterState*> stateMap;
   //    stateMap[GameEngine::Intro] = ics;
   stateMap[GameEngine::LOBBY] = lcs;
+  stateMap[GameEngine::COUNTDOWN] = gcs;
   stateMap[GameEngine::GAME] = gcs;
+  stateMap[GameEngine::GAME_OVER] = gcs;
   syncMaster = new SyncMaster(gameEngine, stateMap);
 
   // Main loop
