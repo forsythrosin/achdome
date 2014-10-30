@@ -87,7 +87,7 @@ int main( int argc, char* argv[] ) {
   GameConfig *gameConfig = new GameConfig("gameTest.json");
   if (gEngine->isMaster()){
 
-    FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(100);
+    FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(500);
     renderSpace = new ClusterRenderSpace();
     UniformDistributor *distributor = new UniformDistributor();
 
