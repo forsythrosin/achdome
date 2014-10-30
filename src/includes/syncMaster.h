@@ -7,17 +7,28 @@
 class ClusterState;
 
 class SyncMaster {
- public: 
-  SyncMaster(GameEngine *ge, std::map<GameEngine::State, ClusterState*>);
+public:
+  SyncMaster(GameEngine *ge, std::map<GameEngine::State, ClusterState*> map);
+  SyncMaster();
   ~SyncMaster();
+
   void preSync();
   void encode();
   void decode();
   void draw();
- private:
-  GameEngine *gameEngine;
-  sgct::SharedObject<GameEngine::State> state;
-  std::map<GameEngine::State, ClusterState*> stateMap;
-  ClusterState *getClusterState();
+
+  void setInitDone();
+
+  void setGameEngine(GameEngine *ge);
+  void setStateMap(std::map<GameEngine::State, ClusterState*> map);
+
+private:
   void detachAll();
+  void attachState(ClusterState *cs);
+  ClusterState* getClusterState();
+
+  GameEngine *gameEngine;
+  sgct::SharedInt state;
+  bool initDone;
+  std::map<GameEngine::State, ClusterState*> stateMap;
 };

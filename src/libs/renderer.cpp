@@ -8,8 +8,8 @@ Renderer::Renderer(sgct::Engine *gEngine) {
 };
 
 Renderer::~Renderer() {
-  for (auto pair : renderConfigs) {
-    RenderConfig rc = pair.second;
+  for (auto &pair : renderConfigs) {
+    RenderConfig &rc = pair.second;
     // delete shaders
     sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
 
@@ -23,6 +23,7 @@ Renderer::~Renderer() {
     for (auto fbo : rc.framebuffers) {
       delete fbo;
     }
+    renderConfigs.erase(rc.id);
   }
 };
 
@@ -43,12 +44,20 @@ int Renderer::addRenderable(
 
   rc.id = nextId++;
   init(rc);
+  std::cout << "add: " << rc.id << std::endl;
   renderConfigs.emplace(rc.id, rc);
   return rc.id;
 };
 
 void Renderer::removeRenderable(int configId) {
-  RenderConfig &rc = renderConfigs.at(configId);
+  auto rcIt = renderConfigs.find(configId);
+  if (rcIt == renderConfigs.end()) {
+    std::cout << "Could not find renderable" << std::endl;
+    return;
+  }
+  RenderConfig &rc = rcIt->second;
+  std::cout << "remove: " << rc.id << " = " << configId << " shader exists = "
+            << sgct::ShaderManager::instance()->shaderProgramExists(std::to_string(rc.id)) << std::endl;
 
   sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
 
@@ -72,7 +81,7 @@ void Renderer::removeRenderable(int configId) {
 void Renderer::init(RenderConfig &renderConfig) {
   // generate vertexArray
   glGenVertexArrays(1, &(renderConfig.vertexArray));
-  glBindVertexArray(renderConfig.vertexArray);
+  glBindVertexArray(renderConfig.vertexArray); // TODO: this row caus segfault sometimes (!)
 
   // generate buffers
   glGenBuffers(1, &(renderConfig.positionBuffer));
@@ -84,6 +93,7 @@ void Renderer::init(RenderConfig &renderConfig) {
   // init shaders
   std::string vertShader = shaderUtils::pathToShader(renderConfig.vertShader);
   std::string fragShader = shaderUtils::pathToShader(renderConfig.fragShader);
+  std::cout << "add shader with id: " << renderConfig.id << std::endl;
   sgct::ShaderManager::instance()->addShaderProgram(std::to_string(renderConfig.id), vertShader, fragShader);
   sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
 
@@ -91,6 +101,7 @@ void Renderer::init(RenderConfig &renderConfig) {
   renderConfig.matrixLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("MVP");
   renderConfig.textureLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTex");
   renderConfig.fboTexSizeLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTexSize");
+  renderConfig.timeLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("time");
 
   sgct::ShaderManager::instance()->unBindShaderProgram();
 };
@@ -204,6 +215,10 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   // Upload uniforms
   sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
   glUniformMatrix4fv(renderConfig.matrixLocation, 1, GL_FALSE, &MVP[0][0]);
+
+  if (renderConfig.timeLocation != -1) {
+    glUniform1f(renderConfig.timeLocation, sgct::Engine::getTime());
+  }
 
   if (configWithFBOId > -1 && configWithFBOId < renderConfigs.size()) {
     int fboWidth, fboHeight;

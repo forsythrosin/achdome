@@ -11,12 +11,12 @@ class Game;
 
 
 class GameEngine {
- public: 
+ public:
 
   enum State {
-    INTRO,
-    LOBBY,
-    GAME
+    INTRO = 0,
+    LOBBY = 1,
+    GAME = 2
   };
 
   GameEngine(WormTracker *wt, PlayerManager *pm, GameConfig *gameConfig);
@@ -45,7 +45,7 @@ class GameEngine {
 
   std::string getCountry(int playerId);
   glm::vec2 getPosition(int playerId); // phi, theta
-  
+
   void tick();
 
   /* TODO: get spawn position */

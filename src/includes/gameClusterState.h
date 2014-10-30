@@ -27,7 +27,7 @@ class GameClusterState : public ClusterState {
   // Renderer + renderables
   RenderableDome *dome;
   RenderableWormGroup *worms;
-  int domeGrid, domeWorms, wormLines;
+  int domeGrid, domeWorms, wormLines, collision;
   float timer = 0.0f;
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;
@@ -35,6 +35,4 @@ class GameClusterState : public ClusterState {
   sgct::SharedVector<WormArc> *wormArcs;
   sgct::SharedVector<WormCollision> *wormCollisions;
   sgct::SharedVector<WormHead> *wormHeads;
-
-  static const int MAX_NUMBER_OF_WORMS = 200;
 };

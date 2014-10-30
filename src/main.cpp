@@ -78,6 +78,7 @@ int main( int argc, char* argv[] ) {
   sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
   gEngine->setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+  syncMaster = new SyncMaster();
   if (!gEngine->init( sgct::Engine::OpenGL_3_3_Core_Profile )) {
       delete gEngine;
       return EXIT_FAILURE;
@@ -109,7 +110,6 @@ int main( int argc, char* argv[] ) {
     gameControllers.push_back(agc);
 
     // ics = new IntroClusterState();
-
     lcs = new LobbyClusterState(gEngine, gameConfig, pm);
     gcs = new GameClusterState(gEngine, gameConfig, renderSpace);
 
@@ -118,15 +118,19 @@ int main( int argc, char* argv[] ) {
   } else {
     // isSlave:
     // ics = new IntroClusterState();
+    gameEngine = nullptr;
     lcs = new LobbyClusterState(gEngine, gameConfig);
     gcs = new GameClusterState(gEngine, gameConfig);
   }
 
   std::map<GameEngine::State, ClusterState*> stateMap;
-  //    stateMap[GameEngine::Intro] = ics;
   stateMap[GameEngine::LOBBY] = lcs;
   stateMap[GameEngine::GAME] = gcs;
-  syncMaster = new SyncMaster(gameEngine, stateMap);
+
+  syncMaster->setGameEngine(gameEngine);
+  syncMaster->setStateMap(stateMap);
+
+  syncMaster->setInitDone();
 
   // Main loop
   gEngine->render();
@@ -148,9 +152,9 @@ void myPreSyncFun() {
       gc->performActions();
     }
     gameEngine->tick();
-    syncMaster->preSync();
   }
   Tweener::getInstance()->tick();
+  syncMaster->preSync();
 }
 
 void myDrawFun() {
