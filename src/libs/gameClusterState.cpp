@@ -77,10 +77,11 @@ void GameClusterState::draw() {
   renderer->renderToFBO(wormLines, stitchStep);
   // render grid lines
   renderer->render(domeGrid);
+
   // render FBO as texture on dome
   renderer->render(domeWorms, wormLines, stitchStep);
 
-  renderer->render(collision);
+  // renderer->render(collision);
 
   ++stitchStep;
 }

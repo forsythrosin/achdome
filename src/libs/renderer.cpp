@@ -56,8 +56,8 @@ void Renderer::removeRenderable(int configId) {
     return;
   }
   RenderConfig &rc = rcIt->second;
-  std::cout << "remove: " << rc.id << " = " << configId << " shader exists = "
-            << sgct::ShaderManager::instance()->shaderProgramExists(std::to_string(rc.id)) << std::endl;
+  // std::cout << "remove: " << rc.id << " = " << configId << " shader exists = "
+  //           << sgct::ShaderManager::instance()->shaderProgramExists(std::to_string(rc.id)) << std::endl;
 
   sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
 
@@ -220,7 +220,7 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
     glUniform1f(renderConfig.timeLocation, sgct::Engine::getTime());
   }
 
-  if (configWithFBOId > -1 && configWithFBOId < renderConfigs.size()) {
+  if (configWithFBOId > -1 && renderConfigs.find(configWithFBOId) != renderConfigs.end()) {
     int fboWidth, fboHeight;
     gEngine->getActiveViewportSize(fboWidth, fboHeight);
     glUniform2f(renderConfig.fboTexSizeLocation, fboWidth, fboHeight);
