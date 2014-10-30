@@ -14,9 +14,6 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   wormCollisions = new sgct::SharedVector<WormCollision>(gameConfig->maximumPlayers);
   wormHeads = new sgct::SharedVector<WormHead>(gameConfig->maximumPlayers);
 
-  dome = new RenderableDome(50, 20);
-  worms = new RenderableWormGroup(gameConfig->maximumPlayers, 4, gameConfig->lineWidth);
-
   renderSpace = rs;
   attached = false;
 }
@@ -28,6 +25,10 @@ GameClusterState::~GameClusterState() {
 }
 
 void GameClusterState::attach() {
+
+  dome = new RenderableDome(50, 20);
+  worms = new RenderableWormGroup(gameConfig->maximumPlayers, 4, gameConfig->lineWidth);
+
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   collision = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "collisionShader.frag", true);
@@ -39,10 +40,17 @@ void GameClusterState::attach() {
 }
 
 void GameClusterState::detach() {
+  renderSpace->clear();
+  wormArcs->setVal({});
+
   renderer->removeRenderable(domeGrid);
   renderer->removeRenderable(domeWorms);
   renderer->removeRenderable(collision);
   renderer->removeRenderable(wormLines);
+
+  delete dome;
+  delete worms;
+
   attached = false;
 }
 
@@ -77,7 +85,6 @@ void GameClusterState::draw() {
   renderer->renderToFBO(wormLines, stitchStep);
   // render grid lines
   renderer->render(domeGrid);
-
   // render FBO as texture on dome
   renderer->render(domeWorms, wormLines, stitchStep);
 

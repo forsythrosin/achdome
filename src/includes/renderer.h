@@ -28,8 +28,8 @@ struct RenderConfig {
 
   GLuint positionBuffer = GL_FALSE;
   GLuint indexBuffer = GL_FALSE;
-  GLuint vertexArray = GL_FALSE;
   GLuint colorBuffer = GL_FALSE;
+  GLuint vertexArray = GL_FALSE;
 
   // uniform
   GLint matrixLocation = -1;
