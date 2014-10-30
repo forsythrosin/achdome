@@ -29,48 +29,50 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
 
     for (glm::quat point : points) {
       glm::vec2 transformed = transform(point);
-      int x = round(transformed.x);
-      int y = round(transformed.y);
+      int i = floor(transformed.x);
+      int j = floor(transformed.y);
 
-      int wormId = arc.getWormId();
-      int time = arc.getTime();
-      
-      // todo? read from more than one pixel if worm is wider?
-      // todo! worms can cross each other if they are +-45 deg and perpendicular
-      PixelValue pv = bitmap->getPixel(x, y);
+      // draw four pixels instead of one to guarantee 4-connectivity.
+      for (int x = i; x <= i + 1; x++) for (int y = j; y <= j + 1; y++) {
 
-      if (pv.isOutsideBounds()) {
-        // hit boundary.
-        if (collisions.find(wormId) == collisions.end()) {
-          // no collision registered for this worm yet.
-          collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
-        } // else, do nothing if collision is already registered.
-      } else if (pv.wormId == wormId) {
-        // hit self.
-        if (pv.time < time - 1) {
-          // Old pixel is older than previous frame
-          if (collisions.find(wormId) == collisions.end()) {
-            // no collision registered for this worm yet
-            collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
-          } // else, do nothing if collision is already registered.
-        } else {
-        }// else, do nothing: (resistant to pixels drawn on current and previous frame)
-      } else if (!pv.isEmpty()) {
-        // hit other worm.
-        if (collisions.find(wormId) == collisions.end()) {
-          // no collision registered for this worm yet.
-          collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
-        }
+          int wormId = arc.getWormId();
+          int time = arc.getTime();
+
+          PixelValue pv = bitmap->getPixel(x, y);
           
-        if (pv.time == time) {
-          // other worm currently being drawn here too,
-          // and should also get a collision, if not yet inserted.
-          if (collisions.find(pv.wormId) == collisions.end()) {
-            collisions.insert({wormId, WormCollision(pv.wormId, wormId, point)});
+          if (pv.isOutsideBounds()) {
+            // hit boundary.
+            if (collisions.find(wormId) == collisions.end()) {
+              // no collision registered for this worm yet.
+              collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+            } // else, do nothing if collision is already registered.
+          } else if (pv.wormId == wormId) {
+            // hit self.
+            if (pv.time < time - 1) {
+              // Old pixel is older than previous frame
+              if (collisions.find(wormId) == collisions.end()) {
+                // no collision registered for this worm yet
+                collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+              } // else, do nothing if collision is already registered.
+            } else {
+            }// else, do nothing: (resistant to pixels drawn on current and previous frame)
+          } else if (!pv.isEmpty()) {
+            // hit other worm.
+            if (collisions.find(wormId) == collisions.end()) {
+              // no collision registered for this worm yet.
+              collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+            }
+
+            if (pv.time == time) {
+              // other worm currently being drawn here too,
+              // and should also get a collision, if not yet inserted.
+              if (collisions.find(pv.wormId) == collisions.end()) {
+                collisions.insert({wormId, WormCollision(pv.wormId, wormId, point)});
+              }
+            }
           }
+          bitmap->setPixel(x, y, PixelValue(arc.getWormId(), arc.getTime()));
         }
-      }
-      bitmap->setPixel(x, y, PixelValue(arc.getWormId(), arc.getTime()));
     }
   }
 
@@ -79,6 +81,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
     v.push_back(it.second);
   }
 
+  //  bitmap->saveToPPM("debug.ppm");
   return v;
 }
 
@@ -109,8 +112,6 @@ glm::vec2 FisheyeCollisionSpace::transform(glm::quat in) {
 
   return glm::vec2(x, y);
 }
-
-
 
 std::vector<glm::quat> FisheyeCollisionSpace::getArcPoints(WormArc arc, double start, double end) {
   glm::quat startQuat = arc.getLerp(start);

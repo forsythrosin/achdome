@@ -33,6 +33,8 @@ void ClusterRenderSpace::addHeads(std::vector<WormHead> heads) {
 
 void ClusterRenderSpace::clear() {
   this->arcs.clear();
+  this->collisions.clear();
+  this->heads.clear();
 }
 
 std::vector<WormArc> ClusterRenderSpace::getArcs() {

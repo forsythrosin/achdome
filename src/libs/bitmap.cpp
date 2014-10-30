@@ -1,5 +1,6 @@
 #include <bitmap.h>
 #include <pixelValue.h>
+#include <fstream>
 
 Bitmap::Bitmap(int width, int height, PixelValue value) {
   this->width = width;
@@ -27,4 +28,23 @@ PixelValue Bitmap::getPixel(int x, int y) {
     return values[y * width + x];
   }
   return PixelValue::createOutsideBounds();
+}
+
+
+void Bitmap::saveToPPM(const char *filename) {
+  std::ofstream ofs;
+  ofs.open(filename);
+  ofs << "P6\n" << width << " " << height << "\n255\n";
+  for (int j = 0; j < height; ++j) {
+    for (int i = 0; i < width; ++i) {
+      PixelValue val = getPixel(i, j);
+      int id = val.wormId;
+      int time = val.time;
+      unsigned char r = (unsigned char) (id*183);
+      unsigned char g = (unsigned char) (100 + id*128);
+      unsigned char b = (unsigned char) (time*78);
+      ofs << r << g << b;
+    }
+  }
+  ofs.close();
 }
