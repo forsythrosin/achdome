@@ -19,7 +19,7 @@ struct GameConfig{
 
   float lineWidth;
   int maximumPlayers;
-
+  std::string password;
   private:
 
   struct AbstractConfigEntity{

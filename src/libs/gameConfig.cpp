@@ -10,6 +10,7 @@ GameConfig::GameConfig() {
   configEntities = {
     new ConfigEntity<double, float>("lineWidth", lineWidth),
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
+    new ConfigEntity<std::string>("password", password)
   };
 
 }
@@ -55,7 +56,7 @@ void GameConfig::load(std::string configName){
   picojson::parse(v, configString.begin(), configString.end(), &err);
 
   if(!err.empty() || !v.is<picojson::object>()){
-    std::cerr << "Couldn't parse to JSON Object" << std::endl;
+    std::cerr << "Couldn't parse to JSON Object: " << err << std::endl;
     return;
   }
   for(auto entity : configEntities){
