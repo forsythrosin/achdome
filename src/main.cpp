@@ -87,7 +87,7 @@ int main( int argc, char* argv[] ) {
 
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(500);
     renderSpace = new ClusterRenderSpace();
-    UniformDistributor *distributor = new UniformDistributor();
+    UniformDistributor *distributor = new UniformDistributor(gameConfig);
 
     ColorTheme *ct = new RainbowColorTheme();
 
@@ -103,7 +103,7 @@ int main( int argc, char* argv[] ) {
     JsonBuilder *dataSerializationBuilder = new JsonBuilder();
 
     PlayerGameController* pgc = new PlayerGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "player");
-    AdminGameController* agc = new AdminGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "admin");
+    AdminGameController* agc = new AdminGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "admin", gameConfig);
     gameControllers.push_back(pgc);
     gameControllers.push_back(agc);
 

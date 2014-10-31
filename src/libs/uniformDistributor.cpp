@@ -4,8 +4,9 @@
 #include <wormHead.h>
 #include <iostream>
 #include <glm/gtc/quaternion.hpp>
+#include <gameConfig.h>
 
-UniformDistributor::UniformDistributor() {
+UniformDistributor::UniformDistributor(GameConfig *gameConfig) : WormHeadDistributor(gameConfig) {
   std::random_device rd;
   randGen = std::mt19937(rd());
 }
@@ -18,6 +19,8 @@ bool UniformDistributor::distribute(std::map<int, WormHead*> wormHeads) {
   std::uniform_real_distribution<float> phiDis(0.0, 2.0 * glm::pi<float>());
   std::uniform_real_distribution<float> vDis(0.1, 1.0);
   std::uniform_real_distribution<float> aDis(0.0, 2.0 * glm::pi<float>());
+
+  float velocityAngle = gameConfig->wormSpeed;
 
   glm::vec3 quatOrigin(1.0, 0.0, 0.0);
 

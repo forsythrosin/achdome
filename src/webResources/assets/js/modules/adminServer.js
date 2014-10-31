@@ -18,9 +18,12 @@ server.authenticate = function (pwd) {
 };
 server.startGame = function() {
   send('start_game');
-}
+};
 server.endGame = function() {
   send('end_game');
+};
+server.updateSettings = function(settings) {
+  send('update_settings', settings);
 }
 
 module.exports = server;

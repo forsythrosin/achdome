@@ -4,9 +4,11 @@
 #include <random>
 #include <wormHeadDistributor.h>
 
+class GameConfig;
+
 class UniformDistributor : public WormHeadDistributor {
 public:
-  UniformDistributor();
+  UniformDistributor(GameConfig *gameConfig);
   ~UniformDistributor();
   bool distribute(std::map<int, WormHead*> wormHeads);
 private:

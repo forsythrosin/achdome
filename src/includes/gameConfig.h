@@ -17,7 +17,9 @@ struct GameConfig{
 
   std::string toString();
 
-  float lineWidth;
+  float wormWidth;
+  float wormSpeed;
+  int countdown;
   int maximumPlayers;
   std::string password;
   private:

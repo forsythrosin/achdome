@@ -121,8 +121,8 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
   switch (action.type) {
   case ClientAction::REGISTER:
     playerId = gameEngine->connectPlayer();
-    if (action.data.count("name") > 0) {
-      gameEngine->setName(playerId, action.data.at("name"));
+    if (action.strings.count("name") > 0) {
+      gameEngine->setName(playerId, action.strings.at("name"));
     }
     sessionIds.insert({playerId, sessionId});
     playerIds.insert({sessionId, playerId});

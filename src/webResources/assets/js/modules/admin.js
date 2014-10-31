@@ -3,6 +3,9 @@ var handlebars = require('handlebars'),
     logotypeAnimator = require('./logotypeAnimator'),
     $ = require('jquery');
 
+// Enable extension of jquery
+window.jQuery = $;
+
 // Handlebars
 var authenticateAdmin = require('../../templates/authenticateAdmin.hbs'),
     disconnected = require('../../templates/disconnected.hbs'),
@@ -56,8 +59,75 @@ var renderAuthenticate = function ($container, params) {
   screen = "authenticate";
 };
 
+var configSliders = {
+  wormWidth: {
+    range: [1, 10],
+    value: null,
+    scaleFactor: 200
+  },
+  wormSpeed: {
+    range: [1, 10],
+    value: null,
+    scaleFactor: 500
+  },
+  countdown: {
+    range: [0, 20],
+    value: null,
+    scaleFactor: 1
+  }
+};
+
+var updateSettings = function ($container, data) {
+  var settings = data.settings || {};
+  Object.keys(settings).forEach(function (key) {
+    var slide = configSliders[key];
+    if (slide !== undefined) {
+      var value = settings[key];
+      slide.value = Math.round(slide.scaleFactor * value);
+      $container.find('.slider#' + key).val(slide.value);
+      console.log("Slider " + key + " set to " + value + " = " + slide.value);
+    }
+  });
+};
+
+var transformColor = function(color) {
+  return [Math.floor(color[0] * 255), Math.floor(color[1] * 255), Math.floor(color[2] * 255), color[3]];
+}
+
+var updatePlayers = function ($container, data) {
+  var players = data.players || {};
+  $connectedPlayers = $container.find('#connectedPlayers');
+  $players = $connectedPlayers.find('#players').empty();
+  var numberOfPlayers = 0;
+  Object.keys(players).forEach(function (key) {
+    var player = players[key];
+    player.color = transformColor(player.color);
+    $players.append(_player(player, options));
+    numberOfPlayers++;
+  });
+  $connectedPlayers.find('#playerCount').text(numberOfPlayers);
+};
+
 var renderAdminPanel = function ($container, params) {
   $container.html(adminPanel(params, options));
+  Object.keys(configSliders).forEach(function (key) {
+    var slide = configSliders[key];
+    $container.find('.slider#' + key).noUiSlider({
+      connect: "lower",
+      start: slide.range[1],
+      step: 1,
+      range: {
+        min: slide.range[0],
+        max: slide.range[1]
+      }
+    }).Link('lower').to('-inline-<div class="tooltip"></div>', function (v) {
+      var value = Math.floor(v);
+      slide.value = value;
+      $(this).html('<span>' + value + '</span>');
+    });
+  });
+  updateSettings($container, params);
+  updatePlayers($container, params);
   screen = "adminPanel";
 };
 
@@ -78,6 +148,18 @@ var setButtonListeners = function ($container) {
     })
     .on('click', '#changeGameState.end', function () {
       server.endGame();
+    })
+    .on('click', '#saveSettings', function() {
+      var settings = {};
+      Object.keys(configSliders).forEach(function (key) {
+        var $slider = $container.find('.slider#' + key);
+        if ($slider) {
+          var slide = configSliders[key];
+          var value = $slider.val();
+          settings[key] = value / slide.scaleFactor;
+        }
+      });
+      server.updateSettings(settings);
     });
 };
 
@@ -104,9 +186,19 @@ var setServerListeners = function ($container) {
       if (err) console.warn(err);
       renderAdminPanel($container, res);
     })
+    .on('settingsChanged', function (err, res) {
+      if (err) console.warn(err);
+      updateSettings($container, res);
+    })
+    .on('playerListUpdated', function (err, res) {
+      if (screen == "adminPanel") {
+        updatePlayers($container, res);
+      }
+    })
     .on('gameStarted', function (err, res) {
       if (screen == "adminPanel") {
-        $('#changeGameState').removeClass().addClass('end').text("End game");
+        $container.find('#changeGameState').removeClass().addClass('end').text("End game");
+        $container.find('#state h1').text('Game started');
       } else {
         res = res || {};
         res.started = true;
@@ -115,7 +207,8 @@ var setServerListeners = function ($container) {
     })
     .on('lobby', function (err, res) {
       if (screen == "adminPanel") {
-        $('#changeGameState').removeClass().addClass('start').text("Start game");
+        $container.find('#changeGameState').removeClass().addClass('start').text("Start game");
+        $container.find('#state h1').text('In lobby');
       } else {
         res = res || {};
         res.ready = true;

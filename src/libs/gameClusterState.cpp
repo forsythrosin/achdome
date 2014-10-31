@@ -28,7 +28,7 @@ void GameClusterState::attach() {
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
 
-  worms = new RenderableWormGroup(2, 4, gameConfig->lineWidth);
+  worms = new RenderableWormGroup(2, 4, gameConfig->wormWidth);
   worms->setWormArcs(wormArcs->getVal());
 
   wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
