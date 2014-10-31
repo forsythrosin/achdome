@@ -4,10 +4,10 @@
 #include <wormArc.h>
 #include <vector>
 
-class RenderableWormGroup : public Renderable {
+class RenderableWormArcs : public Renderable {
 public:
-  RenderableWormGroup(int wormCount, int segsPerWorm, GLfloat wormThickness);
-  ~RenderableWormGroup();
+  RenderableWormArcs(int wormCount, int segsPerWorm, GLfloat wormThickness);
+  ~RenderableWormArcs();
 
   const std::vector<WormArc> getWormArcs() const;
 

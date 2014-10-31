@@ -20,8 +20,6 @@
 #include <keyboardGameController.h>
 #include <rainbowColorTheme.h>
 #include <uniformDistributor.h>
-#include <renderableDome.h>
-#include <renderableWormGroup.h>
 #include <Webserver.h>
 #include <wormArc.h>
 #include <renderer.h>

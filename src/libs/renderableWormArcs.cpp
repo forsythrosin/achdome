@@ -1,9 +1,9 @@
-#include <renderableWormGroup.h>
+#include <renderableWormArcs.h>
 #include <glm/gtc/quaternion.hpp>
 #include <cassert>
 #include <iostream>
 
-RenderableWormGroup::RenderableWormGroup(int wormCount, int segsPerWorm, GLfloat wormThickness) {
+RenderableWormArcs::RenderableWormArcs(int wormCount, int segsPerWorm, GLfloat wormThickness) {
   assert(segsPerWorm != 0);
 
   this->segsPerWorm = segsPerWorm;
@@ -18,9 +18,9 @@ RenderableWormGroup::RenderableWormGroup(int wormCount, int segsPerWorm, GLfloat
   elementData = new GLuint[elementCount*VERTS_PER_ELEMENT];
 };
 
-RenderableWormGroup::~RenderableWormGroup() {};
+RenderableWormArcs::~RenderableWormArcs() {};
 
-void RenderableWormGroup::setWormArcs(std::vector<WormArc> wormArcs) {
+void RenderableWormArcs::setWormArcs(std::vector<WormArc> wormArcs) {
   this->wormArcs = wormArcs;
   std::vector<glm::vec4> colors;
   for (WormArc wa : wormArcs) {
@@ -32,7 +32,7 @@ void RenderableWormGroup::setWormArcs(std::vector<WormArc> wormArcs) {
   update = true;
 };
 
-void RenderableWormGroup::setWormColors(std::vector<glm::vec4> wormColors) {
+void RenderableWormArcs::setWormColors(std::vector<glm::vec4> wormColors) {
   this->wormColors = wormColors;
 
   for (int j = 0; j < wormColors.size(); ++j) {
@@ -54,7 +54,7 @@ void RenderableWormGroup::setWormColors(std::vector<glm::vec4> wormColors) {
   update = true;
 };
 
-void RenderableWormGroup::createVertices() {
+void RenderableWormArcs::createVertices() {
   float refVertsPerWorm = segsPerWorm + 1;
   for (int j = 0; j < wormArcs.size(); ++j) {
     WormArc arc = wormArcs.at(j);
@@ -112,7 +112,7 @@ void RenderableWormGroup::createVertices() {
  * currentRight        nextRight        ...
  *
  */
-void RenderableWormGroup::createElements() {
+void RenderableWormArcs::createElements() {
   for (int j = 0; j < wormArcs.size(); ++j) {
     for (int i = 0; i < segsPerWorm; ++i) {
       int elementIdx0 = (j*segsPerWorm + i)*VERTS_PER_ELEMENT*2;
@@ -135,10 +135,10 @@ void RenderableWormGroup::createElements() {
   }
 };
 
-const GLuint RenderableWormGroup::getVertsPerElement() const {
+const GLuint RenderableWormArcs::getVertsPerElement() const {
   return VERTS_PER_ELEMENT;
 };
 
-const std::vector<WormArc> RenderableWormGroup::getWormArcs() const {
+const std::vector<WormArc> RenderableWormArcs::getWormArcs() const {
   return wormArcs;
 };
