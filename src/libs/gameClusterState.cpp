@@ -43,9 +43,6 @@ void GameClusterState::attach() {
 }
 
 void GameClusterState::detach() {
-  renderSpace->clear();
-  wormArcs->setVal({});
-
   renderer->removeRenderable(domeGrid);
   renderer->removeRenderable(domeWorms);
   renderer->removeRenderable(collision);
