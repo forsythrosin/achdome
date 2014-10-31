@@ -82,7 +82,7 @@ AdminGameController* agc;
 
   if (gEngine->isMaster()){
 
-    fisheyeSpace = new FisheyeCollisionSpace(500);
+    fisheyeSpace = new FisheyeCollisionSpace(2000);
     renderSpace = new ClusterRenderSpace();
     distributor = new UniformDistributor(gameConfig);
 

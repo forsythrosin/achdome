@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <string>
 
 class WormCollision;
 class WormArc;
@@ -23,4 +24,9 @@ class CollisionSpace {
    * Clear the collision space
    */
   virtual void clear() = 0;
+
+  /**
+   * Save bitmap to file
+   */
+  virtual void saveBitmapToFile(std::string filename) = 0;
 };

@@ -5,6 +5,7 @@
 #include <collisionSpace.h>
 #include <vector>
 #include <bitmap.h>
+#include <string>
 
 class WormArc;
 class WormCollision;
@@ -30,6 +31,11 @@ class FisheyeCollisionSpace : public CollisionSpace {
    * Clear the collision space
    */
   void clear();
+
+  /**
+   * Save bitmap to file
+   */
+  void saveBitmapToFile(std::string filename);
 
  private:
   int size;

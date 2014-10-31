@@ -102,8 +102,8 @@ void FisheyeCollisionSpace::clear() {
 glm::vec2 FisheyeCollisionSpace::transform(glm::quat in) {
   glm::vec3 pos = glm::mat3_cast(in) * glm::vec3(1.0, 0.0, 0.0);
 
-  double phi = atan2(pos.y, pos.x);
-  double theta = acos(pos.z);
+  double phi = atan2((double)pos.y, (double)pos.x);
+  double theta = acos((double)pos.z);
   double fov = 2.0 * glm::pi<float>();
 
   float x = size * (0.5 + theta/fov*2.0 * cos(phi));
@@ -141,4 +141,12 @@ std::vector<glm::quat> FisheyeCollisionSpace::getArcPoints(WormArc arc, double s
     points.push_back(endQuat);
   }
   return points;
+}
+
+
+/**
+ * Save bitmap to file
+ */
+void FisheyeCollisionSpace::saveBitmapToFile(std::string filename) {
+  bitmap->saveToPPM(filename);
 }

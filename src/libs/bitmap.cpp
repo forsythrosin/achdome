@@ -31,7 +31,7 @@ PixelValue Bitmap::getPixel(int x, int y) {
 }
 
 
-void Bitmap::saveToPPM(const char *filename) {
+void Bitmap::saveToPPM(std::string filename) {
   std::ofstream ofs;
   ofs.open(filename);
   ofs << "P6\n" << width << " " << height << "\n255\n";
@@ -40,9 +40,9 @@ void Bitmap::saveToPPM(const char *filename) {
       PixelValue val = getPixel(i, j);
       int id = val.wormId;
       int time = val.time;
-      unsigned char r = (unsigned char) (id*183);
-      unsigned char g = (unsigned char) (100 + id*128);
-      unsigned char b = (unsigned char) (time*78);
+      unsigned char r = (unsigned char) id * 200 + (time*5);
+      unsigned char g = (unsigned char) (time*5);
+      unsigned char b = (unsigned char) (time*5);
       ofs << r << g << b;
     }
   }

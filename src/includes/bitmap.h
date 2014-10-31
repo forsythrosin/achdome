@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pixelValue.h>
+#include <string>
 
 class Bitmap {
  public:
@@ -10,7 +11,7 @@ class Bitmap {
   PixelValue getPixel(int x, int y);
   int **getData();
   void clear(PixelValue value);
-  void saveToPPM(const char *filename);
+  void saveToPPM(std::string filename);
  private:
   PixelValue *values;
   int width;

@@ -27,6 +27,7 @@ class WormTracker {
   void setPlayers(std::vector<GamePlayer*> players);
   glm::vec2 getSphericalPosition(int playerId);
   void clearPlayers();
+  void saveCollisionBitmapToFile(std::string filename);
  private:
   std::map<int, WormHead*> wormHeads;
   CollisionSpace *collisionSpace;

@@ -164,3 +164,7 @@ bool WormTracker::setNewGapTimer(int id, int ticksBetweenGaps, int ticksInGap) {
   }  
   return false;
 }
+
+void WormTracker::saveCollisionBitmapToFile(std::string filename) {
+  collisionSpace->saveBitmapToFile(filename);
+}

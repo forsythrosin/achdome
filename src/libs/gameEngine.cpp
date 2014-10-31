@@ -151,6 +151,7 @@ bool GameEngine::endGame() {
   if (currentGame == nullptr) {
     return false;
   }
+  wormTracker->saveCollisionBitmapToFile("wormData.ppm");
   if (gameIndexInTournament < nGamesInTournament - 1) {
     startGameOver();
   } else {
