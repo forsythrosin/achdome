@@ -67,22 +67,23 @@ void RenderableWormGroup::createVertices() {
       int sphereIdx0 = (j*refVertsPerWorm + i)*4;
       int sphereIdx1 = (j*refVertsPerWorm + i)*4 + 2;
 
-      float t = (float)i/(float)segsPerWorm;
-      glm::vec3 pos = arc.getCartesianLerp(t);
+      double t = (double)i/(double)segsPerWorm;
+      glm::dvec3 pos = arc.getCartesianLerp(t);
 
       // Calculate "spread" vectors on the dome surface
       int iNext = (i + 1);
       bool isLast = iNext >= refVertsPerWorm;
       // If last ref vert, take prev vert. Else next vert
       iNext = isLast ? i - 1 : iNext;
-      float tNext = (float)iNext/(float)segsPerWorm;
+      double tNext = (double)iNext / (double)segsPerWorm;
       // If last ref vert, flip vector sign
-      glm::vec3 toNext = isLast ?
+      glm::dvec3 toNext = isLast ?
           -arc.getCartesianLerp(tNext) : arc.getCartesianLerp(tNext);
 
-      glm::vec3 spreadVec = glm::normalize(glm::cross(pos, toNext));
-      glm::vec3 posSpread0 = pos + spreadVec*wormThickness*0.5f;
-      glm::vec3 posSpread1 = pos - spreadVec*wormThickness*0.5f;
+      glm::dvec3 dSpreadVec = glm::normalize(glm::cross(pos, toNext));
+      glm::vec3 spreadVec(dSpreadVec);
+      glm::vec3 posSpread0 = glm::vec3(pos) + spreadVec*wormThickness*0.5f;
+      glm::vec3 posSpread1 = glm::vec3(pos) - spreadVec*wormThickness*0.5f;
 
       cartesianVertexData[cartIdx0] = posSpread0.x;
       cartesianVertexData[cartIdx0 + 1] = posSpread0.y;
@@ -93,10 +94,10 @@ void RenderableWormGroup::createVertices() {
       cartesianVertexData[cartIdx1 + 2] = posSpread1.z;
 
       sphericalVertexData[sphereIdx0] =
-          posSpread0.x != 0.0 ? atan(posSpread0.y/posSpread0.x) : glm::half_pi<float>();
+        posSpread0.x != 0.0 ? atan(posSpread0.y / posSpread0.x) : glm::half_pi<double>();
       sphericalVertexData[sphereIdx0 + 1] = acos(posSpread0.z/glm::length(posSpread0));
       sphericalVertexData[sphereIdx1] =
-          posSpread1.x != 0.0 ? atan(posSpread1.y/posSpread1.x) : glm::half_pi<float>();
+        posSpread1.x != 0.0 ? atan(posSpread1.y / posSpread1.x) : glm::half_pi<double>();
       sphericalVertexData[sphereIdx1 + 1] = acos(posSpread1.z/glm::length(posSpread1));
     }
   }

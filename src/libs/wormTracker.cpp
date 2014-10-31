@@ -10,11 +10,13 @@
 #include <wormHeadDistributor.h>
 #include <iostream>
 #include <gamePlayer.h>
+#include <gameConfig.h>
 
-WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace, WormHeadDistributor *distributor) {
+WormTracker::WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace, WormHeadDistributor *distributor, GameConfig *gameConfig) {
   this->collisionSpace = collisionSpace;
   this->renderSpace = renderSpace;
   this->distributor = distributor;
+  this->gameConfig = gameConfig;
 
   std::random_device rd;
   randomGenerator = std::mt19937(rd());
@@ -40,7 +42,7 @@ void WormTracker::setPlayers(std::vector<GamePlayer*> gamePlayers) {
   clearPlayers();
   for (GamePlayer *gp : gamePlayers) {
     int id = gp->getId();
-    wormHeads.insert({id, new WormHead(gp->getColor())});
+    wormHeads.insert({id, new WormHead(gp->getColor(), gameConfig)});
     setNewRandomGapTimer(id);
   }
   distributor->distribute(wormHeads);
@@ -56,9 +58,9 @@ void WormTracker::clearPlayers() {
 glm::vec2 WormTracker::getSphericalPosition(int playerId) {
   if (wormHeads.count(playerId)) {
     WormHead *wormHead = wormHeads.at(playerId);
-    glm::vec3 cartesianPos = wormHead->getPosition();
-    float phi = atan2f(cartesianPos.y, cartesianPos.x);
-    float theta = acosf(cartesianPos.z);
+    glm::dvec3 cartesianPos = wormHead->getPosition();
+    double phi = atan2(cartesianPos.y, cartesianPos.x);
+    double theta = acos(cartesianPos.z);
     return glm::vec2(phi, theta);
   }
   return glm::vec2(0.0);
@@ -73,9 +75,9 @@ void WormTracker::tick(int time) {
     int id = pair.first;
     WormHead *wh = pair.second;
     if (wh->isMoving()) {
-      glm::quat prevPosition = wh->getQuaternionPosition();
+      glm::dquat prevPosition = wh->getQuaternionPosition();
       wh->tick();
-      glm::quat position = wh->getQuaternionPosition();
+      glm::dquat position = wh->getQuaternionPosition();
       if (!wh->isInGap()) {
         arcs.push_back(WormArc(id, prevPosition, position, time, wh->getColor()));
       }

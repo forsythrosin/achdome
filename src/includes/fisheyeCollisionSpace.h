@@ -40,7 +40,7 @@ class FisheyeCollisionSpace : public CollisionSpace {
  private:
   int size;
   Bitmap *bitmap;
-  glm::vec2 transform(glm::quat in);
-  std::vector<glm::quat> getArcPoints(WormArc arc, double start = 0.0, double end = 1.0);
+  glm::dvec2 transform(glm::dquat in);
+  std::vector<glm::dquat> getArcPoints(WormArc arc, double start = 0.0, double end = 1.0);
   static const float HALF_PIXEL;
 };

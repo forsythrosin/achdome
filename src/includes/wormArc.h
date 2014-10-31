@@ -5,16 +5,16 @@
 
 class WormArc {
  public:
-  WormArc(int id, glm::quat firstQuat, glm::quat secondQuat, int time, glm::vec4 color);
-  glm::vec3 getCartesianLerp(float t);
-  glm::quat getLerp(float t);
+  WormArc(int id, glm::dquat firstQuat, glm::dquat secondQuat, int time, glm::vec4 color);
+  glm::dvec3 getCartesianLerp(double t);
+  glm::dquat getLerp(double t);
   glm::vec4 getColor();
   int getWormId();
   int getTime();
  private:
   int time;
   int wormId;
-  glm::quat firstQuat;
-  glm::quat secondQuat;
+  glm::dquat firstQuat;
+  glm::dquat secondQuat;
   glm::vec4 color;
 };

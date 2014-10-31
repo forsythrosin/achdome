@@ -5,8 +5,8 @@
 
 class WormCollision {
  public:
-  WormCollision(int collider, int collidee, glm::quat position);
-  glm::vec3 getCartesianPosition();
+  WormCollision(int collider, int collidee, glm::dquat position);
+  glm::dvec3 getCartesianPosition();
   int collider, collidee;
-  glm::quat position;
+  glm::dquat position;
 };

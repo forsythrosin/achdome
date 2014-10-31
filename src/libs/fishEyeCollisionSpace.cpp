@@ -24,10 +24,10 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
   std::map<int, WormCollision> collisions;
   
   for (WormArc arc : arcs) {
-    std::vector<glm::quat> points = getArcPoints(arc);
+    std::vector<glm::dquat> points = getArcPoints(arc);
 
-    for (glm::quat point : points) {
-      glm::vec2 transformed = transform(point);
+    for (glm::dquat point : points) {
+      glm::dvec2 transformed = transform(point);
       int i = floor(transformed.x);
       int j = floor(transformed.y);
 
@@ -99,36 +99,44 @@ void FisheyeCollisionSpace::clear() {
   }
 }
 
-glm::vec2 FisheyeCollisionSpace::transform(glm::quat in) {
-  glm::vec3 pos = glm::mat3_cast(in) * glm::vec3(1.0, 0.0, 0.0);
+glm::dvec2 FisheyeCollisionSpace::transform(glm::dquat in) {
+  glm::dvec3 pos = glm::mat3_cast(in) * glm::dvec3(1.0, 0.0, 0.0);
 
   double phi = atan2((double)pos.y, (double)pos.x);
   double theta = acos((double)pos.z);
   double fov = 2.0 * glm::pi<float>();
 
   float x = size * (0.5 + theta/fov*2.0 * cos(phi));
-  float y = size * (0.5 + theta/fov*2.0 * sin(phi));
+  float y = size * (0.5 + theta / fov*2.0 * sin(phi));
 
-  return glm::vec2(x, y);
+  if (abs(pos.y) < 0.01 && abs(pos.x) < 0.01) {
+    // Singularity?
+    //std::cout << "---------------------" << std::endl;
+    //std::cout << in.w << ", " << in.x << ", " << in.y << ", " << in.z << std::endl;
+    std::cout << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+    //std::cout << phi << ", " << theta << ", " << fov << ", " << x << ", " << y << std::endl;
+  }
+
+  return glm::dvec2(x, y);
 }
 
-std::vector<glm::quat> FisheyeCollisionSpace::getArcPoints(WormArc arc, double start, double end) {
-  glm::quat startQuat = arc.getLerp(start);
-  glm::quat endQuat = arc.getLerp(end);
+std::vector<glm::dquat> FisheyeCollisionSpace::getArcPoints(WormArc arc, double start, double end) {
+  glm::dquat startQuat = arc.getLerp(start);
+  glm::dquat endQuat = arc.getLerp(end);
 
-  glm::vec2 transformedStart = transform(startQuat);
-  glm::vec2 transformedEnd = transform(endQuat);
+  glm::dvec2 transformedStart = transform(startQuat);
+  glm::dvec2 transformedEnd = transform(endQuat);
 
   /*  std::cout << "transformedStart" << transformedStart.x << ", " 
              << transformedStart.y << " - "
             << transformedEnd.x << ", "
             << transformedEnd.y << ". t0=" << start << " t1=" << end << std::endl; */
 
-  std::vector<glm::quat> points;
+  std::vector<glm::dquat> points;
   if (glm::distance(transformedStart, transformedEnd) > HALF_PIXEL && end - start > 0.001) {
     double middle = start + (end - start)/2.0;
-    std::vector<glm::quat> head = getArcPoints(arc, start, middle);
-    std::vector<glm::quat> tail = getArcPoints(arc, middle, end);
+    std::vector<glm::dquat> head = getArcPoints(arc, start, middle);
+    std::vector<glm::dquat> tail = getArcPoints(arc, middle, end);
 
     for (int i = 0; i < head.size() - 1; i++) {
       points.push_back(head[i]);

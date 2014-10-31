@@ -3,7 +3,7 @@
 #include <wormArc.h>
 #include <iostream>
 
-WormArc::WormArc(int id, glm::quat firstQuat, glm::quat secondQuat, int time, glm::vec4 color) {
+WormArc::WormArc(int id, glm::dquat firstQuat, glm::dquat secondQuat, int time, glm::vec4 color) {
   this->wormId = id;
   this->firstQuat = firstQuat;
   this->secondQuat = secondQuat;
@@ -19,12 +19,12 @@ int WormArc::getTime() {
   return time;
 }
 
-glm::vec3 WormArc::getCartesianLerp(float t) {
-  glm::quat interpolatedQuat = glm::slerp(firstQuat, secondQuat, t);
-  return glm::mat3_cast(glm::normalize(interpolatedQuat)) * glm::vec3(1.0, 0.0, 0.0);
+glm::dvec3 WormArc::getCartesianLerp(double t) {
+  glm::dquat interpolatedQuat = glm::slerp(firstQuat, secondQuat, t);
+  return glm::mat3_cast(glm::normalize(interpolatedQuat)) * glm::dvec3(1.0, 0.0, 0.0);
 }
 
-glm::quat WormArc::getLerp(float t) {
+glm::dquat WormArc::getLerp(double t) {
   return glm::slerp(firstQuat, secondQuat, t);
 }
 

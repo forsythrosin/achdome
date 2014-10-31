@@ -5,15 +5,16 @@
 #include <glm/gtx/string_cast.hpp>
 #include <cmath>
 #include <random>
+#include <gameConfig.h>
 
 /**
  * Construct a worm head
  */
-WormHead::WormHead(glm::vec4 c) {
+WormHead::WormHead(glm::vec4 c, GameConfig *gameConfig) {
   color = c;
-  setEulerPosition(glm::vec3(0.0));
-  setEulerVelocity(glm::vec3(0.0));
-
+  setEulerPosition(glm::dvec3(0.0));
+  setEulerVelocity(glm::dvec3(0.0));
+  this->gameConfig = gameConfig;
   
   moving = false;
   turningLeft = false;
@@ -28,32 +29,32 @@ WormHead::WormHead(glm::vec4 c) {
  * Move worm head forward
  */
 void WormHead::tick() {
-  glm::vec3 pos = getPosition();
+  glm::dvec3 pos = getPosition();
   if (turningLeft) {
-    float turnAngle = -turnSpeed;
-    glm::vec3 normalizedAxis = pos*((float)sin(turnAngle/2.0));
-    glm::quat turnLeftQuat(cos(turnAngle/2.0), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
+    double turnAngle = -gameConfig->turnSpeed;
+    glm::dvec3 normalizedAxis = pos*(sin(turnAngle / 2.0));
+    glm::dquat turnLeftQuat(cos(turnAngle/2.0), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
 
-    float angle = acos(velocityQuat.w)*2;
-    glm::vec3 axis = glm::normalize(glm::axis(velocityQuat));
+    double angle = acos(velocityQuat.w) * 2;
+    glm::dvec3 axis = glm::normalize(glm::axis(velocityQuat));
 
-    glm::vec3 newAxis = glm::mat3_cast(turnLeftQuat) * axis;
-    glm::vec3 normalizedNewAxis = ((float)sin(angle/2.0))*newAxis;
+    glm::dvec3 newAxis = glm::mat3_cast(turnLeftQuat) * axis;
+    glm::dvec3 normalizedNewAxis = (sin(angle / 2.0))*newAxis;
 
-    velocityQuat = glm::quat(cos(angle/2.0), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
+    velocityQuat = glm::dquat(cos(angle/2.0), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
   if (turningRight) {
-    float turnAngle = turnSpeed;
-    glm::vec3 normalizedAxis = pos*((float)sin(turnAngle/2.0));
-    glm::quat turnRightQuat(cos(turnAngle/2.0), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
+    double turnAngle = gameConfig->turnSpeed;
+    glm::dvec3 normalizedAxis = pos*(sin(turnAngle/2.0));
+    glm::dquat turnRightQuat(cos(turnAngle/2.0), normalizedAxis.x, normalizedAxis.y, normalizedAxis.z);
 
-    float angle = acos(velocityQuat.w)*2;
-    glm::vec3 axis = glm::normalize(glm::axis(velocityQuat));
+    double angle = acos(velocityQuat.w) * 2;
+    glm::dvec3 axis = glm::normalize(glm::axis(velocityQuat));
 
-    glm::vec3 newAxis = glm::mat3_cast(turnRightQuat) * axis;
-    glm::vec3 normalizedNewAxis = ((float)sin(angle/2.0))*newAxis;
+    glm::dvec3 newAxis = glm::mat3_cast(turnRightQuat) * axis;
+    glm::dvec3 normalizedNewAxis = (sin(angle/2.0))*newAxis;
     
-    velocityQuat = glm::quat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
+    velocityQuat = glm::dquat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
 
   if (isMoving()) {
@@ -99,28 +100,28 @@ glm::vec4 WormHead::getColor() {
 /**
  * Get position in 3D space
  */
-glm::vec3 WormHead::getPosition() {
-  return glm::mat3_cast(positionQuat) * glm::vec3(1.0, 0.0, 0.0);
+glm::dvec3 WormHead::getPosition() {
+  return glm::mat3_cast(positionQuat) * glm::dvec3(1.0, 0.0, 0.0);
 }
 
 /**
  * Get velocity in 3D space
  */
-glm::vec3 WormHead::getVelocity() {
-  return glm::mat3_cast(velocityQuat) * glm::vec3(1.0, 0.0, 0.0);
+glm::dvec3 WormHead::getVelocity() {
+  return glm::mat3_cast(velocityQuat) * glm::dvec3(1.0, 0.0, 0.0);
 }
 
 /**
 * Set position
 */
-void WormHead::setPosition(glm::quat pos) {
+void WormHead::setPosition(glm::dquat pos) {
   positionQuat = pos;
 }
 
 /**
 * Set velocity
 */
-void WormHead::setVelocity(glm::quat vel) {
+void WormHead::setVelocity(glm::dquat vel) {
   velocityQuat = vel;
 }
 
@@ -128,15 +129,15 @@ void WormHead::setVelocity(glm::quat vel) {
 
 /** * Set position from Euler angles (XYZ)
  */
-void WormHead::setEulerPosition(glm::vec3 pos) {
-  positionQuat = glm::quat(pos);
+void WormHead::setEulerPosition(glm::dvec3 pos) {
+  positionQuat = glm::dquat(pos);
 }
 
 /**
  * Set velocity from Euler angles (XYZ)
  */
-void WormHead::setEulerVelocity(glm::vec3 vel) {
-  velocityQuat = glm::quat(vel);
+void WormHead::setEulerVelocity(glm::dvec3 vel) {
+  velocityQuat = glm::dquat(vel);
 }
 
 
@@ -144,14 +145,14 @@ void WormHead::setEulerVelocity(glm::vec3 vel) {
 /**
  * Get position in quaternions
  */
-glm::quat WormHead::getQuaternionPosition() {
+glm::dquat WormHead::getQuaternionPosition() {
   return positionQuat;
 }
 
 /**
  * Get velocity in quaternions
  */
-glm::quat WormHead::getQuaternionVelocity() {
+glm::dquat WormHead::getQuaternionVelocity() {
   return velocityQuat;
 }
 

@@ -4,21 +4,23 @@
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 
+class GameConfig;
+
 class WormHead {
  public:
-  WormHead(glm::vec4 color);
+  WormHead(glm::vec4 color, GameConfig *gameConfig);
   void tick();
   std::string toString();
 
   /**
    * Set position using an Euler Angle vector (x, y, z)
    */
-  void setEulerPosition(glm::vec3 pos);
+  void setEulerPosition(glm::dvec3 pos);
 
   /**
    * Set velocity using an Euler Angle vector (x, y, z)
    */
-  void setEulerVelocity(glm::vec3 pos);
+  void setEulerVelocity(glm::dvec3 pos);
 
   /**
   * Get color
@@ -28,32 +30,32 @@ class WormHead {
   /**
    * Get position in cartesian coordinates
    */
-  glm::vec3 getPosition();
+  glm::dvec3 getPosition();
 
   /**
    * Get velocity in cartesian coordinates
    */
-  glm::vec3 getVelocity();
+  glm::dvec3 getVelocity();
 
   /**
   * Set position
   */
-  void setPosition(glm::quat);
+  void setPosition(glm::dquat);
 
   /**
   * Set velocity
   */
-  void setVelocity(glm::quat);
+  void setVelocity(glm::dquat);
 
   /**
    * Get position in quaternions
    */
-  glm::quat getQuaternionPosition();
+  glm::dquat getQuaternionPosition();
 
   /**
    * Get velocity in quaternions
    */
-  glm::quat getQuaternionVelocity();
+  glm::dquat getQuaternionVelocity();
   
   /**
    * Turn left.
@@ -100,9 +102,10 @@ class WormHead {
   bool moving;
   bool turningLeft;
   bool turningRight;
-  glm::quat positionQuat;
-  glm::quat velocityQuat;
-  float turnSpeed;
+  glm::dquat positionQuat;
+  glm::dquat velocityQuat;
+  double turnSpeed;
   int timeLeftBetweenGaps;
   int timeLeftInGap;
+  GameConfig *gameConfig;
 };

@@ -11,10 +11,11 @@ class WormHead;
 class WormEventListener;
 class WormHeadDistributor;
 class GamePlayer;
+class GameConfig;
 
 class WormTracker {
  public:
-  WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace, WormHeadDistributor *distributor);
+  WormTracker(CollisionSpace *collisionSpace, RenderSpace *renderSpace, WormHeadDistributor *distributor, GameConfig *gameConfig);
   ~WormTracker();
   void tick(int time);
   void clear();
@@ -33,6 +34,7 @@ class WormTracker {
   CollisionSpace *collisionSpace;
   RenderSpace *renderSpace;
   WormHeadDistributor *distributor;
+  GameConfig *gameConfig;
   std::vector<WormEventListener*> eventListeners;
   bool setNewRandomGapTimer(int id);
   bool setNewGapTimer(int id, int ticksBetweenGaps, int ticksInGap);
