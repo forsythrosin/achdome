@@ -23,8 +23,8 @@ Renderer::~Renderer() {
     for (auto fbo : rc.framebuffers) {
       delete fbo;
     }
-    renderConfigs.erase(rc.id);
   }
+  renderConfigs.clear();
 };
 
 /**

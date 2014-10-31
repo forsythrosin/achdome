@@ -16,19 +16,13 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
 }
 
 GameClusterState::~GameClusterState() {
-  if(dome){
-    delete dome;
-  }
-  if(worms){
-    delete worms;
-  }
-  if(wormArcs){
+  if (wormArcs != nullptr){
     delete wormArcs;
   }
-  if(wormCollisions){
+  if (wormCollisions != nullptr){
     delete wormCollisions;
   }
-  if(wormHeads){
+  if (wormHeads != nullptr){
     delete wormHeads;
   }
 }
