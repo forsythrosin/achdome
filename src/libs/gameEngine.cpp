@@ -148,7 +148,7 @@ void GameEngine::startGame() {
  * End game.
  */
 bool GameEngine::endGame() {
-  if (currentGame == nullptr) {
+  if (state != State::GAME || currentGame == nullptr) {
     return false;
   }
   wormTracker->saveCollisionBitmapToFile("wormData.ppm");
