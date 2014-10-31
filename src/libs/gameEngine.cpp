@@ -1,10 +1,6 @@
 #include <gameEngine.h>
-#include <iostream>
-#include <player.h>
-#include <vector>
 #include <wormTracker.h>
 #include <game.h>
-#include <gameConfig.h>
 #include <tween.h>
 #include <tweener.h>
 

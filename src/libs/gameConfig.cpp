@@ -20,6 +20,12 @@ GameConfig::GameConfig(std::string configName) : GameConfig(){
   load(configName);
 }
 
+GameConfig::~GameConfig() {
+  for(auto ce : configEntities){
+    delete ce;
+  }
+}
+
 std::string GameConfig::toString() {
   JsonBuilder *builder = new JsonBuilder();
   for(auto entity : configEntities){

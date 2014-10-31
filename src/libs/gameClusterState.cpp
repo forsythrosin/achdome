@@ -1,11 +1,8 @@
 #include <gameClusterState.h>
 
-#include <renderable.h>
-#include <renderer.h>
 #include <renderableDome.h>
 #include <renderableWormGroup.h>
 #include <clusterRenderSpace.h>
-#include <iostream>
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr) {}
 
@@ -19,9 +16,21 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
 }
 
 GameClusterState::~GameClusterState() {
-  delete dome;
-  delete worms;
-  delete wormArcs;
+  if(dome){
+    delete dome;
+  }
+  if(worms){
+    delete worms;
+  }
+  if(wormArcs){
+    delete wormArcs;
+  }
+  if(wormCollisions){
+    delete wormCollisions;
+  }
+  if(wormHeads){
+    delete wormHeads;
+  }
 }
 
 void GameClusterState::attach() {

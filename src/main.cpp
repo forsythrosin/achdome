@@ -1,18 +1,11 @@
 #include "sgct.h"
-#include <glm/glm.hpp>
 #include <iostream>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/constants.hpp>
 #include <gameConfig.h>
-// #include <shaderUtils.h>
-#include <wormHead.h>
 #include <Webserver.h>
 #include <fisheyeCollisionSpace.h>
 #include <clusterRenderSpace.h>
 #include <wormTracker.h>
 #include <jsonActionResolver.h>
-#include <jsonBuilder.h>
 #include <gameEngine.h>
 #include <gameController.h>
 #include <playerGameController.h>
@@ -20,12 +13,6 @@
 #include <keyboardGameController.h>
 #include <rainbowColorTheme.h>
 #include <uniformDistributor.h>
-#include <renderableDome.h>
-#include <renderableWormGroup.h>
-#include <Webserver.h>
-#include <wormArc.h>
-#include <renderer.h>
-#include <cmath>
 
 // Render states
 #include <clusterState.h>
@@ -43,8 +30,6 @@ void myEncodeFun();
 void myDecodeFun();
 void myCleanUpFun();
 
-void webDecoder(const char *, size_t);
-
 void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
 
@@ -55,11 +40,20 @@ std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
 SyncMaster *syncMaster;
 GameConfig *gameConfig;
-//IntroClusterState *ics;
 LobbyClusterState *lcs;
 GameClusterState *gcs;
+FisheyeCollisionSpace *fisheyeSpace;
+UniformDistributor *distributor;
+ColorTheme *ct;
+WormTracker *wt;
+PlayerManager *pm;
+Webserver *webServer;
+JsonActionResolver *actionResolver;
+JsonBuilder *dataSerializationBuilder;
+PlayerGameController *pgc;
+AdminGameController* agc;
 
-int main( int argc, char* argv[] ) {
+  int main( int argc, char* argv[] ) {
   // BAE, load the AchDome fonts!
   sgct_text::FontManager::instance()->addFont("Comfortaa", "fonts/Comfortaa-Regular.ttf", sgct_text::FontManager::FontPath_Local);
   sgct_text::FontManager::instance()->addFont("Comfortaa-Bold", "fonts/Comfortaa-Bold.ttf", sgct_text::FontManager::FontPath_Local);
@@ -88,25 +82,25 @@ int main( int argc, char* argv[] ) {
 
   if (gEngine->isMaster()){
 
-    FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(500);
+    fisheyeSpace = new FisheyeCollisionSpace(500);
     renderSpace = new ClusterRenderSpace();
-    UniformDistributor *distributor = new UniformDistributor();
+    distributor = new UniformDistributor();
 
-    ColorTheme *ct = new RainbowColorTheme();
+    ct = new RainbowColorTheme();
 
-    WormTracker* wt = new WormTracker(fisheyeSpace, renderSpace, distributor);
-    PlayerManager *pm = new PlayerManager(ct);
+    wt = new WormTracker(fisheyeSpace, renderSpace, distributor);
+    pm = new PlayerManager(ct);
 
     gameEngine = new GameEngine(wt, pm, gameConfig);
 
-    Webserver *webServer = new Webserver();
+    webServer = new Webserver();
     webServer->start(8000);
 
-    JsonActionResolver *actionResolver = new JsonActionResolver();
-    JsonBuilder *dataSerializationBuilder = new JsonBuilder();
+    actionResolver = new JsonActionResolver();
+    dataSerializationBuilder = new JsonBuilder();
 
-    PlayerGameController* pgc = new PlayerGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "player");
-    AdminGameController* agc = new AdminGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "admin");
+    pgc = new PlayerGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "player");
+    agc = new AdminGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "admin");
     gameControllers.push_back(pgc);
     gameControllers.push_back(agc);
 
@@ -141,7 +135,6 @@ int main( int argc, char* argv[] ) {
 
   // Clean up
   delete gEngine;
-
   // Exit program
   exit( EXIT_SUCCESS );
 }
@@ -185,4 +178,21 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
+  delete gameEngine;
+  delete renderSpace;
+  delete keyboardGameController;
+  delete syncMaster;
+  delete gameConfig;
+  delete lcs;
+  delete gcs;
+  delete fisheyeSpace;
+  delete distributor;
+  delete ct;
+  delete wt;
+  delete pm;
+  delete webServer;
+  delete actionResolver;
+  delete dataSerializationBuilder;
+  delete pgc;
+  delete agc;
 }

@@ -20,9 +20,14 @@ Webserver::Webserver(){
   socketServer.set_validate_handler(bind(&Webserver::validateHandler, this, ::_1));
 }
 Webserver::~Webserver(){
+  socketServer.stop();
   webserverThread.join();
   for (auto cm : clientMessages) {
     delete cm.second;
+  }
+
+  for(auto sIt : sessionIdToInfo){
+    delete sIt.second;
   }
 }
 void Webserver::start(int port){
@@ -42,7 +47,6 @@ void Webserver::startServer(int port){
   } catch (...) {
       std::cout << "other exception" << std::endl;
   }
-  socketServer.stop();
 }
 
 void Webserver::addBroadcast(std::string message, std::string subProtocol) {

@@ -12,6 +12,7 @@ struct GameConfig{
 
   GameConfig();
   GameConfig(std::string);
+  ~GameConfig();
   void save(std::string);
   void load(std::string);
   void encode();
