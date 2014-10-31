@@ -40,6 +40,7 @@ class GameEngine {
   bool turnRight(int playerId, bool turn);
   bool startMoving(int playerId);
   bool setName(int playerId, std::string name);
+  std::vector<Player*> getPlayers();
   bool isAlive(int playerId);
   int getKiller(int playerId);
   std::vector<int> getKills(int playerId);

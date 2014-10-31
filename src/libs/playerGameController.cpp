@@ -48,11 +48,9 @@ void PlayerGameController::performActions() {
       dataSerializationBuilder
         ->add("message", "countdown")
         ->add("data", dataSerializationBuilder->group()
-              ->add("time", time)
-              ->add("players", players)
-              );
-
-
+          ->add("time", time)
+          ->add("players", players)
+        );
 
       // Gets poitions only of players using this controller
       std::vector<int> activeIds = gameEngine->getCurrentGameParticipants();
@@ -124,8 +122,8 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
   switch (action.type) {
   case ClientAction::REGISTER:
     playerId = gameEngine->connectPlayer();
-    if (action.data.count("name") > 0) {
-      gameEngine->setName(playerId, action.data.at("name"));
+    if (action.strings.count("name") > 0) {
+      gameEngine->setName(playerId, action.strings.at("name"));
     }
     sessionIds.insert({playerId, sessionId});
     playerIds.insert({sessionId, playerId});

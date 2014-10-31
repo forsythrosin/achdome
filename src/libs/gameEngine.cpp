@@ -1,10 +1,6 @@
 #include <gameEngine.h>
-#include <iostream>
-#include <player.h>
-#include <vector>
 #include <wormTracker.h>
 #include <game.h>
-#include <gameConfig.h>
 #include <tween.h>
 #include <tweener.h>
 #include <cassert>
@@ -39,6 +35,10 @@ bool GameEngine::disconnectPlayer(int playerId) {
  */
 std::vector<int> GameEngine::getCurrentGameParticipants() {
   return currentGame->getParticipants();
+}
+
+std::vector<Player*> GameEngine::getPlayers() {
+  return playerManager->getConnectedPlayers();
 }
 
 /**
@@ -182,7 +182,7 @@ void GameEngine::startGameOver() {
 void GameEngine::startTournamentOver() {
   assert(state == State::GAME);
   state = State::TOURNAMENT_OVER;
-  std::cout << "Start tournament over state."
+  std::cout << "Start tournament over state.";
 }
 
 

@@ -1,16 +1,84 @@
 @import "globals";
 @import "common";
 
-#currentState {
-  .top;
+@panelWidth: 250px;
+
+.panel {
+  background: @bright-base;
+  width: @panelWidth;
 }
 
-#connectedPlayers {
-
+section {
+  position: absolute;
+  top: 0;
+  bottom: 0;
 }
 
-#controls {
-  .bottom;
+#settings {
+  .panel;
+  left: 0;
+
+  #saveSettings {
+    background: @positive;
+    color: @positive-dark;
+  }
+
+  .configParam {
+    margin: 30px 20px 50px;
+
+    label {
+      font-family: @header-typeface;
+      text-transform: uppercase;
+      text-align: center;
+      display: block;
+      font-size: 140%;
+      margin-bottom: 10px;
+    }
+
+    .slider {
+      .box-shadow(none);
+      .radius(10px);
+      background: white;
+      border: none;
+      height: 15px;
+
+      .noUi-origin {
+        .box-shadow(none);
+        .radius(10px);
+
+        .noUi-handle {
+          .box-shadow(none);
+          height: 27px;
+          width: 27px;
+          .radius(50%);
+          background: @accent;
+          border: none;
+
+          .tooltip {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+          }
+        }
+
+        .noUi-handle:before, .noUi-handle:after {
+          background: transparent;
+        }
+      }
+    }
+  }
+}
+
+#state {
+  left: @panelWidth;
+  right: @panelWidth;
+
+  h1 {
+    font-size: 300%;
+    text-align: center;
+  }
 
   #changeGameState.start {
     background: @positive;
@@ -20,6 +88,47 @@
   #changeGameState.end {
     background: @negative;
     color: @negative-dark;
+  }
+}
+
+#connectedPlayers {
+  .panel;
+  right: 0;
+  font-family: @header-typeface;
+  text-transform: uppercase;
+
+  #playerCount {
+    text-align: center;
+    font-size: 300%;
+    height: 60px;
+  }
+
+  h3 {
+    text-align: center;
+  }
+
+  #players {
+    position: absolute;
+    top: 82px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: auto;
+
+    .player {
+      margin-top: 10px;
+      color: @diffuse;
+
+      p {
+        padding: 2px;
+      }
+
+      .identifier {
+        margin: 0 10px;
+        width: 25px;
+        height: 25px;
+      }
+    }
   }
 }
 

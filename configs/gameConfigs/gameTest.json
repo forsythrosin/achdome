@@ -1,5 +1,7 @@
 {
-  "lineWidth": 0.05,
+  "wormWidth": 0.02,
+  "wormSpeed": 0.005,
+  "countdown": 10,
   "maximumPlayers": 100,
-  "password": "thisismypassword"
+  "password": "pwd"
 }

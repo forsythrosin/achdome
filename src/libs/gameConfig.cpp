@@ -2,15 +2,22 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "sgct.h"
 
 GameConfig::GameConfig() {
-  lineWidth = 0.05;
+  // Default values if there is no config file
+  wormWidth = 0.02;
+  wormSpeed = 0.01;
+  countdown = 10;
   maximumPlayers = 100;
   countdownDuration = 5;
   gameOverDuration = 5;
+  password = "default";
 
   configEntities = {
-    new ConfigEntity<double, float>("lineWidth", lineWidth),
+    new ConfigEntity<double, float>("wormWidth", wormWidth),
+    new ConfigEntity<double, float>("wormSpeed", wormSpeed),
+    new ConfigEntity<double, int>("countdown", countdown),
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
     new ConfigEntity<std::string>("password", password),
     new ConfigEntity<double, float>("countdownDuration", countdownDuration),
@@ -21,6 +28,12 @@ GameConfig::GameConfig() {
 
 GameConfig::GameConfig(std::string configName) : GameConfig(){
   load(configName);
+}
+
+GameConfig::~GameConfig() {
+  for(auto ce : configEntities){
+    delete ce;
+  }
 }
 
 std::string GameConfig::toString() {
@@ -55,9 +68,20 @@ void GameConfig::load(std::string configName){
   contents << in.rdbuf();
   in.close();
   configString = contents.str();
+  parse(configString);
+}
+
+void GameConfig::encode() {
+  sgct::SharedString str;
+  str.setVal(toString());
+  sgct::SharedData::instance()->writeString(&str);
+}
+
+void GameConfig::parse(std::string string) {
   std::string err;
+
   picojson::value v;
-  picojson::parse(v, configString.begin(), configString.end(), &err);
+  picojson::parse(v, string.begin(), string.end(), &err);
 
   if(!err.empty() || !v.is<picojson::object>()){
     std::cerr << "Couldn't parse to JSON Object: " << err << std::endl;
@@ -68,3 +92,8 @@ void GameConfig::load(std::string configName){
   }
 }
 
+void GameConfig::decode() {
+  sgct::SharedString str;
+  sgct::SharedData::instance()->readString(&str);
+  parse(str.getVal());
+}

@@ -31,30 +31,31 @@ bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) 
   std::transform(message.begin(), message.end(), message.begin(), ::tolower);
   if (message == "start_game") {
     // Requires password
-    if (!requireDataString(v, "password", action)) return false;
+    if (!getDataString(v, "password", action)) return false;
     action.type = ClientAction::START_GAME;
     return true;
   } else if (message == "end_game") {
     // Requires password
-    if (!requireDataString(v, "password", action)) return false;
+    if (!getDataString(v, "password", action)) return false;
     action.type = ClientAction::END_GAME;
     return true;
   } else if (message == "authenticate_admin") {
     // Requires password
-    if (!requireDataString(v, "password", action)) return false;
+    if (!getDataString(v, "password", action)) return false;
     action.type = ClientAction::AUTHENTICATE_ADMIN;
     return true;
-  } else if (message == "register") {
+  } else if (message == "update_settings") {
+    // Requires password
+    if (!getDataString(v, "password", action)) return false;
+    getDataFloat(v, "wormWidth", action);
+    getDataFloat(v, "wormSpeed", action);
+    getDataInt(v, "countdown", action);
+    action.type = ClientAction::UPDATE_SETTINGS;
+    return true;
+  }
+  else if (message == "register") {
     // Requires name
-		picojson::value data;
-		if (!getObject(v, "data", data)) {
-			return false;
-		}
-		std::string name;
-		if (!getString(data, "name", name)) {
-			return false;
-		}
-		action.data.insert(std::pair<std::string, std::string>("name", name));
+    if (!getDataString(v, "name", action)) return false;
     action.type = ClientAction::REGISTER;
 		return true;
   } else if (message == "unregister") {
@@ -80,7 +81,7 @@ bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) 
 	return false;
 }
 
-bool JsonActionResolver::requireDataString(picojson::value v, std::string key, ClientAction &action) {
+bool JsonActionResolver::getDataString(picojson::value v, std::string key, ClientAction &action) {
   picojson::value data;
   if (!getObject(v, "data", data)) {
     return false;
@@ -89,7 +90,33 @@ bool JsonActionResolver::requireDataString(picojson::value v, std::string key, C
   if (!getString(data, key, value)) {
     return false;
   }
-  action.data.insert(std::pair<std::string, std::string>(key, value));
+  action.strings.insert(std::pair<std::string, std::string>(key, value));
+  return true;
+}
+
+bool JsonActionResolver::getDataFloat(picojson::value v, std::string key, ClientAction &action) {
+  picojson::value data;
+  if (!getObject(v, "data", data)) {
+    return false;
+  }
+  float value;
+  if (!getFloat(data, key, value)) {
+    return false;
+  }
+  action.floats.insert(std::pair<std::string, float>(key, value));
+  return true;
+}
+
+bool JsonActionResolver::getDataInt(picojson::value v, std::string key, ClientAction &action) {
+  picojson::value data;
+  if (!getObject(v, "data", data)) {
+    return false;
+  }
+  int value;
+  if (!getInt(data, key, value)) {
+    return false;
+  }
+  action.ints.insert(std::pair<std::string, int>(key, value));
   return true;
 }
 
@@ -106,6 +133,36 @@ bool JsonActionResolver::getString(picojson::value v, std::string key, std::stri
 	}
 	value = result.get<std::string>();
 	return true;
+}
+
+bool JsonActionResolver::getFloat(picojson::value v, std::string key, float &value) {
+  if (!v.contains(key)) {
+    std::cout << "Object does not contain any " << key << std::endl;
+    return false;
+  }
+
+  picojson::value result = v.get(key);
+  if (!result.is<double>()) {
+    std::cout << key << " is not a float" << std::endl;
+    return false;
+  }
+  value = result.get<double>();
+  return true;
+}
+
+bool JsonActionResolver::getInt(picojson::value v, std::string key, int &value) {
+  if (!v.contains(key)) {
+    std::cout << "Object does not contain any " << key << std::endl;
+    return false;
+  }
+
+  picojson::value result = v.get(key);
+  if (!result.is<double>()) {
+    std::cout << key << " is not an int" << std::endl;
+    return false;
+  }
+  value = result.get<double>();
+  return true;
 }
 
 bool JsonActionResolver::getObject(picojson::value v, std::string key, picojson::value &value) {

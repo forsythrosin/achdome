@@ -11,8 +11,8 @@ class PlayerEventListener;
 
 class PlayerManager {
  public:
-   PlayerManager(ColorTheme*);
-
+  PlayerManager(ColorTheme*);
+  ~PlayerManager();
   int connectPlayer();
   bool disconnectPlayer(int playerId);
   bool isConnected(int playerId);

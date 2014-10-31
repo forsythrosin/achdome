@@ -1,13 +1,16 @@
 #include <playerManager.h>
 #include <player.h>
-#include <string>
 #include <sstream>
-#include <glm/glm.hpp>
 #include <glm/ext.hpp>
-#include <iostream>
 
 PlayerManager::PlayerManager(ColorTheme* ct) {
   colorTheme = ct;
+}
+
+PlayerManager::~PlayerManager(){
+  for(auto pIt : players){
+    delete pIt.second;
+  }
 }
 
 int PlayerManager::connectPlayer() {
@@ -30,7 +33,9 @@ bool PlayerManager::disconnectPlayer(int playerId) {
   if (!players[playerId]->isConnected()) {
     return false;
   }
-  players[playerId]->disconnect();
+  Player *player = players[playerId];
+  player->disconnect();
+
   return true;
 }
 

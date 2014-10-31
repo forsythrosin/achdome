@@ -10,7 +10,6 @@ class ClusterState {
     renderer = new Renderer(gEngine);
   };
   virtual ~ClusterState() {
-    std::cout << "ClusterState destructor called" << std::endl;
     delete renderer;
   };
 

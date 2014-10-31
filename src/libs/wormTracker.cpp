@@ -6,8 +6,6 @@
 #include <wormArc.h>
 #include <collisionSpace.h>
 #include <renderSpace.h>
-#include <map>
-#include <vector>
 #include <wormEventListener.h>
 #include <wormHeadDistributor.h>
 #include <iostream>

@@ -4,7 +4,6 @@
 #include <fisheyeCollisionSpace.h>
 #include <wormCollision.h>
 #include <wormArc.h>
-#include <cmath>
 #include <map>
 #include <iostream>
 
@@ -17,7 +16,7 @@ FisheyeCollisionSpace::FisheyeCollisionSpace(int radius) {
 }
 
 FisheyeCollisionSpace::~FisheyeCollisionSpace() {
-
+  delete bitmap;
 }
 
 std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> arcs) {

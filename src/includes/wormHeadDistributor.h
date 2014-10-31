@@ -2,11 +2,13 @@
 
 #include <vector>
 class WormHead;
+class GameConfig;
 
 class WormHeadDistributor {
 public:
+  WormHeadDistributor(GameConfig *gameConfig) { this->gameConfig = gameConfig; };
   virtual ~WormHeadDistributor() {};
   virtual bool distribute(std::map<int, WormHead*> wormHeads) = 0;
 protected:
-  const float velocityAngle = 0.01;
+  GameConfig *gameConfig;
 };

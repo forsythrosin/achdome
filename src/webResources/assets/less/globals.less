@@ -36,6 +36,12 @@
   .text-shadow(~"@{halfsize} @{halfsize} 0 @{color}, -@{halfsize} @{halfsize} 0 @{color}, @{halfsize} -@{halfsize} 0 @{color}, 0px @{halfsize} 0 @{color}, -@{halfsize} -@{halfsize} 0 @{color}, 0px -@{halfsize} 0 @{color}, -@{halfsize} 0px 0 @{color}, @{halfsize} 0px 0 @{color}, @{size} @{size} 0 @{color}, -@{size} @{size} 0 @{color}, @{size} -@{size} 0 @{color}, -@{size} -@{size} 0 @{color}, 0px @{size} 0 @{color}, 0px -@{size} 0 @{color}, -@{size} 0px 0 @{color}, @{size} 0px 0 @{color}, @{halfsize} @{size} 0 @{color}, -@{halfsize} @{size} 0 @{color}, @{halfsize} -@{size} 0 @{color}, -@{halfsize} -@{size} 0 @{color}, @{size} @{halfsize} 0 @{color}, -@{size} @{halfsize} 0 @{color}, @{size} -@{halfsize} 0 @{color}, -@{size} -@{halfsize} 0 @{color}");
 }
 
+.box-shadow (@string) {
+	-webkit-box-shadow: @string;
+	-moz-box-shadow:    @string;
+	box-shadow:         @string;
+}
+
 .gradient(@c1, @c2) {
   background: -webkit-linear-gradient(@c1, @c2); /* For Safari 5.1 to 6.0 */
   background: -o-linear-gradient(@c1, @c2); /* For Opera 11.1 to 12.0 */
