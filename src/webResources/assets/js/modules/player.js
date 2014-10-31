@@ -190,7 +190,7 @@ var setButtonListeners = function ($container) {
 };
 
 var transformColor = function(color) {
-  return [Math.floor(color[0] * 255), Math.floor(color[1] * 255), Math.floor(color[2] * 255), Math.floor(color[3] * 255)];
+  return [Math.floor(color[0] * 255), Math.floor(color[1] * 255), Math.floor(color[2] * 255), color[3]];
 }
 
 var me = {

@@ -1,14 +1,36 @@
-<div id="currentState">
-
-</div>
-<div id="controls">
+<section id="settings">
+  <div class="configParam">
+    <label>Worm width</label>
+    <div class="slider" id="wormWidth"></div>
+  </div>
+  <div class="configParam">
+    <label>Worm speed</label>
+    <div class="slider" id="wormSpeed"></div>
+  </div>
+  <div class="configParam">
+    <label>Countdown</label>
+    <div class="slider" id="countdown"></div>
+  </div>
+  <div class="bottom">
+    <button id="saveSettings">Save</button>
+  </div>
+</section>
+<section id="state">
+  <h1>AchDome</h1>
   <button id="changeGameState"{{#if ready}} class="start"{{else}}{{#if started}} class="end"{{/if}}{{/if}}>
     {{#if ready}}
-      Start game
-    {{else}}
-      {{#if started}}
-        End game
-      {{/if}}
-    {{/if}}
+      Start countdown
+    {{else}}{{#if started}}
+      End game
+    {{/if}}{{/if}}
   </button>
-</div>
+</section>
+<section id="connectedPlayers">
+  <h2 id="playerCount">0</h2>
+  <h3>Players</h3>
+  <div id="players">
+    {{#each players}}
+      {{> player this}}
+    {{/each}}
+  </div>
+</section>

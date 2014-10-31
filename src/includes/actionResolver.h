@@ -7,6 +7,7 @@ struct ClientAction {
     START_GAME,
     END_GAME,
     AUTHENTICATE_ADMIN,
+    UPDATE_SETTINGS,
     REGISTER,
     UNREGISTER,
     START_MOVING,
@@ -16,7 +17,9 @@ struct ClientAction {
     RIGHT_UP
   };
 	Type type;
-	std::map<std::string, std::string> data;
+  std::map<std::string, std::string> strings;
+  std::map<std::string, float> floats;
+  std::map<std::string, int> ints;
 };
 
 class ActionResolver {

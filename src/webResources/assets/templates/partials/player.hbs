@@ -1,4 +1,4 @@
 <div class="player">
   {{> identifier this}}
-  <p>{{name}}</p>
+  <p{{#if inGame}} style="color: {{> color color}}"{{/if}}>{{name}}</p>
 </div>

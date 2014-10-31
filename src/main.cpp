@@ -84,7 +84,7 @@ AdminGameController* agc;
 
     fisheyeSpace = new FisheyeCollisionSpace(500);
     renderSpace = new ClusterRenderSpace();
-    distributor = new UniformDistributor();
+    distributor = new UniformDistributor(gameConfig);
 
     ct = new RainbowColorTheme();
 
@@ -100,7 +100,7 @@ AdminGameController* agc;
     dataSerializationBuilder = new JsonBuilder();
 
     pgc = new PlayerGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "player");
-    agc = new AdminGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "admin");
+    agc = new AdminGameController(gameEngine, webServer, actionResolver, dataSerializationBuilder, "admin", gameConfig);
     gameControllers.push_back(pgc);
     gameControllers.push_back(agc);
 

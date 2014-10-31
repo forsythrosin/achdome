@@ -33,6 +33,10 @@ std::vector<int> GameEngine::getCurrentGameParticipants() {
   return currentGame->getParticipants();
 }
 
+std::vector<Player*> GameEngine::getPlayers() {
+  return playerManager->getConnectedPlayers();
+}
+
 /**
  * Turn left.
  */

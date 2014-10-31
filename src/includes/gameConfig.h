@@ -18,8 +18,12 @@ struct GameConfig{
   void encode();
   void decode();
   std::string toString();
+
+  float wormWidth;
+  float wormSpeed;
+  int countdown;
+
   void parse(std::string);
-  float lineWidth;
   int maximumPlayers;
   std::string password;
   private:

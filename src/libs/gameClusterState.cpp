@@ -30,7 +30,7 @@ GameClusterState::~GameClusterState() {
 void GameClusterState::attach() {
 
   dome = new RenderableDome(50, 20);
-  worms = new RenderableWormGroup(gameConfig->maximumPlayers, 4, gameConfig->lineWidth);
+  worms = new RenderableWormGroup(gameConfig->maximumPlayers, 4, gameConfig->wormWidth);
 
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);

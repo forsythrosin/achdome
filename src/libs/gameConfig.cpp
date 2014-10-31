@@ -5,11 +5,17 @@
 #include "sgct.h"
 
 GameConfig::GameConfig() {
-  lineWidth = 0.05;
+  // Default values if there is no config file
+  wormWidth = 0.02;
+  wormSpeed = 0.01;
+  countdown = 10;
   maximumPlayers = 100;
+  password = "default";
 
   configEntities = {
-    new ConfigEntity<double, float>("lineWidth", lineWidth),
+    new ConfigEntity<double, float>("wormWidth", wormWidth),
+    new ConfigEntity<double, float>("wormSpeed", wormSpeed),
+    new ConfigEntity<double, int>("countdown", countdown),
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
     new ConfigEntity<std::string>("password", password)
   };
