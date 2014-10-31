@@ -120,5 +120,35 @@ button.negative {
   width: 10px;
   height: 10px;
   margin: -5px 0 0 -5px;
+  position: relative;
   .radius(50%);
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes identifierRotation {
+  0%  { .transform(rotate(0deg)); }
+  100%  { .transform(rotate(360deg)); }
+}
+
+/* Standard syntax */
+@keyframes identifierRotation {
+  0%  { .transform(rotate(0deg)); }
+  100%  { .transform(rotate(360deg)); }
+}
+
+.identifier.waiting {
+  background: transparent;
+  border: 4px solid transparent;
+}
+
+.identifier.waiting:after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  background-image: url('../images/identifierOverlay.png');
+  background-size: cover;
+  .loop(identifierRotation, 1s);
 }

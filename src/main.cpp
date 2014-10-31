@@ -88,7 +88,7 @@ AdminGameController* agc;
 
     ct = new RainbowColorTheme();
 
-    wt = new WormTracker(fisheyeSpace, renderSpace, distributor);
+    wt = new WormTracker(fisheyeSpace, renderSpace, distributor, gameConfig);
     pm = new PlayerManager(ct);
 
     gameEngine = new GameEngine(wt, pm, gameConfig);

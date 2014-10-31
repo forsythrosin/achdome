@@ -49,6 +49,7 @@ bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) 
     if (!getDataString(v, "password", action)) return false;
     getDataFloat(v, "wormWidth", action);
     getDataFloat(v, "wormSpeed", action);
+    getDataFloat(v, "turnSpeed", action);
     getDataInt(v, "countdown", action);
     action.type = ClientAction::UPDATE_SETTINGS;
     return true;

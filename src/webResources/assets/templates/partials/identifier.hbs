@@ -1,1 +1,1 @@
-<div class="identifier{{#if me}} me{{/if}}" style="background:{{> color color}};{{#if position}} top:{{position.y}}; left:{{position.x}}{{/if}}"></div>
+<div class="identifier{{#if me}} me{{/if}}{{#if waiting}} waiting{{/if}}" style="{{#if waiting}}border-color:{{else}}background:{{/if}}{{> color color}};{{#if position}} top:{{position.y}}; left:{{position.x}}{{/if}}"></div>

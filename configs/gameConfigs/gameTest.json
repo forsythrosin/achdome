@@ -1,6 +1,7 @@
 {
-  "wormWidth": 0.02,
-  "wormSpeed": 0.005,
+  "wormWidth": 0.005,
+  "wormSpeed": 0.002,
+  "turnSpeed": 0.1,
   "countdown": 10,
   "maximumPlayers": 100,
   "password": "pwd"

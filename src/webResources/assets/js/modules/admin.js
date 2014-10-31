@@ -61,16 +61,25 @@ var renderAuthenticate = function ($container, params) {
 
 var configSliders = {
   wormWidth: {
+    name: "Worm width",
     range: [1, 10],
     value: null,
-    scaleFactor: 200
+    scaleFactor: 1000
   },
   wormSpeed: {
+    name: "Worm speed",
     range: [1, 10],
     value: null,
-    scaleFactor: 500
+    scaleFactor: 2500
+  },
+  turnSpeed: {
+    name: "Turn speed",
+    range: [1, 10],
+    value: null,
+    scaleFactor: 50
   },
   countdown: {
+    name: "Countdown",
     range: [0, 20],
     value: null,
     scaleFactor: 1
@@ -102,6 +111,7 @@ var updatePlayers = function ($container, data) {
   Object.keys(players).forEach(function (key) {
     var player = players[key];
     player.color = transformColor(player.color);
+    player.waiting = !player.inGame;
     $players.append(_player(player, options));
     numberOfPlayers++;
   });
@@ -110,9 +120,12 @@ var updatePlayers = function ($container, data) {
 
 var renderAdminPanel = function ($container, params) {
   $container.html(adminPanel(params, options));
+  $params = $container.find('#configParams');
   Object.keys(configSliders).forEach(function (key) {
     var slide = configSliders[key];
-    $container.find('.slider#' + key).noUiSlider({
+    $slider = $('<div class="slider" id="' + key + '"></div>');
+    $param = $('<div class="configParam">').append('<label>' + slide.name + '</label>').append($slider);
+    $slider.noUiSlider({
       connect: "lower",
       start: slide.range[1],
       step: 1,
@@ -125,6 +138,7 @@ var renderAdminPanel = function ($container, params) {
       slide.value = value;
       $(this).html('<span>' + value + '</span>');
     });
+    $params.append($param);
   });
   updateSettings($container, params);
   updatePlayers($container, params);
@@ -204,6 +218,7 @@ var setServerListeners = function ($container) {
         res.started = true;
         renderAdminPanel($container, res);
       }
+      updatePlayers($container, res);
     })
     .on('lobby', function (err, res) {
       if (screen == "adminPanel") {
@@ -214,5 +229,6 @@ var setServerListeners = function ($container) {
         res.ready = true;
         renderAdminPanel($container, res);
       }
+      updatePlayers($container, res);
     });
 };

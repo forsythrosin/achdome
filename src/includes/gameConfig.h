@@ -21,6 +21,7 @@ struct GameConfig{
 
   float wormWidth;
   float wormSpeed;
+  float turnSpeed;
   int countdown;
 
   void parse(std::string);

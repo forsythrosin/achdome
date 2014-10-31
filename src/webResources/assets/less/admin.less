@@ -4,7 +4,7 @@
 @panelWidth: 250px;
 
 .panel {
-  background: @bright-base;
+  background: @base-2;
   width: @panelWidth;
 }
 
@@ -23,48 +23,57 @@ section {
     color: @positive-dark;
   }
 
-  .configParam {
-    margin: 30px 20px 50px;
+  #configParams {
+    position: absolute;
+    top: 0;
+    bottom: 62px;
+    left: 0;
+    right: 0;
+    overflow: auto;
 
-    label {
-      font-family: @header-typeface;
-      text-transform: uppercase;
-      text-align: center;
-      display: block;
-      font-size: 140%;
-      margin-bottom: 10px;
-    }
+    .configParam {
+      margin: 30px 20px 50px;
 
-    .slider {
-      .box-shadow(none);
-      .radius(10px);
-      background: white;
-      border: none;
-      height: 15px;
+      label {
+        font-family: @header-typeface;
+        text-transform: uppercase;
+        text-align: center;
+        display: block;
+        font-size: 140%;
+        margin-bottom: 10px;
+      }
 
-      .noUi-origin {
+      .slider {
         .box-shadow(none);
         .radius(10px);
+        background: white;
+        border: none;
+        height: 15px;
 
-        .noUi-handle {
+        .noUi-origin {
           .box-shadow(none);
-          height: 27px;
-          width: 27px;
-          .radius(50%);
-          background: @accent;
-          border: none;
+          .radius(10px);
 
-          .tooltip {
-            position: absolute;
-            top: 30px;
-            left: 0;
-            right: 0;
-            text-align: center;
+          .noUi-handle {
+            .box-shadow(none);
+            height: 27px;
+            width: 27px;
+            .radius(50%);
+            background: @accent;
+            border: none;
+
+            .tooltip {
+              position: absolute;
+              top: 30px;
+              left: 0;
+              right: 0;
+              text-align: center;
+            }
           }
-        }
 
-        .noUi-handle:before, .noUi-handle:after {
-          background: transparent;
+          .noUi-handle:before, .noUi-handle:after {
+            background: transparent;
+          }
         }
       }
     }

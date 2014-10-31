@@ -6,8 +6,9 @@
 
 GameConfig::GameConfig() {
   // Default values if there is no config file
-  wormWidth = 0.02;
-  wormSpeed = 0.01;
+  wormWidth = 0.005;
+  wormSpeed = 0.002;
+  turnSpeed = 0.1;
   countdown = 10;
   maximumPlayers = 100;
   countdownDuration = 5;
@@ -17,6 +18,7 @@ GameConfig::GameConfig() {
   configEntities = {
     new ConfigEntity<double, float>("wormWidth", wormWidth),
     new ConfigEntity<double, float>("wormSpeed", wormSpeed),
+    new ConfigEntity<double, float>("turnSpeed", turnSpeed),
     new ConfigEntity<double, int>("countdown", countdown),
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
     new ConfigEntity<std::string>("password", password),

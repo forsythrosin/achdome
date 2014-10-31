@@ -15,6 +15,7 @@ protected:
   GameConfig *gameConfig;
   float wormWidth;
   float wormSpeed;
+  float turnSpeed;
   int countdown;
   void addPlayers(DataSerializationBuilder*, std::vector<Player*>);
   void addSettings(DataSerializationBuilder*);

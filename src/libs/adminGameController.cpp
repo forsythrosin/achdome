@@ -8,6 +8,7 @@ AdminGameController::AdminGameController(GameEngine *ge, Webserver *ws, ActionRe
   this->gameConfig = gameConfig;
   wormWidth = gameConfig->wormWidth;
   wormSpeed = gameConfig->wormSpeed;
+  turnSpeed = gameConfig->turnSpeed;
   countdown = gameConfig->countdown;
 };
 
@@ -27,26 +28,25 @@ void AdminGameController::performActions() {
     webServer->addBroadcast(message, subProtocol);
   }
 
-  if (wormWidth != gameConfig->wormWidth || wormSpeed != gameConfig->wormSpeed || countdown != gameConfig->countdown) {
+  if (wormWidth != gameConfig->wormWidth || wormSpeed != gameConfig->wormSpeed || turnSpeed != gameConfig->turnSpeed || countdown != gameConfig->countdown) {
     // Settings changed
     wormWidth = gameConfig->wormWidth;
     wormSpeed = gameConfig->wormSpeed;
+    turnSpeed = gameConfig->turnSpeed;
     countdown = gameConfig->countdown;
 
-    std::string message =
-      dataSerializationBuilder
-        ->add("message", "settingsChanged")
-        ->add("data", dataSerializationBuilder->group()
-          ->add("settings", dataSerializationBuilder->group()
-            ->add("wormWidth", wormWidth)
-            ->add("wormSpeed", wormSpeed)
-            ->add("countdown", countdown)
-          )
-        )->build();
+    DataSerializationBuilder *data = dataSerializationBuilder->group();
+    dataSerializationBuilder
+      ->add("message", "settingsChanged")
+      ->add("data", data);
+    addSettings(data);
+    std::string message = dataSerializationBuilder->build();
     webServer->addBroadcast(message, subProtocol);
   }
 
   if (currentState != prevState) {
+    DataSerializationBuilder *data = dataSerializationBuilder->group();
+
     // Game state changed
     std::string sendMessage;
     switch (currentState) {
@@ -54,11 +54,19 @@ void AdminGameController::performActions() {
 
       break;
     case GameEngine::LOBBY:
-      sendMessage = dataSerializationBuilder->add("message", "lobby")->build();
+      addPlayers(data, gameEngine->getPlayers());
+      sendMessage = dataSerializationBuilder
+        ->add("message", "lobby")
+        ->add("data", data)
+        ->build();
       webServer->addBroadcast(sendMessage, subProtocol);
       break;
     case GameEngine::GAME:
-      sendMessage = dataSerializationBuilder->add("message", "gameStarted")->build();
+      addPlayers(data, gameEngine->getPlayers());
+      sendMessage = dataSerializationBuilder
+        ->add("message", "gameStarted")
+        ->add("data", data)
+        ->build();
       webServer->addBroadcast(sendMessage, subProtocol);
       break;
     }
@@ -109,6 +117,10 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
       std::cout << "wormSpeed = " << action.floats.at("wormSpeed") << std::endl;
       gameConfig->wormSpeed = action.floats.at("wormSpeed");
     }
+    if (action.floats.count("turnSpeed") > 0) {
+      std::cout << "turnSpeed = " << action.floats.at("turnSpeed") << std::endl;
+      gameConfig->turnSpeed = action.floats.at("turnSpeed");
+    }
     if (action.ints.count("countdown") > 0) {
       std::cout << "countdown = " << action.ints.at("countdown") << std::endl;
       gameConfig->countdown = action.ints.at("countdown");
@@ -142,6 +154,7 @@ void AdminGameController::addSettings(DataSerializationBuilder *builder) {
   builder->add("settings", dataSerializationBuilder->group()
     ->add("wormWidth", gameConfig->wormWidth)
     ->add("wormSpeed", gameConfig->wormSpeed)
+    ->add("turnSpeed", gameConfig->turnSpeed)
     ->add("countdown", gameConfig->countdown)
   );
 }
