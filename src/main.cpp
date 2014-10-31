@@ -54,7 +54,7 @@ ClusterRenderSpace *renderSpace;
 std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
 SyncMaster *syncMaster;
-
+GameConfig *gameConfig;
 //IntroClusterState *ics;
 LobbyClusterState *lcs;
 GameClusterState *gcs;
@@ -79,12 +79,13 @@ int main( int argc, char* argv[] ) {
   gEngine->setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   syncMaster = new SyncMaster();
+  gameConfig = new GameConfig("gameTest.json");
+
   if (!gEngine->init( sgct::Engine::OpenGL_3_3_Core_Profile )) {
       delete gEngine;
       return EXIT_FAILURE;
   }
 
-  GameConfig *gameConfig = new GameConfig("gameTest.json");
   if (gEngine->isMaster()){
 
     FisheyeCollisionSpace *fisheyeSpace = new FisheyeCollisionSpace(500);
@@ -165,10 +166,12 @@ void myDrawFun() {
 }
 
 void myEncodeFun() {
+  gameConfig->encode();
   syncMaster->encode();
 }
 
 void myDecodeFun() {
+  gameConfig->decode();
   syncMaster->decode();
 }
 

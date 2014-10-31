@@ -14,9 +14,10 @@ struct GameConfig{
   GameConfig(std::string);
   void save(std::string);
   void load(std::string);
-
+  void encode();
+  void decode();
   std::string toString();
-
+  void parse(std::string);
   float lineWidth;
   int maximumPlayers;
   std::string password;
