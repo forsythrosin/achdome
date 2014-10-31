@@ -10,6 +10,7 @@ All rights reserved.
 #include "Webserver.h"
 
 Webserver::Webserver(){
+  nextId = 1;
   socketServer.init_asio();
   socketServer.set_reuse_addr(true);
   socketServer.set_open_handler(bind(&Webserver::onOpen, this, ::_1));
