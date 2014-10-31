@@ -6,11 +6,15 @@
 GameConfig::GameConfig() {
   lineWidth = 0.05;
   maximumPlayers = 100;
+  countdownDuration = 5;
+  gameOverDuration = 5;
 
   configEntities = {
     new ConfigEntity<double, float>("lineWidth", lineWidth),
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
-    new ConfigEntity<std::string>("password", password)
+    new ConfigEntity<std::string>("password", password),
+    new ConfigEntity<double, float>("countdownDuration", countdownDuration),
+    new ConfigEntity<double, float>("gameOverDuration", gameOverDuration)
   };
 
 }

@@ -43,7 +43,7 @@ void PlayerGameController::performActions() {
     }
 
     case GameEngine::COUNTDOWN: {
-      float time = gameEngine->getCountdownSecondsLeft();
+      float time = gameEngine->getSecondsLeftInCountdown();
       DataSerializationBuilder *players = dataSerializationBuilder->group();
       dataSerializationBuilder
         ->add("message", "countdown")

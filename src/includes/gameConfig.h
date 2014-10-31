@@ -20,6 +20,9 @@ struct GameConfig{
   float lineWidth;
   int maximumPlayers;
   std::string password;
+  float countdownDuration;
+  float gameOverDuration;
+
   private:
 
   struct AbstractConfigEntity{

@@ -56,8 +56,9 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
     webServer->addMessage(sessionId, sendMessage);
     break;
   case ClientAction::START_GAME:
+    // TODO: Change this enum to START_TOURNAMENT and use user-defined number of games.
     std::cout << "Game started by admin " << sessionId << std::endl;
-    gameEngine->startGame();
+    gameEngine->startTournament(3);
     break;
   case ClientAction::END_GAME:
     std::cout << "Game ended by admin " << sessionId << std::endl;
