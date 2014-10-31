@@ -6,8 +6,6 @@
 #include <wormArc.h>
 #include <collisionSpace.h>
 #include <renderSpace.h>
-#include <map>
-#include <vector>
 #include <wormEventListener.h>
 #include <wormHeadDistributor.h>
 #include <iostream>
@@ -89,8 +87,6 @@ void WormTracker::tick(int time) {
   }
 
   std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
-
-
   
   renderSpace->addHeads(heads);
   renderSpace->addArcs(arcs);
@@ -108,6 +104,8 @@ void WormTracker::clear() {
     delete it.second;
   }
   wormHeads.clear();
+  collisionSpace->clear();
+  renderSpace->clear();
 }
 
 bool WormTracker::startWormHead(int id) {

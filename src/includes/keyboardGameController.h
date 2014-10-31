@@ -17,7 +17,7 @@ class KeyboardGameController : public GameController {
  private:
   std::queue<KeyEvent> eventQueue;
   void perform(KeyEvent e);
-  void startGame();
+  void startCountdown();
   void connectPlayer();
   void startMoving();
   void turnLeft(bool turn);

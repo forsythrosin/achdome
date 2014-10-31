@@ -10,6 +10,7 @@ class Bitmap {
   PixelValue getPixel(int x, int y);
   int **getData();
   void clear(PixelValue value);
+  void saveToPPM(const char *filename);
  private:
   PixelValue *values;
   int width;

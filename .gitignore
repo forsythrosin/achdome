@@ -3,5 +3,6 @@ src/external
 compile*
 src/webResources/assets/js/achdome.js
 src/webResources/assets/js/achdomePlayer.js
+src/webResources/assets/js/achdomeAdmin.js
 src/webResources/node_modules
 .DS_Store

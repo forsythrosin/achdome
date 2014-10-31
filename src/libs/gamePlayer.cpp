@@ -1,6 +1,5 @@
 #include <gamePlayer.h>
 #include <player.h>
-#include <vector>
 #include <iostream>
 
 GamePlayer::GamePlayer(Player *p) {
@@ -8,10 +7,11 @@ GamePlayer::GamePlayer(Player *p) {
   alive = true;
   startedMoving = false;
   killer = -1;
+  points = 0;
 }
 
 std::vector<int> GamePlayer::getKillIds() {
-	return std::vector<int>();
+  return std::vector<int>();
 }
 
 int GamePlayer::getKiller() {
@@ -64,4 +64,22 @@ bool GamePlayer::startMoving() {
     return true;
   }
   return false;
+}
+
+bool GamePlayer::hasStartedMoving() {
+  return startedMoving;
+}
+
+bool GamePlayer::isMoving() {
+  return isAlive() && hasStartedMoving();
+}
+
+void GamePlayer::tick() {
+  if (startedMoving && isAlive()) {
+    points++;
+  }
+}
+
+int GamePlayer::getPoints() {
+  return points;
 }

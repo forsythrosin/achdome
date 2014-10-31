@@ -5,6 +5,8 @@
 class RenderablePanel;
 class Player;
 class PlayerManager;
+class RenderableDome;
+class SyncablePlayer;
 
 class LobbyClusterState : public ClusterState {
  public:
@@ -20,11 +22,19 @@ class LobbyClusterState : public ClusterState {
   void encode();
   void decode();
 
+  void setPlayerListAnchor(glm::vec3 anchor);
+
  private:
   glm::mat4 getMVP(int offset);
 
   PlayerManager *playerManager;
-  sgct::SharedVector<Player*> *sharedPlayers;
+  std::vector<Player> players;
+  sgct::SharedVector<SyncablePlayer> *sharedPlayers;
+  sgct::SharedString playerName;
 
-  const glm::vec3 LIST_UPPER_LEFT_ANCHOR = glm::vec3(-2.8f, 7.5f, 2.15f);
+  RenderableDome *dome;
+  int domeGrid;
+
+  glm::vec3 playerListAnchor;
+  const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(-2.8f, 7.5f, 2.15f);
 };

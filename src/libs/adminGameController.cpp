@@ -116,7 +116,7 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
     break;
   case ClientAction::START_GAME:
     std::cout << "Game started by admin " << sessionId << std::endl;
-    gameEngine->startGame();
+    gameEngine->startCountdown();
     break;
   case ClientAction::END_GAME:
     std::cout << "Game ended by admin " << sessionId << std::endl;
