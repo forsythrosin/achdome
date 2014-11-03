@@ -1,7 +1,8 @@
 #include <gameClusterState.h>
 
 #include <renderableDome.h>
-#include <renderableWormGroup.h>
+#include <renderableWormArcs.h>
+#include <renderableWormHeads.h>
 #include <clusterRenderSpace.h>
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr) {}
@@ -16,28 +17,28 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
 }
 
 GameClusterState::~GameClusterState() {
-  if (wormArcs != nullptr){
-    delete wormArcs;
-  }
-  if (wormCollisions != nullptr){
-    delete wormCollisions;
-  }
-  if (wormHeads != nullptr){
-    delete wormHeads;
-  }
+  if (renderableDome != nullptr) delete renderableDome;
+  if (renderableArcs != nullptr) delete renderableArcs;
+  if (renderableHeads != nullptr) delete renderableHeads;
+
+  if (wormArcs != nullptr) delete wormArcs;
+  if (wormCollisions != nullptr) delete wormCollisions;
+  if (wormHeads != nullptr) delete wormHeads;
 }
 
 void GameClusterState::attach() {
+  renderableDome = new RenderableDome(50, 20);
+  renderableArcs = new RenderableWormArcs(gameConfig->maximumPlayers, 4, gameConfig->wormWidth);
+  renderableHeads = new RenderableWormHeads(gameConfig->maximumPlayers, gameConfig->wormWidth);
 
-  dome = new RenderableDome(50, 20);
-  worms = new RenderableWormGroup(gameConfig->maximumPlayers, 4, gameConfig->wormWidth);
+  domeGrid = renderer->addRenderable(renderableDome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
+  domeWorms = renderer->addRenderable(renderableDome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
+  collision = renderer->addRenderable(renderableDome, GL_LINES, "domeShader.vert", "collisionShader.frag", true);
 
-  domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
-  domeWorms = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
-  collision = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "collisionShader.frag", true);
-
-  worms->setWormArcs(wormArcs->getVal());
-  wormLines = renderer->addRenderable(worms, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
+  renderableArcs->setWormArcs(wormArcs->getVal());
+  wormLines = renderer->addRenderable(renderableArcs, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
+  renderableHeads->setWormHeads(wormHeads->getVal());
+  wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
 
   attached = true;
 }
@@ -47,9 +48,14 @@ void GameClusterState::detach() {
   renderer->removeRenderable(domeWorms);
   renderer->removeRenderable(collision);
   renderer->removeRenderable(wormLines);
+  renderer->removeRenderable(wormDots);
 
-  delete dome;
-  delete worms;
+  delete renderableDome;
+  renderableDome = nullptr;
+  delete renderableArcs;
+  renderableArcs = nullptr;
+  delete renderableHeads;
+  renderableHeads = nullptr;
 
   attached = false;
 }
@@ -57,16 +63,12 @@ void GameClusterState::detach() {
 void GameClusterState::preSync() {
   if (renderSpace != nullptr) {
     std::vector<WormArc> arcs = renderSpace->getArcs();
-    std::vector<WormCollision> collisions = renderSpace->getCollisions();
     std::vector<WormHead> heads = renderSpace->getHeads();
-    //    std::vector<WormCollision> collisions = renderSpace->getCollisions();
+    std::vector<WormCollision> collisions = renderSpace->getCollisions();
 
     wormArcs->setVal(arcs);
     wormCollisions->setVal(collisions);
     wormHeads->setVal(heads);
-
-    //    std::cout << arcs.size() << std::endl;
-    //    wormCollisions->setVal(collisions);
 
     renderSpace->clear();
   }
@@ -78,9 +80,12 @@ void GameClusterState::preSync() {
 void GameClusterState::draw() {
   // Copy current worm positions and colors
   std::vector<WormArc> arcs = wormArcs->getVal();
+  std::vector<WormHead> heads = wormHeads->getVal();
+  std::vector<WormCollision> collisions = wormCollisions->getVal();
+  renderableArcs->setWormArcs(arcs);
+  renderableHeads->setWormHeads(heads);
 
-  worms->setWormArcs(arcs);
-
+  renderer->render(wormDots);
   // render wormLines to FBO
   renderer->renderToFBO(wormLines, stitchStep);
   // render grid lines

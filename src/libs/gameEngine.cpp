@@ -173,7 +173,7 @@ void GameEngine::startGameOver() {
   Tween gameOverTween(gameOverSecondsLeft, [this, duration](double t) {
       this->gameOverSecondsLeft = duration - t*duration;
     }, [this]() {
-      this->startCountdown();
+      this->startLobby();
     });
 
   Tweener::getInstance()->startTween(gameOverTween);
