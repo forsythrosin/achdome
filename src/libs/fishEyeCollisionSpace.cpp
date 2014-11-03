@@ -113,7 +113,7 @@ glm::dvec2 FisheyeCollisionSpace::transform(glm::dquat in) {
     // Singularity?
     //std::cout << "---------------------" << std::endl;
     //std::cout << in.w << ", " << in.x << ", " << in.y << ", " << in.z << std::endl;
-    std::cout << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+    //std::cout << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
     //std::cout << phi << ", " << theta << ", " << fov << ", " << x << ", " << y << std::endl;
   }
 
