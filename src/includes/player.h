@@ -16,6 +16,6 @@ class Player {
  private:
   int id;
   glm::vec4 color;
-  std::string name;
+  char name[50];
   bool connected;
 };

@@ -110,7 +110,6 @@ void GameClusterState::encode() {
 void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
   sgct::SharedData *data = sgct::SharedData::instance();
-
   data->readVector(wormArcs);
   data->readVector(wormCollisions);
   data->readVector(wormHeads);
