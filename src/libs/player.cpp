@@ -5,7 +5,9 @@
 Player::Player(int id, glm::vec4 color, std::string name) {
   this->id = id;
   this->color = color;
-  this->name = name;
+  const size_t size = std::extent<decltype(this->name)>::value;
+  std::fill(this->name, this->name+size, 0);
+  std::copy(name.begin(), name.end(), this->name);
   this->connected = true;
 }
 
@@ -15,7 +17,9 @@ int Player::getId() {
 }
 
 void Player::setName(std::string name) {
-  this->name = name;
+  const size_t size = std::extent<decltype(this->name)>::value;
+  std::fill(this->name, this->name+size, 0);
+  std::copy(name.begin(), name.end(), this->name);
 }
 
 std::string Player::getName() {

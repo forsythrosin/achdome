@@ -4,7 +4,6 @@
 #include <playerManager.h>
 #include <algorithm>
 #include <renderableDome.h>
-#include <syncablePlayer.h>
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : LobbyClusterState(gEngine, gameConfig, nullptr) {
   attached = false;
@@ -12,7 +11,7 @@ LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConf
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, PlayerManager *playerManager) : ClusterState(gEngine, gameConfig) {
   this->playerManager = playerManager;
-  sharedPlayers = new sgct::SharedVector<SyncablePlayer>(100);
+  sharedPlayers = new sgct::SharedVector<Player>(100);
   playerName.setVal("");
   setPlayerListAnchor(DEFAULT_PLAYER_LIST_ANCHOR);
   dome = new RenderableDome(50, 20);
@@ -27,18 +26,22 @@ LobbyClusterState::~LobbyClusterState() {
 
 void LobbyClusterState::attach() {
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
+  domeLogo = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeLogoShader.frag", true);
   attached = true;
 }
 
 void LobbyClusterState::detach() {
   renderer->removeRenderable(domeGrid);
+  renderer->removeRenderable(domeLogo);
   attached = false;
 }
 
 void LobbyClusterState::draw() {
   // render grid lines
   renderer->render(domeGrid);
+  renderer->render(domeLogo);
 
+  auto players = sharedPlayers->getVal();
   for (int offset = 0; offset < players.size(); ++offset) {
     Player &player = players.at(offset);
     std::string playerName = player.getName();
@@ -75,14 +78,11 @@ glm::mat4 LobbyClusterState::getMVP(int offset) {
  */
 void LobbyClusterState::preSync() {
   if (playerManager != nullptr) {
-    players.clear();
-    std::vector<SyncablePlayer> syncablePlayers;
-    for (Player *p : playerManager->getConnectedPlayers()) {
-      players.push_back(*p);
-      SyncablePlayer sp(p->getId(), p->getColor());
-      syncablePlayers.push_back(sp);
+    auto connectedPlayers = std::vector<Player>();
+    for(auto *p : playerManager->getConnectedPlayers()){
+      connectedPlayers.push_back(*p);
     }
-    sharedPlayers->setVal(syncablePlayers);
+    sharedPlayers->setVal(connectedPlayers);
   }
 }
 
@@ -92,11 +92,6 @@ void LobbyClusterState::preSync() {
  */
 void LobbyClusterState::encode() {
   sgct::SharedData::instance()->writeVector(sharedPlayers);
-
-  for (auto p : players) {
-    playerName.setVal(p.getName());
-    sgct::SharedData::instance()->writeString(&playerName);
-  }
 }
 
 /**
@@ -105,14 +100,4 @@ void LobbyClusterState::encode() {
  */
 void LobbyClusterState::decode() {
   sgct::SharedData::instance()->readVector(sharedPlayers);
-
-  players.clear();
-  for (auto sp : sharedPlayers->getVal()) {
-    sgct::SharedData::instance()->readString(&playerName);
-    std::string name = playerName.getVal();
-
-    // Create a real Player and add to players
-    Player p(sp.getId(), sp.getColor(), name);
-    players.push_back(p);
-  }
 }

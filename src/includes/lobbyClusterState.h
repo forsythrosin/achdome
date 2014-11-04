@@ -28,12 +28,12 @@ class LobbyClusterState : public ClusterState {
   glm::mat4 getMVP(int offset);
 
   PlayerManager *playerManager;
-  std::vector<Player> players;
-  sgct::SharedVector<SyncablePlayer> *sharedPlayers;
+  sgct::SharedVector<Player> *sharedPlayers;
   sgct::SharedString playerName;
 
   RenderableDome *dome;
   int domeGrid;
+  int domeLogo;
 
   glm::vec3 playerListAnchor;
   const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(-2.8f, 7.5f, 2.15f);
