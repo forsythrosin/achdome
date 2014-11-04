@@ -27,17 +27,20 @@ LobbyClusterState::~LobbyClusterState() {
 
 void LobbyClusterState::attach() {
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
+  domeLogo = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeLogoShader.frag", true);
   attached = true;
 }
 
 void LobbyClusterState::detach() {
   renderer->removeRenderable(domeGrid);
+  renderer->removeRenderable(domeLogo);
   attached = false;
 }
 
 void LobbyClusterState::draw() {
   // render grid lines
   renderer->render(domeGrid);
+  renderer->render(domeLogo);
 
   for (int offset = 0; offset < players.size(); ++offset) {
     Player &player = players.at(offset);
