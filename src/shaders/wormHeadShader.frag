@@ -3,8 +3,15 @@
 uniform sampler2D fboTex;
 
 in vec4 vColor;
+in vec3 center;
+in vec3 worldPos;
+
 out vec4 color;
 
 void main() {
-  color = vColor;
+  vec4 headColor = vColor;
+  float distToCenter = distance(worldPos, center);
+  headColor.a *= 1.0 - step(0.9992, distToCenter);
+  // headColor.a *= 1.0 - step(1.0, distToCenter);
+  color = headColor;
 }

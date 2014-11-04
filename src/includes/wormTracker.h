@@ -42,6 +42,6 @@ class WormTracker {
   
   const int MIN_TIME_BETWEEN_GAPS = 100;
   const int MAX_TIME_BETWEEN_GAPS = 200;
-  const int MIN_TIME_IN_GAP = 5;
-  const int MAX_TIME_IN_GAP = 8;
+  const int MIN_TIME_IN_GAP = 20;
+  const int MAX_TIME_IN_GAP = 30;
 };

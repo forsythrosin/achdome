@@ -34,6 +34,7 @@ protected:
   // GL handles
   GLuint vertexArray;
   GLuint positionBuffer, indexBuffer, colorBuffer;
+  GLuint nextBufferIndex = 0;
 
   bool update = false;
 

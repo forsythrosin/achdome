@@ -42,7 +42,7 @@ void GameClusterState::attach() {
   renderableArcs->setWormArcs(wormArcs->getVal());
   wormLines = renderer->addRenderable(renderableArcs, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
   renderableHeads->setWormHeads(wormHeads->getVal());
-  wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
+  wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
   attached = true;
 }
@@ -86,11 +86,16 @@ void GameClusterState::draw() {
   std::vector<WormArc> arcs = wormArcs->getVal();
   std::vector<WormHead> heads = wormHeads->getVal();
   std::vector<WormCollision> collisions = wormCollisions->getVal();
+
   renderableArcs->setWormArcs(arcs);
   renderableHeads->setWormHeads(heads);
 
-  // renderer->renderToFBO(wormDots, stitchStep);
-  renderer->render(wormDots);
+  // if (!heads.empty() && heads.at(0).isInGap()) {
+  //   renderer->render(wormDots);
+  // } else {
+  //   renderer->renderToFBO(wormDots, stitchStep);
+  // }
+
   // render wormLines to FBO
   renderer->renderToFBO(wormLines, stitchStep);
   // render grid lines
