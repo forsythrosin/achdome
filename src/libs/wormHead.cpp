@@ -53,7 +53,7 @@ void WormHead::tick() {
 
     glm::dvec3 newAxis = glm::mat3_cast(turnRightQuat) * axis;
     glm::dvec3 normalizedNewAxis = (sin(angle/2.0))*newAxis;
-    
+
     velocityQuat = glm::dquat(cos(angle/2), normalizedNewAxis.x, normalizedNewAxis.y, normalizedNewAxis.z);
   }
 
@@ -108,7 +108,10 @@ glm::dvec3 WormHead::getPosition() {
  * Get velocity in 3D space
  */
 glm::dvec3 WormHead::getVelocity() {
-  return glm::mat3_cast(velocityQuat) * glm::dvec3(1.0, 0.0, 0.0);
+  glm::dquat nextPosQuat = velocityQuat * positionQuat;
+  glm::dvec3 posVec = glm::mat3_cast(positionQuat) *glm::dvec3(1.0, 0.0, 0.0);
+  glm::dvec3 nextPosVec = glm::mat3_cast(nextPosQuat) *glm::dvec3(1.0, 0.0, 0.0);
+  return nextPosVec - posVec;
 }
 
 /**

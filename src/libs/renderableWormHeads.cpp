@@ -12,6 +12,7 @@ RenderableWormHeads::RenderableWormHeads(int wormCount, GLfloat wormThickness) {
   sphericalVertexData = new GLfloat[vertexCount*2];
   cartesianVertexData = new GLfloat[vertexCount*3];
   vertexColorData = new GLfloat[vertexCount*4];
+
   elementData = new GLuint[elementCount*VERTS_PER_ELEMENT];
 };
 
@@ -56,7 +57,7 @@ void RenderableWormHeads::createVertices() {
     WormHead wh = wormHeads.at(j);
     glm::vec3 headPos = (glm::vec3) wh.getPosition();
     glm::vec3 headDirection = glm::normalize((glm::vec3) wh.getVelocity())*wormThickness;
-    glm::vec3 domeNormal = headPos; // for convenience, already normalized
+    glm::vec3 domeNormal = glm::normalize(headPos);
 
     for (int i = 0; i < VERTS_PER_HEAD; ++i) {
       int cartIdx = (j*VERTS_PER_HEAD + i)*3;

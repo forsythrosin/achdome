@@ -26,11 +26,6 @@ struct RenderConfig {
   int id;
   bool hidden = false;
 
-  GLuint positionBuffer = GL_FALSE;
-  GLuint indexBuffer = GL_FALSE;
-  GLuint colorBuffer = GL_FALSE;
-  GLuint vertexArray = GL_FALSE;
-
   // uniform
   GLint matrixLocation = -1;
   GLint textureLocation = -1;
@@ -53,7 +48,6 @@ public:
 
 private:
   void init(RenderConfig &renderConfig);
-  void loadToGPU(RenderConfig &renderConfig);
 
   std::map<int, RenderConfig> renderConfigs;
   const float DOME_ROTATION = -90.0;

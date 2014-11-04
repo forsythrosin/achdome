@@ -13,12 +13,6 @@ Renderer::~Renderer() {
     // delete shaders
     sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
 
-    // delete buffers + VAO
-    glDeleteBuffers(1, &rc.positionBuffer);
-    glDeleteBuffers(1, &rc.colorBuffer);
-    glDeleteBuffers(1, &rc.indexBuffer);
-    glDeleteVertexArrays(1, &rc.vertexArray);
-
     // delete FBOs
     for (auto fbo : rc.framebuffers) {
       delete fbo;
@@ -56,16 +50,11 @@ void Renderer::removeRenderable(int configId) {
     return;
   }
   RenderConfig &rc = rcIt->second;
-  // std::cout << "remove: " << rc.id << " = " << configId << " shader exists = "
-  //           << sgct::ShaderManager::instance()->shaderProgramExists(std::to_string(rc.id)) << std::endl;
 
   sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
 
   // delete buffers + VAO
-  glDeleteBuffers(1, &rc.positionBuffer);
-  glDeleteBuffers(1, &rc.colorBuffer);
-  glDeleteBuffers(1, &rc.indexBuffer);
-  glDeleteVertexArrays(1, &rc.vertexArray);
+  rc.renderable->detach();
 
   // delete FBOs
   for (auto fbo : rc.framebuffers) {
@@ -79,16 +68,9 @@ void Renderer::removeRenderable(int configId) {
  * @param renderConfig config to initialize from
  */
 void Renderer::init(RenderConfig &renderConfig) {
-  // generate vertexArray
-  glGenVertexArrays(1, &(renderConfig.vertexArray));
-  glBindVertexArray(renderConfig.vertexArray); // TODO: this row cause segfault sometimes (!)
-
-  // generate buffers
-  glGenBuffers(1, &(renderConfig.positionBuffer));
-  glGenBuffers(1, &(renderConfig.indexBuffer));
-  glGenBuffers(1, &(renderConfig.colorBuffer));
-
-  loadToGPU(renderConfig);
+  // generate buffers + VAO
+  renderConfig.renderable->attach();
+  renderConfig.renderable->loadToGPU(renderConfig.sphericalCoords);
 
   // init shaders
   std::string vertShader = shaderUtils::pathToShader(renderConfig.vertShader);
@@ -104,62 +86,6 @@ void Renderer::init(RenderConfig &renderConfig) {
   renderConfig.timeLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("time");
 
   sgct::ShaderManager::instance()->unBindShaderProgram();
-};
-
-/**
- * Uploads vertex + element data to the GPU
- * @param renderConfig config to upload data from
- */
-void Renderer::loadToGPU(RenderConfig &renderConfig) {
-  // Determine entity dimensions
-  int vertexDim = renderConfig.sphericalCoords ? 2 : 3;
-  int colorDim = 4;
-
-  // Get data arrays
-  Renderable *renderable = renderConfig.renderable;
-  const GLfloat* vertexData = vertexDim == 2 ?
-    renderable->getSphericalVertexData():
-    renderable->getCartesianVertexData();
-  const GLfloat* colorData = renderable->getVertexColorData();
-  const GLuint* elementData = renderable->getElementData();
-
-  // Upload vertex positions
-  glBindBuffer(GL_ARRAY_BUFFER, renderConfig.positionBuffer);
-  glBufferData(
-    GL_ARRAY_BUFFER,
-    renderable->getVertexCount()*sizeof(GLfloat)*vertexDim,
-    vertexData,
-    GL_STATIC_DRAW
-  );
-  // Use buffer as position buffer for shader location = 0
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
-
-  // Upload colors
-  glBindBuffer(GL_ARRAY_BUFFER, renderConfig.colorBuffer);
-  glBufferData(
-    GL_ARRAY_BUFFER,
-    renderable->getVertexCount()*sizeof(GLfloat)*colorDim,
-    colorData,
-    GL_STATIC_DRAW
-  );
-  // Use buffer as color buffer for shader location = 1
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, colorDim, GL_FLOAT, GL_FALSE, 0, 0);
-
-  // Upload elements (e.g. triangles or line segments)
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.indexBuffer);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER,
-    renderable->getElementCount()*sizeof(GLuint)*renderable->getVertsPerElement(),
-    elementData,
-    GL_STATIC_DRAW
-  );
-
-  // Unbind
-  glBindVertexArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 };
 
 /**
@@ -202,15 +128,12 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
 
   // Upload new vertices if needed
   if (renderable->update) {
-    loadToGPU(renderConfig);
+    renderable->loadToGPU(renderConfig.sphericalCoords);
     renderable->update = false;
   }
 
   // Define MVP matrix
   glm::mat4 MVP = gEngine->getActiveModelViewProjectionMatrix()*ROT_STAT;
-  // rot += 0.04f;
-  // glm::mat4 rot_mat = glm::rotate(glm::mat4(1.0f), rot, glm::vec3(0.0f, 0.0f, 1.0f));
-  // glm::mat4 scene_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, -1.0, -25.0))*rot_stat*rot_mat;
 
   // Upload uniforms
   sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
@@ -235,11 +158,11 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   }
 
   // Bind position array
-  glBindVertexArray(renderConfig.vertexArray);
+  glBindVertexArray(renderConfig.renderable->vertexArray);
   glEnableVertexAttribArray(0);
   // glEnableVertexAttribArray(1);
 
-  // Don't seem to need to rebind buffers?
+  // TODO: Don't seem to need to rebind buffers?
   // glBindBuffer(GL_ARRAY_BUFFER, renderConfig.positionBuffer);
   // glBindBuffer(GL_ARRAY_BUFFER, renderConfig.colorBuffer);
   // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.indexBuffer);

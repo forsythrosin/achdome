@@ -6,7 +6,7 @@
 
 class Renderable {
 public:
-  Renderable() = default;
+  Renderable();
   virtual ~Renderable();
 
   const int getVertexCount() const;
@@ -17,6 +17,10 @@ public:
   const GLfloat * const getVertexColorData() const;
   const GLuint * const getElementData() const;
 
+  virtual void loadToGPU(bool sphericalCoords = false);
+  virtual void attach();
+  virtual void detach();
+
   virtual const GLuint getVertsPerElement() const = 0;
 
 protected:
@@ -26,6 +30,11 @@ protected:
   int vertexCount, elementCount;
   GLfloat *cartesianVertexData, *sphericalVertexData, *vertexColorData;
   GLuint *elementData;
+
+  // GL handles
+  GLuint vertexArray;
+  GLuint positionBuffer, indexBuffer, colorBuffer;
+
   bool update = false;
 
 friend class Renderer;
