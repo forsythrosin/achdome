@@ -6,7 +6,8 @@
 #include <wormHead.h>
 
 class RenderableDome;
-class RenderableWormGroup;
+class RenderableWormArcs;
+class RenderableWormHeads;
 class ClusterRenderSpace;
 
 class GameClusterState : public ClusterState {
@@ -25,9 +26,11 @@ class GameClusterState : public ClusterState {
 
  private:
   // Renderer + renderables
-  RenderableDome *dome;
-  RenderableWormGroup *worms;
-  int domeGrid, domeWorms, wormLines, collision;
+  RenderableDome *renderableDome;
+  RenderableWormArcs *renderableArcs;
+  RenderableWormHeads *renderableHeads;
+
+  int domeGrid, domeWorms, wormLines, wormDots, collision;
   float timer = 0.0f;
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;

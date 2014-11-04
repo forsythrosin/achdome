@@ -28,8 +28,7 @@ class LobbyClusterState : public ClusterState {
   glm::mat4 getMVP(int offset);
 
   PlayerManager *playerManager;
-  std::vector<Player> players;
-  sgct::SharedVector<SyncablePlayer> *sharedPlayers;
+  sgct::SharedVector<Player> *sharedPlayers;
   sgct::SharedString playerName;
 
   RenderableDome *dome;

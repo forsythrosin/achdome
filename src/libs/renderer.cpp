@@ -44,7 +44,7 @@ int Renderer::addRenderable(
 
   rc.id = nextId++;
   init(rc);
-  std::cout << "add: " << rc.id << std::endl;
+  std::cout << "add renderable with id = " << rc.id << std::endl;
   renderConfigs.emplace(rc.id, rc);
   return rc.id;
 };
@@ -81,7 +81,7 @@ void Renderer::removeRenderable(int configId) {
 void Renderer::init(RenderConfig &renderConfig) {
   // generate vertexArray
   glGenVertexArrays(1, &(renderConfig.vertexArray));
-  glBindVertexArray(renderConfig.vertexArray); // TODO: this row caus segfault sometimes (!)
+  glBindVertexArray(renderConfig.vertexArray); // TODO: this row cause segfault sometimes (!)
 
   // generate buffers
   glGenBuffers(1, &(renderConfig.positionBuffer));
