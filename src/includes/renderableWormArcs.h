@@ -6,7 +6,7 @@
 
 class RenderableWormArcs : public Renderable {
 public:
-  RenderableWormArcs(int wormCount, int segsPerWorm, GLfloat wormThickness);
+  RenderableWormArcs(int wormCount, int segsPerWorm);
   ~RenderableWormArcs();
 
   const std::vector<WormArc> getWormArcs() const;
@@ -23,7 +23,6 @@ protected:
 
 private:
   int vertsPerWorm, segsPerWorm;
-  GLfloat wormThickness;
   std::vector<WormArc> wormArcs;
   std::vector<glm::vec4> wormColors;
   const GLuint VERTS_PER_ELEMENT = 3;

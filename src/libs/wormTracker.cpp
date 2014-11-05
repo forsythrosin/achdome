@@ -70,6 +70,7 @@ void WormTracker::tick(int time) {
 
   std::vector<WormArc> arcs;
   std::vector<WormHead> heads;
+  float width = gameConfig->wormWidth;
 
   for (const auto &pair : wormHeads) {
     int id = pair.first;
@@ -79,7 +80,7 @@ void WormTracker::tick(int time) {
       wh->tick();
       glm::dquat position = wh->getQuaternionPosition();
       if (!wh->isInGap()) {
-        arcs.push_back(WormArc(id, prevPosition, position, time, wh->getColor()));
+        arcs.push_back(WormArc(id, prevPosition, position, width, time, wh->getColor()));
       }
       if (wh->needsNewGapTimer()) {
         setNewRandomGapTimer(id);

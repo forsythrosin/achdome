@@ -3,11 +3,10 @@
 #include <cassert>
 #include <iostream>
 
-RenderableWormArcs::RenderableWormArcs(int wormCount, int segsPerWorm, GLfloat wormThickness) {
+RenderableWormArcs::RenderableWormArcs(int wormCount, int segsPerWorm) {
   assert(segsPerWorm != 0);
 
   this->segsPerWorm = segsPerWorm;
-  this->wormThickness = wormThickness;
   vertsPerWorm = (segsPerWorm + 1)*2; // e.g. 3 segs need 8 vertices -> 6 triangles
   vertexCount = wormCount*vertsPerWorm;
   elementCount = wormCount*segsPerWorm*2; // 2 triangles per segment
@@ -82,8 +81,8 @@ void RenderableWormArcs::createVertices() {
 
       glm::dvec3 dSpreadVec = glm::normalize(glm::cross(pos, toNext));
       glm::vec3 spreadVec(dSpreadVec);
-      glm::vec3 posSpread0 = glm::vec3(pos) + spreadVec*wormThickness*0.5f;
-      glm::vec3 posSpread1 = glm::vec3(pos) - spreadVec*wormThickness*0.5f;
+      glm::vec3 posSpread0 = glm::vec3(pos) + spreadVec*arc.getWidth()*0.5f;
+      glm::vec3 posSpread1 = glm::vec3(pos) - spreadVec*arc.getWidth()*0.5f;
 
       cartesianVertexData[cartIdx0] = posSpread0.x;
       cartesianVertexData[cartIdx0 + 1] = posSpread0.y;
