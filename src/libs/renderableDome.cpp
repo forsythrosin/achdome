@@ -7,10 +7,10 @@ RenderableDome::RenderableDome(int as, int is) {
   vertexCount = azmSegs*(inclSegs+1); // e.g. 4 verts needed to draw 3 segs
   elementCount = azmSegs*inclSegs*2;
 
-  sphericalVertexData = new GLfloat[vertexCount*2];
-  cartesianVertexData = new GLfloat[vertexCount*3];
-  vertexColorData = new GLfloat[vertexCount*4];
-  elementData = new GLuint[elementCount*VERTS_PER_ELEMENT];
+  sphericalVertexData.reserve(vertexCount*2);
+  cartesianVertexData.reserve(vertexCount*3);
+  vertexColorData.reserve(vertexCount*4);
+  elementData.reserve(elementCount*VERTS_PER_ELEMENT);
 
   createVertices();
   createElements();
@@ -22,6 +22,8 @@ RenderableDome::~RenderableDome() {};
  * Vertex placement
  */
 void RenderableDome::createVertices() {
+  cartesianVertexData.clear();
+  sphericalVertexData.clear();
   for (int j = 0; j <= inclSegs; ++j) {
     float theta = glm::half_pi<float>()*(float)j/inclSegs;
     for (int i = 0; i < azmSegs; ++i) {
@@ -31,14 +33,14 @@ void RenderableDome::createVertices() {
 
       // (θ, φ) to (x, y, z)
       // x
-      cartesianVertexData[cartIdx] = R*glm::sin(theta)*glm::cos(phi);
+      cartesianVertexData.push_back(R*glm::sin(theta)*glm::cos(phi));
       // y
-      cartesianVertexData[cartIdx + 1] = R*glm::sin(theta)*glm::sin(phi);
+      cartesianVertexData.push_back(R*glm::sin(theta)*glm::sin(phi));
       // z
-      cartesianVertexData[cartIdx + 2] = R*glm::cos(theta);
+      cartesianVertexData.push_back(R*glm::cos(theta));
 
-      sphericalVertexData[sphereIdx] = phi;
-      sphericalVertexData[sphereIdx + 1] = theta;
+      sphericalVertexData.push_back(phi);
+      sphericalVertexData.push_back(theta);
     }
   }
 };
@@ -47,6 +49,7 @@ void RenderableDome::createVertices() {
  * Tessellation of the dome
  */
 void RenderableDome::createElements() {
+  elementData.clear();
   for (int i = 0; i < azmSegs*inclSegs; ++i) {
     int idx = i*6;
     int rowIndex = i%azmSegs;
@@ -58,14 +61,14 @@ void RenderableDome::createElements() {
     int nextDown = rowIndex == (azmSegs - 1) ? i + 1 : i + azmSegs + 1;
 
     // left element
-    elementData[idx] = self;
-    elementData[idx + 1] = straightDown;
-    elementData[idx + 2] = prev;
+    elementData.push_back(self);
+    elementData.push_back(straightDown);
+    elementData.push_back(prev);
 
     // right element
-    elementData[idx + 3] = self;
-    elementData[idx + 4] = nextDown;
-    elementData[idx + 5] = straightDown;
+    elementData.push_back(self);
+    elementData.push_back(nextDown);
+    elementData.push_back(straightDown);
   }
 };
 
