@@ -20,6 +20,8 @@ public:
   void loadToGPU(bool sphericalCoords = false);
   void attach();
   void detach();
+  void enableAttributes();
+  void disableAttributes();
 
 protected:
   void createVertices();
@@ -30,9 +32,11 @@ private:
   std::vector<WormHead> wormHeads;
   std::vector<glm::vec4> wormColors;
   std::vector<GLfloat> headCenterData;
+  std::vector<GLfloat> headDirectionData;
 
   // additional GL handles
   GLuint headCenterBuffer;
+  GLuint headDirectionBuffer;
 
   const GLuint VERTS_PER_ELEMENT = 3;
   const GLuint ELEMENTS_PER_HEAD = 2;

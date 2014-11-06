@@ -3,16 +3,19 @@
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec4 vertexColor;
 layout(location = 2) in vec3 headCenterPos;
+layout(location = 3) in vec3 headDirectionPos;
 uniform mat4 MVP;
 
 out vec4 vColor;
 out vec3 center;
 out vec3 worldPos;
+out vec3 forwardPoint;
 
 void main() {
   vColor = vertexColor;
   center = headCenterPos;
   worldPos = pos;
+  forwardPoint = headDirectionPos;
 
   // static dome radius: 7.5m
   float r = 7.5;

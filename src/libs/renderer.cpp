@@ -159,8 +159,7 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
 
   // Bind position array
   glBindVertexArray(renderConfig.renderable->vertexArray);
-  glEnableVertexAttribArray(0);
-  // glEnableVertexAttribArray(1);
+  renderConfig.renderable->enableAttributes();
 
   // TODO: Don't seem to need to rebind buffers?
   // glBindBuffer(GL_ARRAY_BUFFER, renderConfig.positionBuffer);
@@ -176,7 +175,7 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   );
 
   // Clean up + unbind
-  glDisableVertexAttribArray(0);
+  renderConfig.renderable->disableAttributes();
   glBindVertexArray(0);
   sgct::ShaderManager::instance()->unBindShaderProgram();
   glDisable(GL_BLEND);
