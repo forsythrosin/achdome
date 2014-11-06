@@ -29,7 +29,7 @@ private:
   GLfloat wormThickness;
   std::vector<WormHead> wormHeads;
   std::vector<glm::vec4> wormColors;
-  GLfloat *headCenterData;
+  std::vector<GLfloat> headCenterData;
 
   // additional GL handles
   GLuint headCenterBuffer;

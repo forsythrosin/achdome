@@ -1,6 +1,5 @@
 #include <lobbyClusterState.h>
 #include <player.h>
-#include <playerLobbyTile.h>
 #include <playerManager.h>
 #include <algorithm>
 #include <renderableDome.h>

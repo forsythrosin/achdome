@@ -9,19 +9,17 @@ RenderableWormHeads::RenderableWormHeads(int wormCount, GLfloat wormThickness) {
   vertexCount = wormCount*VERTS_PER_HEAD;
   elementCount = wormCount*ELEMENTS_PER_HEAD;
 
-  sphericalVertexData = new GLfloat[vertexCount*2];
-  cartesianVertexData = new GLfloat[vertexCount*3];
-  vertexColorData = new GLfloat[vertexCount*4];
+  sphericalVertexData.reserve(vertexCount*2);
+  cartesianVertexData.reserve(vertexCount*3);
+  vertexColorData.reserve(vertexCount*4);
+  elementData.reserve(elementCount*VERTS_PER_ELEMENT);
 
-  elementData = new GLuint[elementCount*VERTS_PER_ELEMENT];
-
-  headCenterData = new GLfloat[vertexCount*3];
+  headCenterData.reserve(vertexCount*3);
+  
   headCenterBuffer = GL_FALSE;
 };
 
-RenderableWormHeads::~RenderableWormHeads() {
-  delete[] headCenterData;
-};
+RenderableWormHeads::~RenderableWormHeads() {};
 
 void RenderableWormHeads::setWormHeads(std::vector<WormHead> wormHeads) {
   this->wormHeads = wormHeads;
@@ -37,20 +35,15 @@ void RenderableWormHeads::setWormHeads(std::vector<WormHead> wormHeads) {
 
 void RenderableWormHeads::setWormColors(std::vector<glm::vec4> wormColors) {
   this->wormColors = wormColors;
-
+  vertexColorData.clear();
   for (int j = 0; j < wormColors.size(); ++j) {
     glm::vec4 color = wormColors.at(j);
 
     for (int i = 0; i < VERTS_PER_HEAD; ++i) {
-      int r = (j*VERTS_PER_HEAD + i)*4;
-      int g = (j*VERTS_PER_HEAD + i)*4 + 1;
-      int b = (j*VERTS_PER_HEAD + i)*4 + 2;
-      int a = (j*VERTS_PER_HEAD + i)*4 + 3;
-
-      vertexColorData[r] = color[0];
-      vertexColorData[g] = color[1];
-      vertexColorData[b] = color[2];
-      vertexColorData[a] = color[3];
+      vertexColorData.push_back(color[0]);
+      vertexColorData.push_back(color[1]);
+      vertexColorData.push_back(color[2]);
+      vertexColorData.push_back(color[3]);
     }
   }
 
@@ -58,28 +51,25 @@ void RenderableWormHeads::setWormColors(std::vector<glm::vec4> wormColors) {
 };
 
 void RenderableWormHeads::createVertices() {
+  cartesianVertexData.clear();
+  headCenterData.clear();
+  
   for (int j = 0; j < wormHeads.size(); ++j) {
     WormHead wh = wormHeads.at(j);
     glm::vec3 headPos = (glm::vec3) wh.getPosition();
     glm::vec3 headDirection = glm::normalize((glm::vec3) wh.getVelocity());
     glm::vec3 domeNormal = glm::normalize(headPos);
 
-    std::cout << glm::length(headDirection) << std::endl;
-    std::cout << glm::length(domeNormal) << std::endl;
-
     for (int i = 0; i < VERTS_PER_HEAD; ++i) {
-      int cartIdx = (j*VERTS_PER_HEAD + i)*3;
-      int sphereIdx = (j*VERTS_PER_HEAD + i)*2;
-
       glm::vec3 quadPoint = headPos + glm::rotate(headDirection, i*360.0f/VERTS_PER_HEAD, domeNormal);
 
-      cartesianVertexData[cartIdx] = quadPoint.x;
-      cartesianVertexData[cartIdx + 1] = quadPoint.y;
-      cartesianVertexData[cartIdx + 2] = quadPoint.z;
+      cartesianVertexData.push_back(quadPoint.x);
+      cartesianVertexData.push_back(quadPoint.y);
+      cartesianVertexData.push_back(quadPoint.z);
 
-      headCenterData[cartIdx] = headPos.x;
-      headCenterData[cartIdx + 1] = headPos.y;
-      headCenterData[cartIdx + 2] = headPos.z;
+      headCenterData.push_back(headPos.x);
+      headCenterData.push_back(headPos.y);
+      headCenterData.push_back(headPos.z);
 
       // sphericalVertexData[cartIdx] = headPos.x;
       // sphericalVertexData[cartIdx + 1] = headPos.y;
@@ -88,22 +78,20 @@ void RenderableWormHeads::createVertices() {
 };
 
 void RenderableWormHeads::createElements() {
+  elementData.clear();
   for (int i = 0; i < wormHeads.size(); ++i) {
-    int elementIdx0 = i*ELEMENTS_PER_HEAD*VERTS_PER_ELEMENT;
-    int elementIdx1 = i*ELEMENTS_PER_HEAD*VERTS_PER_ELEMENT + VERTS_PER_ELEMENT;
-
     int first = i*VERTS_PER_HEAD;
     int second = i*VERTS_PER_HEAD + 1;
     int third = i*VERTS_PER_HEAD + 2;
     int fourth = i*VERTS_PER_HEAD + 3;
 
-    elementData[elementIdx0] = first;
-    elementData[elementIdx0 + 1] = second;
-    elementData[elementIdx0 + 2] = third;
+    elementData.push_back(first);
+    elementData.push_back(second);
+    elementData.push_back(third);
 
-    elementData[elementIdx1] = first;
-    elementData[elementIdx1 + 1] = third;
-    elementData[elementIdx1 + 2] = fourth;
+    elementData.push_back(first);
+    elementData.push_back(third);
+    elementData.push_back(fourth);
   }
 };
 
@@ -118,8 +106,8 @@ void RenderableWormHeads::loadToGPU(bool sphericalCoords) {
   glBindBuffer(GL_ARRAY_BUFFER, headCenterBuffer);
   glBufferData(
     GL_ARRAY_BUFFER,
-    vertexCount*sizeof(GLfloat)*vertexDim,
-    headCenterData,
+    headCenterData.size()*sizeof(GLfloat)*vertexDim,
+    &headCenterData[0],
     GL_STATIC_DRAW
   );
   glEnableVertexAttribArray(2);
