@@ -11,6 +11,7 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   wormArcs = new sgct::SharedVector<WormArc>(gameConfig->maximumPlayers);
   wormCollisions = new sgct::SharedVector<WormCollision>(gameConfig->maximumPlayers);
   wormHeads = new sgct::SharedVector<WormHead>(gameConfig->maximumPlayers);
+  timer.setVal(0);
 
   renderableDome = nullptr;
   renderableArcs = nullptr;
@@ -44,6 +45,9 @@ void GameClusterState::attach() {
   renderableHeads->setWormHeads(wormHeads->getVal());
   wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
+  timeUni = new Uniform<float>("time");
+  renderer->setUniform(wormDots, timeUni);
+
   attached = true;
 }
 
@@ -61,6 +65,9 @@ void GameClusterState::detach() {
   delete renderableHeads;
   renderableHeads = nullptr;
 
+  delete timeUni;
+  timeUni = nullptr;
+
   attached = false;
 }
 
@@ -73,6 +80,7 @@ void GameClusterState::preSync() {
     wormArcs->setVal(arcs);
     wormCollisions->setVal(collisions);
     wormHeads->setVal(heads);
+    timer.setVal(timer.getVal() + 1);
 
     renderSpace->clear();
   }
@@ -89,6 +97,8 @@ void GameClusterState::draw() {
 
   renderableArcs->setWormArcs(arcs);
   renderableHeads->setWormHeads(heads);
+
+  timeUni->set(timer.getVal());
 
   renderer->render(wormDots);
 
@@ -118,12 +128,15 @@ void GameClusterState::encode() {
   data->writeVector(wormArcs);
   data->writeVector(wormCollisions);
   data->writeVector(wormHeads);
+  data->writeInt(&timer);
 }
 
 void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
   sgct::SharedData *data = sgct::SharedData::instance();
+
   data->readVector(wormArcs);
   data->readVector(wormCollisions);
   data->readVector(wormHeads);
+  data->readInt(&timer);
 }
