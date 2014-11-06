@@ -14,6 +14,7 @@ class Game : WormEventListener, PlayerEventListener {
  public:
   Game(int gameId, PlayerManager *pm, WormTracker *wt);
   ~Game();
+  int getId();
   bool turnLeft(int playerId, bool turn);
   bool turnRight(int playerId, bool turn);
   bool startMoving(int playerId);
@@ -25,8 +26,8 @@ class Game : WormEventListener, PlayerEventListener {
   bool start();
   bool end();
   std::vector<int> getParticipants();
-  std::string getCountry(int playerId);
   glm::vec2 getPosition(int playerId); // phi, theta
+  int getPoints(int playerId);
   int getNumberOfPlayers();
   int getNumberOfPlayersAlive();
   int getNumberOfPlayersStartedMoving();

@@ -75,8 +75,14 @@ class GameEngine {
   float countdownSecondsLeft;
   float gameOverSecondsLeft;
 
+  int getCurrentGameId();
   int gameIndexInTournament;
   int nGamesInTournament;
   int getGameIndexInTournament();
 
+  void printGameStatistics();
+  void printTournamentStatistics();
+  std::vector<int> getPlayedGameIdsInTournament();
+
+  
 };

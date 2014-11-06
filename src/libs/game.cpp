@@ -33,6 +33,10 @@ Game::~Game() {
   wormTracker->removeEventListener(this);
 } 
 
+int Game::getId() {
+  return gameId;
+}
+
 
 bool Game::start() {
   time = 0;
@@ -172,11 +176,6 @@ std::vector<int> Game::getParticipants() {
   return ids;
 }
 
-
-std::string Game::getCountry(int playerId) {
-  return "";
-}
-
 glm::vec2 Game::getPosition(int playerId) {
   return wormTracker->getSphericalPosition(playerId);
 }
@@ -193,6 +192,13 @@ bool Game::startMoving(int playerId) {
   }
   gamePlayers[playerId]->startMoving();
   return wormTracker->startWormHead(playerId);
+}
+
+int Game::getPoints(int playerId) {
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return -1;
+  }
+  return gamePlayers[playerId]->getPoints();
 }
 
 bool Game::isOver() {

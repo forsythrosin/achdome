@@ -18,6 +18,7 @@ class GameClusterState : public ClusterState {
 
   void attach();
   void detach();
+  void reset();
 
   void preSync();
   void draw();
@@ -35,6 +36,7 @@ class GameClusterState : public ClusterState {
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;
 
+  sgct::SharedBool *resetSignal;
   sgct::SharedVector<WormArc> *wormArcs;
   sgct::SharedVector<WormCollision> *wormCollisions;
   sgct::SharedVector<WormHead> *wormHeads;

@@ -43,7 +43,8 @@ public:
   void removeRenderable(int configId);
   void render(int configId, int configWithFBOId = -1, int stitchStep = 0);
   void renderToFBO(int configId, int stitchStep = 0);
-
+  void resetFBO(int configId);
+  
   glm::mat4 getMVP();
 
 private:

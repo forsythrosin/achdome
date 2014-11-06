@@ -8,6 +8,7 @@
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr) {}
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs) : ClusterState(gEngine, gameConfig) {
+  resetSignal = new sgct::SharedBool(false);
   wormArcs = new sgct::SharedVector<WormArc>(gameConfig->maximumPlayers);
   wormCollisions = new sgct::SharedVector<WormCollision>(gameConfig->maximumPlayers);
   wormHeads = new sgct::SharedVector<WormHead>(gameConfig->maximumPlayers);
@@ -47,6 +48,10 @@ void GameClusterState::attach() {
   attached = true;
 }
 
+void GameClusterState::reset() {
+  renderer->resetFBO(wormLines);
+}
+
 void GameClusterState::detach() {
   renderer->removeRenderable(domeGrid);
   renderer->removeRenderable(domeWorms);
@@ -69,19 +74,26 @@ void GameClusterState::preSync() {
     std::vector<WormArc> arcs = renderSpace->getArcs();
     std::vector<WormHead> heads = renderSpace->getHeads();
     std::vector<WormCollision> collisions = renderSpace->getCollisions();
+    bool reset = renderSpace->getResetSignal();
 
     wormArcs->setVal(arcs);
     wormCollisions->setVal(collisions);
     wormHeads->setVal(heads);
+    resetSignal->setVal(reset);
 
     renderSpace->clear();
   }
 
   // Reset stitch step
   stitchStep = 0;
+
+  if (resetSignal->getVal()) {
+    reset(); 
+  }
 }
 
 void GameClusterState::draw() {
+
   // Copy current worm positions and colors
   std::vector<WormArc> arcs = wormArcs->getVal();
   std::vector<WormHead> heads = wormHeads->getVal();
@@ -115,6 +127,7 @@ void GameClusterState::encode() {
   // get things from renderSpace and send it to everyone.
   sgct::SharedData *data = sgct::SharedData::instance();
 
+  data->writeBool(resetSignal);
   data->writeVector(wormArcs);
   data->writeVector(wormCollisions);
   data->writeVector(wormHeads);
@@ -123,6 +136,8 @@ void GameClusterState::encode() {
 void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
   sgct::SharedData *data = sgct::SharedData::instance();
+
+  data->writeBool(resetSignal);
   data->readVector(wormArcs);
   data->readVector(wormCollisions);
   data->readVector(wormHeads);

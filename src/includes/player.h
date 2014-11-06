@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <map>
 
 class Player {
  public:
@@ -13,9 +14,12 @@ class Player {
   glm::vec4 getColor();
   bool isConnected();
   bool disconnect();
+  void setPointsInGame(int gameId, int points);
+  int getPointsInGame(int gameId);
  private:
   int id;
   glm::vec4 color;
   char name[50];
   bool connected;
+  std::map<int, int> points;
 };

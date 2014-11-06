@@ -39,6 +39,11 @@ class ClusterRenderSpace : public RenderSpace {
   void addCollisions(std::vector<WormCollision>);
 
   /**
+   * Reset the render space. (Set signal to reset FBO.)
+   */
+  void reset();
+  
+  /**
    * Clear the render space
    */
   void clear();
@@ -58,8 +63,14 @@ class ClusterRenderSpace : public RenderSpace {
    */
   std::vector<WormHead> getHeads();
 
+  /**
+   * Get reset signal
+   */
+  bool getResetSignal();
+
  private:
   std::vector<WormArc> arcs;
   std::vector<WormCollision> collisions;
   std::vector<WormHead> heads;
+  bool resetSignal = false;
 };
