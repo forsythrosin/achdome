@@ -12,8 +12,6 @@ out vec4 color;
 // c3: Upper rounded egde at vertical shape
 // c4: Lower rounded egde at vertical shape
 
-
-
 void main() {
 
 
@@ -23,7 +21,7 @@ void main() {
   // Use this to top on logo:
   //  float t = min(time * 5 - 20, 1 + maxAngle);
 
-  float inTime = time * 5 - 20;
+  float inTime = (time * 5 - 20)*0.02;
 
   inTime = min(inTime, 1 + maxAngle);
 

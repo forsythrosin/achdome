@@ -46,6 +46,7 @@ void GameClusterState::attach() {
   renderableHeads->setWormHeads(wormHeads->getVal());
   wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
+  timer.setVal(0);
   timeUni = new Uniform<float>("time");
   renderer->setUniform(wormDots, timeUni);
 
@@ -96,7 +97,7 @@ void GameClusterState::preSync() {
   stitchStep = 0;
 
   if (resetSignal->getVal()) {
-    reset(); 
+    reset();
   }
 }
 

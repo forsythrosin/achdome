@@ -1,3 +1,5 @@
+#pragma once
+
 #include "sgct.h"
 
 class AbstractUniform {

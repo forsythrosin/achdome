@@ -11,7 +11,8 @@ LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConf
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, PlayerManager *playerManager) : ClusterState(gEngine, gameConfig) {
   this->playerManager = playerManager;
   sharedPlayers = new sgct::SharedVector<Player>(100);
-  playerName.setVal("");
+  // playerName.setVal("");
+  timer.setVal(0);
   setPlayerListAnchor(DEFAULT_PLAYER_LIST_ANCHOR);
   dome = new RenderableDome(50, 20);
 
@@ -26,16 +27,27 @@ LobbyClusterState::~LobbyClusterState() {
 void LobbyClusterState::attach() {
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   domeLogo = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeLogoShader.frag", true);
+
+  timer.setVal(0);
+  timeUni = new Uniform<float>("time");
+  renderer->setUniform(domeLogo, timeUni);
+
   attached = true;
 }
 
 void LobbyClusterState::detach() {
   renderer->removeRenderable(domeGrid);
   renderer->removeRenderable(domeLogo);
+
+  delete timeUni;
+  timeUni = nullptr;
+
   attached = false;
 }
 
 void LobbyClusterState::draw() {
+  timeUni->set(timer.getVal());
+
   // render grid lines
   renderer->render(domeGrid);
   renderer->render(domeLogo);
@@ -82,6 +94,8 @@ void LobbyClusterState::preSync() {
       connectedPlayers.push_back(*p);
     }
     sharedPlayers->setVal(connectedPlayers);
+
+    timer.setVal(timer.getVal() + 1);
   }
 }
 
@@ -90,7 +104,10 @@ void LobbyClusterState::preSync() {
  * Encode vector with SyncablePlayer:s then encode each player name separately
  */
 void LobbyClusterState::encode() {
-  sgct::SharedData::instance()->writeVector(sharedPlayers);
+  sgct::SharedData *data = sgct::SharedData::instance();
+
+  data->writeVector(sharedPlayers);
+  data->writeInt(&timer);
 }
 
 /**
@@ -98,5 +115,8 @@ void LobbyClusterState::encode() {
  * Decode vector with SyncablePlayer:s then decode each player name separately
  */
 void LobbyClusterState::decode() {
-  sgct::SharedData::instance()->readVector(sharedPlayers);
+  sgct::SharedData *data = sgct::SharedData::instance();
+
+  data->readVector(sharedPlayers);
+  data->readInt(&timer);
 }
