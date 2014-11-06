@@ -1,7 +1,7 @@
 @import "globals";
 @import "common";
 
-@panelWidth: 250px;
+@panelWidth: 200px;
 
 .panel {
   background: @base-2;
@@ -39,7 +39,7 @@ section {
         text-transform: uppercase;
         text-align: center;
         display: block;
-        font-size: 140%;
+        font-size: 120%;
         margin-bottom: 10px;
       }
 
@@ -85,16 +85,68 @@ section {
   right: @panelWidth;
 
   h1 {
-    font-size: 300%;
+    font-size: 200%;
     text-align: center;
   }
 
-  #changeGameState.start {
+  button, input {
+    display: none;
+  }
+
+  #numberOfGames {
+    position: relative;
+
+    @arrow-width: 30px;
+    @input-height: 60px;
+
+    .value {
+      height: @input-height;
+      padding: 0;
+      margin: 0 @arrow-width + 10px;
+      background: white;
+      text-align: center;
+      color: @base;
+      font-size: 200%;
+    }
+
+    .down, .up {
+      content: '';
+      position: absolute;
+      top: 0;
+      height: 0;
+      width: 0;
+      border-color: @bright-base;
+      border-style: solid;
+      border-width: @input-height/2 0;
+      border-top-color: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .down {
+      left: 5px;
+      border-right-width: @arrow-width;
+    }
+
+    .down:active {
+      border-right-color: white;
+    }
+
+    .up {
+      right: 5px;
+      border-left-width: @arrow-width;
+    }
+
+    .up:active {
+      border-left-color: white;
+    }
+  }
+
+  #startTournament {
     background: @positive;
     color: @positive-dark;
   }
 
-  #changeGameState.end {
+  #endTournament, #endGame {
     background: @negative;
     color: @negative-dark;
   }

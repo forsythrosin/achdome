@@ -61,10 +61,34 @@ void AdminGameController::performActions() {
         ->build();
       webServer->addBroadcast(sendMessage, subProtocol);
       break;
+    case GameEngine::COUNTDOWN:
+      addPlayers(data, gameEngine->getPlayers());
+      sendMessage = dataSerializationBuilder
+        ->add("message", "countdown")
+        ->add("data", data)
+        ->build();
+      webServer->addBroadcast(sendMessage, subProtocol);
+      break;
     case GameEngine::GAME:
       addPlayers(data, gameEngine->getPlayers());
       sendMessage = dataSerializationBuilder
         ->add("message", "gameStarted")
+        ->add("data", data)
+        ->build();
+      webServer->addBroadcast(sendMessage, subProtocol);
+      break;
+    case GameEngine::GAME_OVER:
+      addPlayers(data, gameEngine->getPlayers());
+      sendMessage = dataSerializationBuilder
+        ->add("message", "gameOver")
+        ->add("data", data)
+        ->build();
+      webServer->addBroadcast(sendMessage, subProtocol);
+      break;
+    case GameEngine::TOURNAMENT_OVER:
+      addPlayers(data, gameEngine->getPlayers());
+      sendMessage = dataSerializationBuilder
+        ->add("message", "tournamentOver")
         ->add("data", data)
         ->build();
       webServer->addBroadcast(sendMessage, subProtocol);
@@ -91,22 +115,36 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
   }
 
   switch (action.type) {
-  case ClientAction::AUTHENTICATE_ADMIN:
+  case ClientAction::AUTHENTICATE_ADMIN: {
     std::cout << "Authenticated admin " << sessionId << std::endl;
     data = dataSerializationBuilder->group();
+    std::string state = "";
+    switch (currentState) {
+    case GameEngine::LOBBY:
+      state = "lobby";
+      break;
+    case GameEngine::COUNTDOWN:
+      state = "countdown";
+      break;
+    case GameEngine::GAME:
+      state = "gameStarted";
+      break;
+    case GameEngine::GAME_OVER:
+      state = "gameOver";
+      break;
+    case GameEngine::TOURNAMENT_OVER:
+      state = "tournamentOver";
+      break;
+    }
     dataSerializationBuilder
-      ->add("message", "authenticated")
+      ->add("message", state)
       ->add("data", data);
     addSettings(data);
     addPlayers(data, gameEngine->getPlayers());
-    if (currentState == GameEngine::GAME) {
-      data->add("started", 1);
-    } else if (currentState == GameEngine::LOBBY) {
-      data->add("ready", 1);
-    }
     sendMessage = dataSerializationBuilder->build();
     webServer->addMessage(sessionId, sendMessage);
     break;
+  }
   case ClientAction::UPDATE_SETTINGS:
     std::cout << "Settings updated by admin " << sessionId << std::endl;
     if (action.floats.count("wormWidth") > 0) {
@@ -126,10 +164,13 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
       gameConfig->countdown = action.ints.at("countdown");
     }
     break;
-  case ClientAction::START_GAME:
-    // TODO: Change this enum to START_TOURNAMENT and use user-defined number of games.
-    std::cout << "Game started by admin " << sessionId << std::endl;
-    gameEngine->startTournament(3);
+  case ClientAction::START_TOURNAMENT:
+    std::cout << "Tournament started by admin " << sessionId << std::endl;
+    gameEngine->startTournament(action.ints.at("numberOfGames"));
+    break;
+  case ClientAction::END_TOURNAMENT:
+    std::cout << "Tournament started by admin " << sessionId << std::endl;
+    gameEngine->endTournament();
     break;
   case ClientAction::END_GAME:
     std::cout << "Game ended by admin " << sessionId << std::endl;

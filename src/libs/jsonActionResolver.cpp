@@ -29,10 +29,16 @@ bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) 
   }
 
   std::transform(message.begin(), message.end(), message.begin(), ::tolower);
-  if (message == "start_game") {
+  if (message == "start_tournament") {
     // Requires password
     if (!getDataString(v, "password", action)) return false;
-    action.type = ClientAction::START_GAME;
+    if (!getDataInt(v, "numberOfGames", action)) action.ints.insert(std::pair<std::string, int>("numberOfGames", 1));
+    action.type = ClientAction::START_TOURNAMENT;
+    return true;
+  } else if (message == "end_tournament") {
+    // Requires password
+    if (!getDataString(v, "password", action)) return false;
+    action.type = ClientAction::END_TOURNAMENT;
     return true;
   } else if (message == "end_game") {
     // Requires password

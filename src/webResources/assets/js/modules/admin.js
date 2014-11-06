@@ -157,10 +157,25 @@ var setButtonListeners = function ($container) {
         $password.addClass('warning').attr('placeholder', 'Enter password');
       }
     })
-    .on('click', '#changeGameState.start', function () {
-      server.startGame();
+    .on('click', '#numberOfGames .down', function () {
+      $numberOfGames = $container.find('#numberOfGames .value');
+      var val = parseInt($numberOfGames.text());
+      if (--val > 0)
+        $numberOfGames.text(val);
     })
-    .on('click', '#changeGameState.end', function () {
+    .on('click', '#numberOfGames .up', function () {
+      $numberOfGames = $container.find('#numberOfGames .value');
+      var val = parseInt($numberOfGames.text());
+      $numberOfGames.text(++val);
+    })
+    .on('click', '#startTournament', function () {
+      $numberOfGames = $container.find('#numberOfGames .value');
+      server.startTournament(parseInt($numberOfGames.text()));
+    })
+    .on('click', '#endTournament', function () {
+      server.endTournament();
+    })
+    .on('click', '#endGame', function () {
       server.endGame();
     })
     .on('click', '#saveSettings', function() {
@@ -196,10 +211,6 @@ var setServerListeners = function ($container) {
         renderAuthenticate($container, res);
       }
     })
-    .on('authenticated', function (err, res) {
-      if (err) console.warn(err);
-      renderAdminPanel($container, res);
-    })
     .on('settingsChanged', function (err, res) {
       if (err) console.warn(err);
       updateSettings($container, res);
@@ -210,25 +221,21 @@ var setServerListeners = function ($container) {
       }
     })
     .on('gameStarted', function (err, res) {
-      if (screen == "adminPanel") {
-        $container.find('#changeGameState').removeClass().addClass('end').text("End game");
-        $container.find('#state h1').text('Game started');
-      } else {
-        res = res || {};
-        res.started = true;
+      if (screen != "adminPanel") {
         renderAdminPanel($container, res);
       }
+      $container.find('#startTournament, #numberOfGames').hide();
+      $container.find('#endGame, #endTournament').show();
+      $container.find('#state h1').text('Game started');
       updatePlayers($container, res);
     })
     .on('lobby', function (err, res) {
-      if (screen == "adminPanel") {
-        $container.find('#changeGameState').removeClass().addClass('start').text("Start game");
-        $container.find('#state h1').text('In lobby');
-      } else {
-        res = res || {};
-        res.ready = true;
+      if (screen != "adminPanel") {
         renderAdminPanel($container, res);
       }
+      $container.find('#startTournament, #numberOfGames').show();
+      $container.find('#endGame, #endTournament').hide();
+      $container.find('#state h1').text('In lobby');
       updatePlayers($container, res);
     });
 };

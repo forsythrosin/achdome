@@ -179,6 +179,18 @@ void GameEngine::startGameOver() {
   Tweener::getInstance()->startTween(gameOverTween);
 }
 
+/**
+* End tournament.
+*/
+bool GameEngine::endTournament() {
+  if ((state != State::GAME || currentGame == nullptr) && state != State::GAME_OVER) {
+    return false;
+  }
+  // TODO: Implement this functionality
+  std::cout << "End tournament" << std::endl;
+  return true;
+}
+
 
 void GameEngine::startTournamentOver() {
   assert(state == State::GAME);
