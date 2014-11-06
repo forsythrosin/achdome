@@ -30,6 +30,11 @@ struct GameConfig{
   float countdownDuration;
   float gameOverDuration;
 
+  int minTimeBetweenGaps;
+  int maxTimeBetweenGaps;
+  int minTimeInGap;
+  int maxTimeInGap;
+
   private:
 
   struct AbstractConfigEntity{

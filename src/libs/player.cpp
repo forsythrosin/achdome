@@ -1,6 +1,6 @@
 #include <glm/glm.hpp>
 #include <player.h>
-
+#include <map>
 
 Player::Player(int id, glm::vec4 color, std::string name) {
   this->id = id;
@@ -42,4 +42,15 @@ bool Player::isConnected() {
 bool Player::disconnect() {
   connected = false;
   return true;
+}
+
+void Player::setPointsInGame(int gameId, int points) {
+  this->points[gameId] = points;
+}
+
+int Player::getPointsInGame(int gameId) {
+  if (points.find(gameId) == points.end()) {
+    return -1;
+  }
+  return points[gameId];
 }

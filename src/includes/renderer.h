@@ -14,7 +14,7 @@ public:
   Renderer(sgct::Engine *gEngine);
   ~Renderer();
 
-  // Add + remove renderables
+  // Renderables handling
   int addRenderable(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical);
   void removeRenderable(int configId);
 
@@ -22,7 +22,9 @@ public:
   void render(int configId, int configWithFBOId = -1, int stitchStep = 0);
   void renderToFBO(int configId, int stitchStep = 0);
 
+  // Convenience methods
   void setUniform(int configId, AbstractUniform *uniform);
+  void resetFBO(int configId);
   glm::mat4 getMVP();
 
 private:

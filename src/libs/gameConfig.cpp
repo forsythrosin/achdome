@@ -14,6 +14,10 @@ GameConfig::GameConfig() {
   countdownDuration = 5;
   gameOverDuration = 5;
   password = "default";
+  minTimeBetweenGaps = 200;
+  maxTimeBetweenGaps = 400;
+  minTimeInGap = 10;
+  maxTimeInGap = 20;
 
   configEntities = {
     new ConfigEntity<double, float>("wormWidth", wormWidth),
@@ -23,7 +27,11 @@ GameConfig::GameConfig() {
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
     new ConfigEntity<std::string>("password", password),
     new ConfigEntity<double, float>("countdownDuration", countdownDuration),
-    new ConfigEntity<double, float>("gameOverDuration", gameOverDuration)
+    new ConfigEntity<double, float>("gameOverDuration", gameOverDuration),
+    new ConfigEntity<double, int>("minTimeBetweenGaps", minTimeBetweenGaps),
+    new ConfigEntity<double, int>("maxTimeBetweenGaps", maxTimeBetweenGaps),
+    new ConfigEntity<double, int>("minTimeInGap", minTimeInGap),
+    new ConfigEntity<double, int>("maxTimeInGap", maxTimeInGap)
   };
 
 }

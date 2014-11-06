@@ -57,6 +57,10 @@ bool JsonActionResolver::resolve(std::string jsonMessage, ClientAction &action) 
     getDataFloat(v, "wormSpeed", action);
     getDataFloat(v, "turnSpeed", action);
     getDataInt(v, "countdown", action);
+    getDataInt(v, "minTimeBetweenGaps", action);
+    getDataInt(v, "maxTimeBetweenGaps", action);
+    getDataInt(v, "minTimeInGap", action);
+    getDataInt(v, "maxTimeInGap", action);
     action.type = ClientAction::UPDATE_SETTINGS;
     return true;
   }

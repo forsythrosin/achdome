@@ -83,6 +83,20 @@ var configSliders = {
     range: [0, 20],
     value: null,
     scaleFactor: 1
+  },
+  timeBetweenGaps: {
+    name: "Between gaps",
+    range: [100, 800],
+    step: 50,
+    values: [null, null],
+    scaleFactor: 1
+  },
+  timeInGap: {
+    name: "In gap",
+    range: [5, 40],
+    step: 5,
+    values: [null, null],
+    scaleFactor: 1
   }
 };
 
@@ -95,6 +109,23 @@ var updateSettings = function ($container, data) {
       slide.value = Math.round(slide.scaleFactor * value);
       $container.find('.slider#' + key).val(slide.value);
       console.log("Slider " + key + " set to " + value + " = " + slide.value);
+    } else {
+      // Check if slider is range
+      var prefix = key.substr(0,3),
+          rangeType = key.substr(3);
+      rangeType = rangeType.charAt(0).toLowerCase() + rangeType.slice(1);
+      slide = configSliders[rangeType];
+      if (slide !== undefined) {
+        if (prefix == 'min') {
+          var value = settings[key];
+          slide.value = Math.round(slide.scaleFactor * value);
+          $container.find('.slider#' + rangeType).val([slide.value,null]);
+        } else if (prefix == 'max') {
+          var value = settings[key];
+          slide.value = Math.round(slide.scaleFactor * value);
+          $container.find('.slider#' + rangeType).val([null,slide.value]);
+        }
+      }
     }
   });
 };
@@ -125,19 +156,33 @@ var renderAdminPanel = function ($container, params) {
     var slide = configSliders[key];
     $slider = $('<div class="slider" id="' + key + '"></div>');
     $param = $('<div class="configParam">').append('<label>' + slide.name + '</label>').append($slider);
+    var isRange = Array.isArray(slide.values);
     $slider.noUiSlider({
-      connect: "lower",
-      start: slide.range[1],
-      step: 1,
+      connect: isRange ? true : "lower",
+      start: isRange ? slide.range : slide.range[1],
+      step: slide.step || 1,
       range: {
         min: slide.range[0],
         max: slide.range[1]
       }
-    }).Link('lower').to('-inline-<div class="tooltip"></div>', function (v) {
-      var value = Math.floor(v);
-      slide.value = value;
-      $(this).html('<span>' + value + '</span>');
     });
+    if (isRange) {
+      $slider.Link('lower').to('-inline-<div class="tooltip"></div>', function (v) {
+        var value = Math.floor(v);
+        slide.values[0] = value;
+        $(this).html('<span>' + value + '</span>');
+      }).Link('upper').to('-inline-<div class="tooltip"></div>', function (v) {
+        var value = Math.floor(v);
+        slide.values[1] = value;
+        $(this).html('<span>' + value + '</span>');
+      });
+    } else {
+      $slider.Link('lower').to('-inline-<div class="tooltip"></div>', function (v) {
+        var value = Math.floor(v);
+        slide.value = value;
+        $(this).html('<span>' + value + '</span>');
+      });
+    }
     $params.append($param);
   });
   updateSettings($container, params);
@@ -184,8 +229,15 @@ var setButtonListeners = function ($container) {
         var $slider = $container.find('.slider#' + key);
         if ($slider) {
           var slide = configSliders[key];
-          var value = $slider.val();
-          settings[key] = value / slide.scaleFactor;
+          if (Array.isArray(slide.values)) {
+            var capitalized = key.charAt(0).toUpperCase() + key.slice(1);
+            var values = $slider.val();
+            settings['min' + capitalized] = values[0] / slide.scaleFactor;
+            settings['max' + capitalized] = values[1] / slide.scaleFactor;
+          } else {
+            var value = $slider.val();
+            settings[key] = value / slide.scaleFactor;
+          }
         }
       });
       server.updateSettings(settings);

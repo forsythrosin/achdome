@@ -58,10 +58,7 @@ void Renderer::removeRenderable(int configId) {
   // delete buffers + VAO
   rc.renderable->detach();
 
-  // delete FBOs
-  for (auto fbo : rc.framebuffers) {
-    delete fbo;
-  }
+  resetFBO(configId);
   renderConfigs.erase(configId);
 };
 
@@ -133,6 +130,26 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
   render(configId);
   glBindFramebuffer(GL_FRAMEBUFFER, screenFBO);
 };
+
+
+/**
+ * Resets FBO (for all stitchSteps) of a specified RenderCongig 
+ */
+void Renderer::resetFBO(int configId) {
+  auto rcIt = renderConfigs.find(configId);
+  if (rcIt == renderConfigs.end()) {
+    std::cout << "Could not find renderable when resetting FBO." << std::endl;
+    return;
+  }
+  RenderConfig &rc = rcIt->second;
+
+  // delete FBOs
+  for (auto fbo : rc.framebuffers) {
+    delete fbo;
+  }
+  rc.framebuffers.clear();
+}
+
 
 /**
  * Renders the specified RenderConfig to the currently bound FBO

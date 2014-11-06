@@ -19,6 +19,7 @@ class GameClusterState : public ClusterState {
 
   void attach();
   void detach();
+  void reset();
 
   void preSync();
   void draw();
@@ -36,6 +37,7 @@ class GameClusterState : public ClusterState {
   ClusterRenderSpace *renderSpace;
   Uniform<float> *timeUni;
 
+  sgct::SharedBool *resetSignal;
   sgct::SharedVector<WormArc> *wormArcs;
   sgct::SharedVector<WormCollision> *wormCollisions;
   sgct::SharedVector<WormHead> *wormHeads;

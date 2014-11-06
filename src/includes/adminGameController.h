@@ -17,6 +17,10 @@ protected:
   float wormSpeed;
   float turnSpeed;
   int countdown;
+  int minTimeBetweenGaps;
+  int maxTimeBetweenGaps;
+  int minTimeInGap;
+  int maxTimeInGap;
   void addPlayers(DataSerializationBuilder*, std::vector<Player*>);
   void addSettings(DataSerializationBuilder*);
 };

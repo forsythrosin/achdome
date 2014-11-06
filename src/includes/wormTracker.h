@@ -39,9 +39,4 @@ class WormTracker {
   bool setNewRandomGapTimer(int id);
   bool setNewGapTimer(int id, int ticksBetweenGaps, int ticksInGap);
   std::mt19937 randomGenerator;
-  
-  const int MIN_TIME_BETWEEN_GAPS = 100;
-  const int MAX_TIME_BETWEEN_GAPS = 200;
-  const int MIN_TIME_IN_GAP = 20;
-  const int MAX_TIME_IN_GAP = 30;
 };

@@ -98,6 +98,42 @@ bool PlayerManager::setColor(int playerId, glm::vec4 color) {
   return true;
 }
 
+bool PlayerManager::setPointsInGame(int playerId, int gameId, int points) {
+  if (players.find(playerId) == players.end()) {
+    return false;
+  }
+  players[playerId]->setPointsInGame(gameId, points);
+}
+
+int PlayerManager::getPointsInGame(int playerId, int gameId) {
+  if (players.find(playerId) == players.end()) {
+    return -1;
+  }
+  return players[playerId]->getPointsInGame(gameId);
+}
+
+int PlayerManager::getPointsInGames(int playerId, std::vector<int> gameIds) {
+  if (players.find(playerId) == players.end()) {
+    return -1;
+  }
+  int totalPoints = 0;
+  bool participated = false;
+  for (int gameId : gameIds) {
+    int p = players[playerId]->getPointsInGame(gameId);
+    if (p != -1) {
+      totalPoints += p;
+      participated = true;
+    }
+  }
+
+  if (participated) {
+    return totalPoints;
+  } else {
+    return -1;
+  }
+}
+
+
 void PlayerManager::addEventListener(PlayerEventListener *pel) {
   eventListeners.push_back(pel);
 }
@@ -117,6 +153,17 @@ std::vector<Player*> PlayerManager::getConnectedPlayers() {
     if (player->isConnected()) {
       vect.push_back(player);
     }
+  }
+  return vect;
+}
+
+/**
+ * Return all player ids in map.
+ */
+std::vector<int> PlayerManager::getPlayerIds() {
+  std::vector<int> vect;
+  for (auto it : players) {
+    vect.push_back(it.first);
   }
   return vect;
 }

@@ -38,4 +38,9 @@ class RenderSpace {
    * Clear the render space
    */
   virtual void clear() = 0;
+
+  /**
+   *
+   */
+  virtual void reset() = 0;
 };
