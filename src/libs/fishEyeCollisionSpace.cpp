@@ -86,13 +86,14 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
 
 void FisheyeCollisionSpace::clear() {
   float radius = float(size)/2.0;
+  float radiusSquared = radius*radius;
 
   for (int y = 0; y < this->size; y++) {
     for (int x = 0; x < this->size; x++) {
       float dx = (x - radius);
       float dy = (y - radius);
-      float r = sqrt(dx*dx + dy*dy);
-      if (r < radius) {
+      float r = dx*dx + dy*dy;
+      if (r < radiusSquared) {
         this->bitmap->setPixel(x, y, PixelValue::createEmpty());
       }
     }
