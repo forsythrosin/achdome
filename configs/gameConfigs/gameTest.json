@@ -4,5 +4,9 @@
   "turnSpeed": 0.1,
   "countdown": 10,
   "maximumPlayers": 100,
-  "password": "pwd"
+  "password": "pwd",
+  "minTimeBetweenGaps": 200,
+  "maxTimeBetweenGaps": 400,
+  "minTimeInGap": 10,
+  "maxTimeInGap": 20
 }

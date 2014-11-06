@@ -150,8 +150,8 @@ bool WormTracker::turnRight(int id, bool turn) {
 
 bool WormTracker::setNewRandomGapTimer(int id) {
 
-  std::uniform_real_distribution<> timeBetweenGapsDistribution(MIN_TIME_BETWEEN_GAPS, MAX_TIME_BETWEEN_GAPS);
-  std::uniform_real_distribution<> timeInGapDistribution(MIN_TIME_IN_GAP, MAX_TIME_IN_GAP);
+  std::uniform_real_distribution<> timeBetweenGapsDistribution(gameConfig->minTimeBetweenGaps, gameConfig->maxTimeBetweenGaps);
+  std::uniform_real_distribution<> timeInGapDistribution(gameConfig->minTimeInGap, gameConfig->maxTimeInGap);
 
   int ticksBetweenGaps = timeBetweenGapsDistribution(randomGenerator);
   int ticksInGap = timeInGapDistribution(randomGenerator);

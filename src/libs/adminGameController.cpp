@@ -10,6 +10,10 @@ AdminGameController::AdminGameController(GameEngine *ge, Webserver *ws, ActionRe
   wormSpeed = gameConfig->wormSpeed;
   turnSpeed = gameConfig->turnSpeed;
   countdown = gameConfig->countdown;
+  minTimeBetweenGaps = gameConfig->minTimeBetweenGaps;
+  maxTimeBetweenGaps = gameConfig->maxTimeBetweenGaps;
+  minTimeInGap = gameConfig->minTimeInGap;
+  maxTimeInGap = gameConfig->maxTimeInGap;
 };
 
 void AdminGameController::performActions() {
@@ -28,12 +32,25 @@ void AdminGameController::performActions() {
     webServer->addBroadcast(message, subProtocol);
   }
 
-  if (wormWidth != gameConfig->wormWidth || wormSpeed != gameConfig->wormSpeed || turnSpeed != gameConfig->turnSpeed || countdown != gameConfig->countdown) {
+  if (
+        wormWidth != gameConfig->wormWidth ||
+        wormSpeed != gameConfig->wormSpeed ||
+        turnSpeed != gameConfig->turnSpeed ||
+        countdown != gameConfig->countdown ||
+        minTimeBetweenGaps != gameConfig->minTimeBetweenGaps ||
+        maxTimeBetweenGaps != gameConfig->maxTimeBetweenGaps ||
+        minTimeInGap != gameConfig->minTimeInGap ||
+        maxTimeInGap != gameConfig->maxTimeInGap
+     ) {
     // Settings changed
     wormWidth = gameConfig->wormWidth;
     wormSpeed = gameConfig->wormSpeed;
     turnSpeed = gameConfig->turnSpeed;
     countdown = gameConfig->countdown;
+    minTimeBetweenGaps = gameConfig->minTimeBetweenGaps;
+    maxTimeBetweenGaps = gameConfig->maxTimeBetweenGaps;
+    minTimeInGap = gameConfig->minTimeInGap;
+    maxTimeInGap = gameConfig->maxTimeInGap;
 
     DataSerializationBuilder *data = dataSerializationBuilder->group();
     dataSerializationBuilder
@@ -163,6 +180,22 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
       std::cout << "countdown = " << action.ints.at("countdown") << std::endl;
       gameConfig->countdown = action.ints.at("countdown");
     }
+    if (action.ints.count("minTimeBetweenGaps") > 0) {
+      std::cout << "minTimeBetweenGaps = " << action.ints.at("minTimeBetweenGaps") << std::endl;
+      gameConfig->minTimeBetweenGaps = action.ints.at("minTimeBetweenGaps");
+    }
+    if (action.ints.count("maxTimeBetweenGaps") > 0) {
+      std::cout << "maxTimeBetweenGaps = " << action.ints.at("maxTimeBetweenGaps") << std::endl;
+      gameConfig->maxTimeBetweenGaps = action.ints.at("maxTimeBetweenGaps");
+    }
+    if (action.ints.count("minTimeInGap") > 0) {
+      std::cout << "minTimeInGap = " << action.ints.at("minTimeInGap") << std::endl;
+      gameConfig->minTimeInGap = action.ints.at("minTimeInGap");
+    }
+    if (action.ints.count("maxTimeInGap") > 0) {
+      std::cout << "maxTimeInGap = " << action.ints.at("maxTimeInGap") << std::endl;
+      gameConfig->maxTimeInGap = action.ints.at("maxTimeInGap");
+    }
     break;
   case ClientAction::START_TOURNAMENT:
     std::cout << "Tournament started by admin " << sessionId << std::endl;
@@ -197,5 +230,9 @@ void AdminGameController::addSettings(DataSerializationBuilder *builder) {
     ->add("wormSpeed", gameConfig->wormSpeed)
     ->add("turnSpeed", gameConfig->turnSpeed)
     ->add("countdown", gameConfig->countdown)
+    ->add("minTimeBetweenGaps", gameConfig->minTimeBetweenGaps)
+    ->add("maxTimeBetweenGaps", gameConfig->maxTimeBetweenGaps)
+    ->add("minTimeInGap", gameConfig->minTimeInGap)
+    ->add("maxTimeInGap", gameConfig->maxTimeInGap)
   );
 }
