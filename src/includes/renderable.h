@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sgct/ogl_headers.h"
+#include <vector>
 
 // class Renderer;
 
@@ -12,10 +13,10 @@ public:
   const int getVertexCount() const;
   const int getElementCount() const;
 
-  const GLfloat * const getCartesianVertexData() const;
-  const GLfloat * const getSphericalVertexData() const;
-  const GLfloat * const getVertexColorData() const;
-  const GLuint * const getElementData() const;
+  const std::vector<GLfloat> getCartesianVertexData() const;
+  const std::vector<GLfloat> getSphericalVertexData() const;
+  const std::vector<GLfloat> getVertexColorData() const;
+  const std::vector<GLuint> getElementData() const;
 
   virtual void loadToGPU(bool sphericalCoords = false);
   virtual void attach();
@@ -28,8 +29,8 @@ protected:
   virtual void createElements() = 0;
 
   int vertexCount, elementCount;
-  GLfloat *cartesianVertexData, *sphericalVertexData, *vertexColorData;
-  GLuint *elementData;
+  std::vector<GLfloat> cartesianVertexData, sphericalVertexData, vertexColorData;
+  std::vector<GLuint> elementData;
 
   // GL handles
   GLuint vertexArray;

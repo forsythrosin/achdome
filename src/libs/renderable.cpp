@@ -7,12 +7,7 @@ Renderable::Renderable() {
   colorBuffer = GL_FALSE;
 }
 
-Renderable::~Renderable() {
-  delete [] sphericalVertexData;
-  delete [] cartesianVertexData;
-  delete [] vertexColorData;
-  delete [] elementData;
-}
+Renderable::~Renderable() {}
 
 void Renderable::attach() {
     // generate vertexArray
@@ -32,28 +27,28 @@ void Renderable::detach() {
   glDeleteVertexArrays(1, &vertexArray);
 }
 
-const GLfloat * const Renderable::getCartesianVertexData() const {
+const std::vector<GLfloat> Renderable::getCartesianVertexData() const {
   return cartesianVertexData;
 }
 
-const GLfloat * const Renderable::getSphericalVertexData() const {
+const std::vector<GLfloat> Renderable::getSphericalVertexData() const {
   return sphericalVertexData;
 }
 
-const GLfloat * const Renderable::getVertexColorData() const {
+const std::vector<GLfloat> Renderable::getVertexColorData() const {
   return vertexColorData;
 }
 
-const GLuint * const Renderable::getElementData() const {
+const std::vector<GLuint> Renderable::getElementData() const {
   return elementData;
 }
 
 const int Renderable::getVertexCount() const {
-  return vertexCount;
+  return cartesianVertexData.size()/3;
 }
 
 const int Renderable::getElementCount() const {
-  return elementCount;
+  return elementData.size()/getVertsPerElement();
 }
 
 void Renderable::loadToGPU(bool sphericalCoords) {
@@ -61,14 +56,14 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   int vertexDim = sphericalCoords ? 2 : 3;
   int colorDim = 4;
 
-  const GLfloat* vertexData = vertexDim == 2 ? sphericalVertexData : cartesianVertexData;
+  auto positionData = (vertexDim == 2 ? sphericalVertexData : cartesianVertexData);
 
   // Upload vertex positions
   glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
   glBufferData(
     GL_ARRAY_BUFFER,
-    vertexCount*sizeof(GLfloat)*vertexDim,
-    vertexData,
+    positionData.size()*sizeof(GLfloat),
+    &positionData[0],
     GL_STATIC_DRAW
   );
   // Use buffer as position buffer for shader location = 0
@@ -79,8 +74,8 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
   glBufferData(
     GL_ARRAY_BUFFER,
-    vertexCount*sizeof(GLfloat)*colorDim,
-    vertexColorData,
+    vertexColorData.size()*sizeof(GLfloat),
+    &vertexColorData[0],
     GL_STATIC_DRAW
   );
   // Use buffer as color buffer for shader location = 1
@@ -91,8 +86,8 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER,
-    elementCount*sizeof(GLuint)*getVertsPerElement(),
-    elementData,
+    elementData.size()*sizeof(GLuint),
+    &elementData[0],
     GL_STATIC_DRAW
   );
 
@@ -101,4 +96,3 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
-
