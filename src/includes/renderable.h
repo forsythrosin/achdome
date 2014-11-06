@@ -21,6 +21,8 @@ public:
   virtual void loadToGPU(bool sphericalCoords = false);
   virtual void attach();
   virtual void detach();
+  virtual void enableAttributes();
+  virtual void disableAttributes();
 
   virtual const GLuint getVertsPerElement() const = 0;
 

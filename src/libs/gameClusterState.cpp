@@ -90,6 +90,8 @@ void GameClusterState::draw() {
   renderableArcs->setWormArcs(arcs);
   renderableHeads->setWormHeads(heads);
 
+  renderer->render(wormDots);
+
   // if (!heads.empty() && heads.at(0).isInGap()) {
   //   renderer->render(wormDots);
   // } else {
