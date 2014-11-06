@@ -16,8 +16,11 @@ server.authenticate = function (pwd) {
   password = pwd;
   send('authenticate_admin');
 };
-server.startGame = function() {
-  send('start_game');
+server.startTournament = function(numberOfGames) {
+  send('start_tournament', {numberOfGames: numberOfGames});
+};
+server.endTournament = function() {
+  send('end_tournament');
 };
 server.endGame = function() {
   send('end_game');

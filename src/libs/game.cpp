@@ -134,7 +134,7 @@ void Game::updateGameOver() {
   float nAlive = getNumberOfPlayersAlive();
 
   float startRatio = nStarted/nPlayers;
-  gameOver = nAlive <= 1 && startRatio > 0.5;
+  gameOver = nAlive <= 1 && startRatio >= 0.5;
 }
 
 bool Game::isParticipating(int playerId) {

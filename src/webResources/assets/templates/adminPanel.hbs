@@ -5,14 +5,15 @@
   </div>
 </section>
 <section id="state">
-  <h1>AchDome</h1>
-  <button id="changeGameState"{{#if ready}} class="start"{{else}}{{#if started}} class="end"{{/if}}{{/if}}>
-    {{#if ready}}
-      Start countdown
-    {{else}}{{#if started}}
-      End game
-    {{/if}}{{/if}}
-  </button>
+  <h1></h1>
+  <div id="numberOfGames">
+    <div class="down"></div>
+    <div class="value">2</div>
+    <div class="up"></div>
+  </div>
+  <button id="startTournament">Start tournament</button>
+  <button id="endGame">End game</button>
+  <button id="endTournament">End tournament</button>
 </section>
 <section id="connectedPlayers">
   <h2 id="playerCount">0</h2>

@@ -48,7 +48,7 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   glBufferData(
     GL_ARRAY_BUFFER,
     positionData.size()*sizeof(GLfloat),
-    &positionData[0],
+    positionData.data(),
     GL_STATIC_DRAW
   );
   // Use buffer as position buffer for shader location = 0
@@ -60,7 +60,7 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   glBufferData(
     GL_ARRAY_BUFFER,
     vertexColorData.size()*sizeof(GLfloat),
-    &vertexColorData[0],
+    vertexColorData.data(),
     GL_STATIC_DRAW
   );
   // Use buffer as color buffer for shader location = 1
@@ -72,7 +72,7 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER,
     elementData.size()*sizeof(GLuint),
-    &elementData[0],
+    elementData.data(),
     GL_STATIC_DRAW
   );
 

@@ -4,7 +4,8 @@
 
 struct ClientAction {
   enum Type {
-    START_GAME,
+    START_TOURNAMENT,
+    END_TOURNAMENT,
     END_GAME,
     AUTHENTICATE_ADMIN,
     UPDATE_SETTINGS,

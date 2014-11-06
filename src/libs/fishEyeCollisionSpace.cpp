@@ -44,6 +44,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
             if (collisions.find(wormId) == collisions.end()) {
               // no collision registered for this worm yet.
               collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+              std::cout << wormId << " is outside bounds at " << x << ", " << y << std::endl;
             } // else, do nothing if collision is already registered.
           } else if (pv.wormId == wormId) {
             // hit self.
@@ -52,6 +53,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
               if (collisions.find(wormId) == collisions.end()) {
                 // no collision registered for this worm yet
                 collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+                std::cout << wormId << " collided with itself at " << x << ", " << y << ". t1 = " << time << ", t0 = "<< pv.time << std::endl;
               } // else, do nothing if collision is already registered.
             } else {
             }// else, do nothing: (resistant to pixels drawn on current and previous frame)
@@ -60,6 +62,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
             if (collisions.find(wormId) == collisions.end()) {
               // no collision registered for this worm yet.
               collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+              std::cout << wormId << " collided with " << pv.wormId << " at " << x << ", " << y << std::endl;
             }
 
             if (pv.time == time) {
@@ -86,13 +89,14 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
 
 void FisheyeCollisionSpace::clear() {
   float radius = float(size)/2.0;
+  float radiusSquared = radius*radius;
 
   for (int y = 0; y < this->size; y++) {
     for (int x = 0; x < this->size; x++) {
       float dx = (x - radius);
       float dy = (y - radius);
-      float r = sqrt(dx*dx + dy*dy);
-      if (r < radius) {
+      float r = dx*dx + dy*dy;
+      if (r < radiusSquared) {
         this->bitmap->setPixel(x, y, PixelValue::createEmpty());
       }
     }
@@ -108,14 +112,6 @@ glm::dvec2 FisheyeCollisionSpace::transform(glm::dquat in) {
 
   float x = size * (0.5 + theta/fov*2.0 * cos(phi));
   float y = size * (0.5 + theta / fov*2.0 * sin(phi));
-
-  if (abs(pos.y) < 0.01 && abs(pos.x) < 0.01) {
-    // Singularity?
-    //std::cout << "---------------------" << std::endl;
-    //std::cout << in.w << ", " << in.x << ", " << in.y << ", " << in.z << std::endl;
-    //std::cout << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
-    //std::cout << phi << ", " << theta << ", " << fov << ", " << x << ", " << y << std::endl;
-  }
 
   return glm::dvec2(x, y);
 }
