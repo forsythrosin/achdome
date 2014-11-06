@@ -126,7 +126,7 @@ void RenderableWormHeads::loadToGPU(bool sphericalCoords) {
   glBufferData(
     GL_ARRAY_BUFFER,
     headDirectionData.size()*sizeof(GLfloat),
-    &headDirectionData.data(),
+    headDirectionData.data(),
     GL_STATIC_DRAW
   );
   glEnableVertexAttribArray(3);
