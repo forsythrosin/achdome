@@ -29,6 +29,7 @@ void myInitOGLFun();
 void myEncodeFun();
 void myDecodeFun();
 void myCleanUpFun();
+void myPostSyncPreDrawFun();
 
 void keyCallback(int key, int action);
 void mouseButtonCallback(int button, int action);
@@ -64,6 +65,7 @@ AdminGameController* agc;
   gEngine->setInitOGLFunction( myInitOGLFun );
   gEngine->setDrawFunction( myDrawFun );
   gEngine->setPreSyncFunction( myPreSyncFun );
+  gEngine->setPostSyncPreDrawFunction ( myPostSyncPreDrawFun );
   gEngine->setKeyboardCallbackFunction( keyCallback );
   gEngine->setMouseButtonCallbackFunction( mouseButtonCallback );
   gEngine->setCleanUpFunction( myCleanUpFun );
@@ -152,6 +154,11 @@ void myPreSyncFun() {
   }
   Tweener::getInstance()->tick();
   syncMaster->preSync();
+  gEngine->checkForOGLErrors();
+}
+
+void myPostSyncPreDrawFun() {
+  syncMaster->postSyncPreDraw();
 }
 
 void myDrawFun() {

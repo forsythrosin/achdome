@@ -153,7 +153,7 @@ bool GameEngine::endGame() {
   if (state != State::GAME || currentGame == nullptr) {
     return false;
   }
-  wormTracker->saveCollisionBitmapToFile("wormData.ppm");
+  // wormTracker->saveCollisionBitmapToFile("wormData.ppm");
 
   // Copy points from GamePlayers to Players.
   std::vector<int> participants = currentGame->getParticipants();

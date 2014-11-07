@@ -13,6 +13,7 @@ public:
   ~SyncMaster();
 
   void preSync();
+  void postSyncPreDraw();
   void encode();
   void decode();
   void draw();

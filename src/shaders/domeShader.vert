@@ -11,12 +11,13 @@ void main() {
 
   // spherical -> cartesian
   vec3 vertPosition = vec3(
-    r*sin(phiTheta.y)*cos(phiTheta.x),
-    r*sin(phiTheta.y)*sin(phiTheta.x),
-    r*cos(phiTheta.y)
+    sin(phiTheta.y)*cos(phiTheta.x),
+    sin(phiTheta.y)*sin(phiTheta.x),
+    cos(phiTheta.y)
   );
-  
+
   sphericalPos = phiTheta;
   cartesianPos = vertPosition;
-  gl_Position = MVP*vec4(vertPosition, 1.0);
+
+  gl_Position = MVP*vec4(vertPosition*r, 1.0);
 }
