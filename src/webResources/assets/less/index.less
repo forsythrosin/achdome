@@ -30,7 +30,6 @@
       right: 0;
       background: black;
       border-radius: 50%;
-      .gradient(@base 50%, black 50%);
 
       #identifierWrapper {
         position: absolute;
@@ -95,6 +94,31 @@
           .loop(findMeAfter, 2s);
         }
       }
+    }
+
+    @text-width: 80px;
+
+    #dome:before, #dome:after {
+      color: white;
+      position: absolute;
+      width: @text-width;
+      height: 20px;
+      font-size: 20px;
+      text-align: center;
+      text-transform: uppercase;
+      left: 50%;
+      margin-left: -@text-width/2;
+      .opacity(0.3);
+    }
+
+    #dome:before {
+      top: 5px;
+      content: 'back';
+    }
+
+    #dome:after {
+      bottom: 10px;
+      content: 'front';
     }
   }
 
