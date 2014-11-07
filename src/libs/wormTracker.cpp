@@ -109,6 +109,7 @@ void WormTracker::clear() {
   wormHeads.clear();
   collisionSpace->clear();
   renderSpace->clear();
+  renderSpace->reset();
 }
 
 bool WormTracker::startWormHead(int id) {

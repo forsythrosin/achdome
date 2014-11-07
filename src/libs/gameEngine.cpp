@@ -4,6 +4,8 @@
 #include <tween.h>
 #include <tweener.h>
 #include <cassert>
+#include <iostream>
+#include <iomanip>
 
 GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm, GameConfig *gameConfig) {
   state = State::LOBBY;
@@ -152,12 +154,55 @@ bool GameEngine::endGame() {
     return false;
   }
   wormTracker->saveCollisionBitmapToFile("wormData.ppm");
+
+  // Copy points from GamePlayers to Players.
+  std::vector<int> participants = currentGame->getParticipants();
+  for (int playerId : participants) {
+    playerManager->setPointsInGame(playerId, getCurrentGameId(), currentGame->getPoints(playerId));
+  }
+
   if (gameIndexInTournament < nGamesInTournament - 1) {
     startGameOver();
   } else {
     startTournamentOver();
   }
   return true;
+}
+
+
+void GameEngine::printGameStatistics() {
+
+  std::vector<int> participants = currentGame->getParticipants();
+  std::cout << "Results in game " << getCurrentGameId() << ": " << std::endl;
+  for (int playerId : participants) {
+    std::string name = playerManager->getName(playerId);
+    int points = currentGame->getPoints(playerId);
+    std::cout << std::setw(20) << std::setfill(' ') << name << ": " << points << std::endl;
+  }
+
+}
+
+
+void GameEngine::printTournamentStatistics() {
+  std::vector<int> gameIds = getPlayedGameIdsInTournament();
+
+  std::vector<int> playerIds = playerManager->getPlayerIds();
+  std::map<int, int> points;
+  for (auto playerId : playerIds) {
+    points[playerId] = playerManager->getPointsInGames(playerId, gameIds);
+  }
+  
+  std::cout << "Results in tournament: " << std::endl;
+  
+  for (auto p : points) {
+    int playerId = p.first;
+    std::string name = playerManager->getName(playerId);
+    int playerPoints = p.second;
+
+    if (playerPoints != -1) {
+      std::cout << std::setw(20) << std::setfill(' ') << name << ": " << playerPoints << std::endl;
+    }
+  }
 }
 
 
@@ -169,11 +214,15 @@ void GameEngine::startGameOver() {
   state = State::GAME_OVER;
   std::cout << "Start game over state." << std::endl;
 
+  printGameStatistics();
+  delete currentGame;
+  currentGame = nullptr;
+  
   gameOverSecondsLeft = duration;
   Tween gameOverTween(gameOverSecondsLeft, [this, duration](double t) {
       this->gameOverSecondsLeft = duration - t*duration;
     }, [this]() {
-      this->startLobby();
+      this->startCountdown();
     });
 
   Tweener::getInstance()->startTween(gameOverTween);
@@ -192,10 +241,51 @@ bool GameEngine::endTournament() {
 }
 
 
+int GameEngine::getCurrentGameId() {
+  if (currentGame == nullptr) {
+    return -1;
+  }
+  return currentGame->getId();
+}
+
+std::vector<int> GameEngine::getPlayedGameIdsInTournament() {
+  assert(currentGame != nullptr);
+
+  std::vector<int> gameIds;
+
+  // get id of the last finished game.
+  int lastPlayedGameId = getCurrentGameId();
+  if (!currentGame->isOver()) {
+    lastPlayedGameId--;
+  }
+  
+  for (int gameId = getCurrentGameId() - gameIndexInTournament; gameId <= lastPlayedGameId; gameId++) {
+    gameIds.push_back(gameId);
+  }
+  return gameIds;
+}
+
+
 void GameEngine::startTournamentOver() {
   assert(state == State::GAME);
   state = State::TOURNAMENT_OVER;
+  
+  printGameStatistics();
+  printTournamentStatistics();
+  delete currentGame;
+  currentGame = nullptr;
+
   std::cout << "Start tournament over state.";
+
+  // Start timeout to go to lobby. We may want to change this to a que from admin.
+  float duration = gameConfig->gameOverDuration;
+  gameOverSecondsLeft = duration;
+  Tween tournamentOverTween(gameOverSecondsLeft, [this, duration](double t) {
+      this->gameOverSecondsLeft = duration - t*duration;
+    }, [this]() {
+      this->startLobby();
+    });
+  Tweener::getInstance()->startTween(tournamentOverTween);
 }
 
 

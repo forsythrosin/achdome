@@ -85,7 +85,7 @@ void Renderable::loadToGPU(bool sphericalCoords) {
 }
 
 void Renderable::attach() {
-    // generate vertexArray
+  // generate vertexArray
   glGenVertexArrays(1, &vertexArray);
   glBindVertexArray(vertexArray); // TODO: this row cause segfault sometimes (!)
 

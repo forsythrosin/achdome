@@ -25,6 +25,11 @@ class PlayerManager {
   void removeEventListener(PlayerEventListener *pm);
   int getPlayerIdByName(std::string name);
   std::vector<Player*> getConnectedPlayers();
+  std::vector<int> getPlayerIds();
+
+  bool setPointsInGame(int playerId, int gameId, int points);
+  int getPointsInGame(int playerId, int gameId);
+  int getPointsInGames(int playerId, std::vector<int> gameIds);
 private:
   std::map<int, Player*> players;
   std::string generatePlayerName();

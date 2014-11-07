@@ -4,6 +4,7 @@
 #include <wormArc.h>
 #include <wormCollision.h>
 #include <wormHead.h>
+#include <uniformWrappers.h>
 
 class RenderableDome;
 class RenderableWormArcs;
@@ -18,6 +19,7 @@ class GameClusterState : public ClusterState {
 
   void attach();
   void detach();
+  void reset();
 
   void preSync();
   void draw();
@@ -31,11 +33,13 @@ class GameClusterState : public ClusterState {
   RenderableWormHeads *renderableHeads;
 
   int domeGrid, domeWorms, wormLines, wormDots, collision;
-  float timer = 0.0f;
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;
+  Uniform<float> *timeUni;
 
+  sgct::SharedBool *resetSignal;
   sgct::SharedVector<WormArc> *wormArcs;
   sgct::SharedVector<WormCollision> *wormCollisions;
   sgct::SharedVector<WormHead> *wormHeads;
+  sgct::SharedInt timer;
 };

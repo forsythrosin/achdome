@@ -8,9 +8,11 @@
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr) {}
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs) : ClusterState(gEngine, gameConfig) {
+  resetSignal = new sgct::SharedBool(false);
   wormArcs = new sgct::SharedVector<WormArc>(gameConfig->maximumPlayers);
   wormCollisions = new sgct::SharedVector<WormCollision>(gameConfig->maximumPlayers);
   wormHeads = new sgct::SharedVector<WormHead>(gameConfig->maximumPlayers);
+  timer.setVal(0);
 
   renderableDome = nullptr;
   renderableArcs = nullptr;
@@ -44,7 +46,15 @@ void GameClusterState::attach() {
   renderableHeads->setWormHeads(wormHeads->getVal());
   wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
+  timer.setVal(0);
+  timeUni = new Uniform<float>("time");
+  renderer->setUniform(wormDots, timeUni);
+
   attached = true;
+}
+
+void GameClusterState::reset() {
+  renderer->resetFBO(wormLines);
 }
 
 void GameClusterState::detach() {
@@ -61,6 +71,9 @@ void GameClusterState::detach() {
   delete renderableHeads;
   renderableHeads = nullptr;
 
+  delete timeUni;
+  timeUni = nullptr;
+
   attached = false;
 }
 
@@ -69,19 +82,27 @@ void GameClusterState::preSync() {
     std::vector<WormArc> arcs = renderSpace->getArcs();
     std::vector<WormHead> heads = renderSpace->getHeads();
     std::vector<WormCollision> collisions = renderSpace->getCollisions();
+    bool reset = renderSpace->getResetSignal();
 
     wormArcs->setVal(arcs);
     wormCollisions->setVal(collisions);
     wormHeads->setVal(heads);
+    timer.setVal(timer.getVal() + 1);
 
+    resetSignal->setVal(reset);
     renderSpace->clear();
   }
 
   // Reset stitch step
   stitchStep = 0;
+
+  if (resetSignal->getVal()) {
+    reset();
+  }
 }
 
 void GameClusterState::draw() {
+
   // Copy current worm positions and colors
   std::vector<WormArc> arcs = wormArcs->getVal();
   std::vector<WormHead> heads = wormHeads->getVal();
@@ -89,6 +110,8 @@ void GameClusterState::draw() {
 
   renderableArcs->setWormArcs(arcs);
   renderableHeads->setWormHeads(heads);
+
+  timeUni->set(timer.getVal());
 
   renderer->render(wormDots);
 
@@ -115,15 +138,20 @@ void GameClusterState::encode() {
   // get things from renderSpace and send it to everyone.
   sgct::SharedData *data = sgct::SharedData::instance();
 
+  data->writeBool(resetSignal);
   data->writeVector(wormArcs);
   data->writeVector(wormCollisions);
   data->writeVector(wormHeads);
+  data->writeInt(&timer);
 }
 
 void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
   sgct::SharedData *data = sgct::SharedData::instance();
+
+  data->writeBool(resetSignal);
   data->readVector(wormArcs);
   data->readVector(wormCollisions);
   data->readVector(wormHeads);
+  data->readInt(&timer);
 }

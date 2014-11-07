@@ -2,7 +2,8 @@
 
 #include <clusterState.h>
 #include <vector>
-class RenderablePanel;
+#include <uniformWrappers.h>
+
 class Player;
 class PlayerManager;
 class RenderableDome;
@@ -30,10 +31,12 @@ class LobbyClusterState : public ClusterState {
   PlayerManager *playerManager;
   sgct::SharedVector<Player> *sharedPlayers;
   sgct::SharedString playerName;
+  sgct::SharedInt timer;
 
   RenderableDome *dome;
   int domeGrid;
   int domeLogo;
+  Uniform<float> *timeUni;
 
   glm::vec3 playerListAnchor;
   const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(-2.8f, 7.5f, 2.15f);

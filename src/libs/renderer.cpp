@@ -2,6 +2,7 @@
 #include <shaderUtils.h>
 #include <string>
 #include <iostream>
+#include <renderConfig.h>
 
 Renderer::Renderer(sgct::Engine *gEngine) {
   this->gEngine = gEngine;
@@ -49,6 +50,7 @@ void Renderer::removeRenderable(int configId) {
     std::cout << "Could not find renderable" << std::endl;
     return;
   }
+
   RenderConfig &rc = rcIt->second;
 
   sgct::ShaderManager::instance()->removeShaderProgram(std::to_string(rc.id));
@@ -56,10 +58,7 @@ void Renderer::removeRenderable(int configId) {
   // delete buffers + VAO
   rc.renderable->detach();
 
-  // delete FBOs
-  for (auto fbo : rc.framebuffers) {
-    delete fbo;
-  }
+  resetFBO(configId);
   renderConfigs.erase(configId);
 };
 
@@ -75,22 +74,42 @@ void Renderer::init(RenderConfig &renderConfig) {
   // init shaders
   std::string vertShader = shaderUtils::pathToShader(renderConfig.vertShader);
   std::string fragShader = shaderUtils::pathToShader(renderConfig.fragShader);
-  std::cout << "add shader with id: " << renderConfig.id << std::endl;
-  sgct::ShaderManager::instance()->addShaderProgram(std::to_string(renderConfig.id), vertShader, fragShader);
-  sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
+
+  sgct::ShaderManager *sMan = sgct::ShaderManager::instance();
+  sMan->addShaderProgram(std::to_string(renderConfig.id), vertShader, fragShader);
 
   // Uniform locations
-  renderConfig.matrixLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("MVP");
-  renderConfig.textureLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTex");
-  renderConfig.fboTexSizeLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTexSize");
-  renderConfig.timeLocation = sgct::ShaderManager::instance()->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("time");
+  renderConfig.matrixLocation = sMan->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("MVP");
+  renderConfig.textureLocation = sMan->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTex");
+  renderConfig.fboTexSizeLocation = sMan->getShaderProgram(std::to_string(renderConfig.id)).getUniformLocation("fboTexSize");
+};
+
+/**
+ * Assign uniform to the specified RenderConfig
+ * @param configId renderConfig ID (must have been added to this renderer)
+ * @param uniform  any uniform available in uniformWrappers.h
+ */
+void Renderer::setUniform(int configId, AbstractUniform *uniform) {
+  auto rcIt = renderConfigs.find(configId);
+  if (rcIt == renderConfigs.end()) {
+    std::cout << "Trying to add uniform to non-existing RenderConfig" << std::endl;
+    return;
+  }
+  RenderConfig &rc = rcIt->second;
+
+  sgct::ShaderManager *sMan = sgct::ShaderManager::instance();
+
+  sMan->bindShaderProgram(std::to_string(rc.id));
+  rc.uniforms[uniform->getName()] = uniform;
+  sgct::ShaderProgram program = sMan->getShaderProgram(std::to_string(rc.id));
+  uniform->setLocation(program.getUniformLocation(uniform->getName()));
 
   sgct::ShaderManager::instance()->unBindShaderProgram();
 };
 
 /**
  * Renders the specified RenderConfig to its FBO, matching the corresponding stitchStep
- * @param configId   renderConfig ID (i.e. position in renderConfigs vector)
+ * @param configId   renderConfig ID
  * @param stitchStep (optional) sgct stitch step. Default 0
  */
 void Renderer::renderToFBO(int configId, int stitchStep) {
@@ -112,6 +131,26 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
   glBindFramebuffer(GL_FRAMEBUFFER, screenFBO);
 };
 
+
+/**
+ * Resets FBO (for all stitchSteps) of a specified RenderCongig 
+ */
+void Renderer::resetFBO(int configId) {
+  auto rcIt = renderConfigs.find(configId);
+  if (rcIt == renderConfigs.end()) {
+    std::cout << "Could not find renderable when resetting FBO." << std::endl;
+    return;
+  }
+  RenderConfig &rc = rcIt->second;
+
+  // delete FBOs
+  for (auto fbo : rc.framebuffers) {
+    delete fbo;
+  }
+  rc.framebuffers.clear();
+}
+
+
 /**
  * Renders the specified RenderConfig to the currently bound FBO
  * @param configId        renderConfig ID (i.e. position in renderConfigs vector)
@@ -119,7 +158,6 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
  * @param stitchStep      (optional) sgct stitch step. Default 0
  */
 void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
-
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
@@ -139,8 +177,8 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   sgct::ShaderManager::instance()->bindShaderProgram(std::to_string(renderConfig.id));
   glUniformMatrix4fv(renderConfig.matrixLocation, 1, GL_FALSE, &MVP[0][0]);
 
-  if (renderConfig.timeLocation != -1) {
-    glUniform1f(renderConfig.timeLocation, sgct::Engine::getTime());
+  for (auto pair : renderConfig.uniforms) {
+    pair.second->upload();
   }
 
   if (configWithFBOId > -1 && renderConfigs.find(configWithFBOId) != renderConfigs.end()) {

@@ -28,8 +28,7 @@ void RenderableWormHeads::setWormHeads(std::vector<WormHead> wormHeads) {
   std::vector<glm::vec4> colors;
   for (WormHead wh : wormHeads) {
     colors.push_back(wh.getColor());
-  }
-  setWormColors(colors);
+  }  setWormColors(colors);
   createVertices();
   createElements();
   update = true;
