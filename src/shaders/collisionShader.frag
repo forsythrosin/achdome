@@ -21,9 +21,11 @@ void main() {
 
     float distFromEpicentrum = distance(cartesianPos, epicentrum);
 
-    shockWaveColor.a += smoothstep(shockwaveRadius - thickness, shockwaveRadius + thickness, distFromEpicentrum);
-    shockWaveColor.a *= (1.0 - smoothstep(shockwaveRadius - thickness, shockwaveRadius + thickness, distFromEpicentrum));
-    shockWaveColor.a *= ((clampRadius - thickness)/distFromEpicentrum);
+    float localShockwave = smoothstep(shockwaveRadius - thickness, shockwaveRadius + thickness, distFromEpicentrum);
+    localShockwave *= (1.0 - smoothstep(shockwaveRadius - thickness, shockwaveRadius + thickness, distFromEpicentrum));
+    localShockwave *= ((clampRadius - thickness)/distFromEpicentrum);
+
+    shockWaveColor.a += localShockwave;
   }
 
   color = shockWaveColor;

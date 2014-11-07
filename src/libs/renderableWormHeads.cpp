@@ -61,7 +61,6 @@ void RenderableWormHeads::createVertices() {
     glm::vec3 headPos = (glm::vec3) wh.getPosition();
     glm::vec3 headDirection = glm::normalize((glm::vec3) wh.getVelocity());
     glm::vec3 domeNormal = glm::normalize(headPos);
-    glm::vec3 forwardPoint = headPos + headDirection;
 
     for (int i = 0; i < VERTS_PER_HEAD; ++i) {
       glm::vec3 quadPoint = headPos + glm::rotate(headDirection, i*360.0f/VERTS_PER_HEAD, domeNormal);
@@ -74,9 +73,9 @@ void RenderableWormHeads::createVertices() {
       headCenterData.push_back(headPos.y);
       headCenterData.push_back(headPos.z);
 
-      headDirectionData.push_back(forwardPoint.x);
-      headDirectionData.push_back(forwardPoint.y);
-      headDirectionData.push_back(forwardPoint.z);
+      headDirectionData.push_back(headDirection.x);
+      headDirectionData.push_back(headDirection.y);
+      headDirectionData.push_back(headDirection.z);
 
       // sphericalVertexData[cartIdx] = headPos.x;
       // sphericalVertexData[cartIdx + 1] = headPos.y;

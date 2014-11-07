@@ -39,5 +39,5 @@ class LobbyClusterState : public ClusterState {
   Uniform<float> *timeUni;
 
   glm::vec3 playerListAnchor;
-  const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(-2.8f, 7.5f, 2.15f);
+  const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(0.0f, 7.5f, 1.0f);
 };

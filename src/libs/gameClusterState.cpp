@@ -134,6 +134,7 @@ void GameClusterState::postSyncPreDraw() {
   }
 
   std::vector<glm::vec4> activeCollisions;
+  std::vector<glm::vec4> collisionColors;
   for (auto pair : collisionTimerQueue) {
     glm::vec3 pos = (glm::vec3) pair.second.getCartesianPosition();
     float lifeTime = 1.0 - (float)(tickNumber - pair.first)/(float)COLLISION_DURATION;
@@ -144,9 +145,6 @@ void GameClusterState::postSyncPreDraw() {
 }
 
 void GameClusterState::draw() {
-
-  renderer->render(wormDots);
-
   // if (!heads.empty() && heads.at(0).isInGap()) {
   //   renderer->render(wormDots);
   // } else {
@@ -161,6 +159,7 @@ void GameClusterState::draw() {
   renderer->render(domeWorms, wormLines, stitchStep);
   // renderer->render(domeWorms, wormDots, stitchStep);
 
+  renderer->render(wormDots);
   renderer->render(collision);
 
   ++stitchStep;
