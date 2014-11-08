@@ -6,17 +6,18 @@ in vec4 vColor;
 in vec3 center;
 in vec3 worldPos;
 in vec3 headDirection;
+in vec3 appearance;
 
 out vec4 color;
 
-float distanceToLine(vec3 p, vec3 p0, vec3 p1) {
+float distanceToLineSegment(vec3 p, vec3 p0, vec3 p1) {
   vec3 v = normalize(p1 - p0);
 
   float t0 = dot(p0, v);
   float t1 = dot(p1, v);
   float t = dot(p, v);
 
-  vec3 projected = p0 + t*v;
+  vec3 projected = p0 + (t - t0)*v;
   float distToLine = length(projected - p);
   
   float distToP0 = distance(p, p0);
@@ -28,9 +29,9 @@ float distanceToLine(vec3 p, vec3 p0, vec3 p1) {
 }
 
 void main() {
-  float strokeWidth = 0.01;
-  float arrowWidth = 0.05;
-  float arrowLength = 0.06;
+  float strokeWidth = appearance.x;
+  float arrowWidth = appearance.y;
+  float arrowLength = appearance.z;
 
   vec4 headColor = vColor;
   vec3 perpDirection = cross(center, headDirection);
@@ -40,9 +41,9 @@ void main() {
   vec3 p2 = center + headDirection * arrowLength * 0.5 - perpDirection * arrowWidth * 0.5;
   vec3 p3 = center + headDirection * arrowLength * 0.5 + perpDirection * arrowWidth * 0.5;
 
-  float minDist = min(min(distanceToLine(worldPos, p0, p1),
-                          distanceToLine(worldPos, p2, p1)),
-                          distanceToLine(worldPos, p3, p1));
+  float minDist = min(min(distanceToLineSegment(worldPos, p0, p1),
+                          distanceToLineSegment(worldPos, p1, p2)),
+                          distanceToLineSegment(worldPos, p1, p3));
 
   headColor.a = 1.0 - step(strokeWidth, minDist);
 

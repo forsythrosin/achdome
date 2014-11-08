@@ -4,6 +4,12 @@
 #include <cassert>
 #include <iostream>
 
+/*
+uniform float strokeWidth;
+uniform float arrowWidth;
+uniform float arrowLength;
+*/
+
 RenderableWormHeads::RenderableWormHeads(int wormCount, GLfloat wormThickness) {
   this->wormThickness = wormThickness;
   vertexCount = wormCount*VERTS_PER_HEAD;
@@ -55,6 +61,7 @@ void RenderableWormHeads::createVertices() {
   cartesianVertexData.clear();
   headCenterData.clear();
   headDirectionData.clear();
+  appearanceData.clear();
 
   for (int j = 0; j < wormHeads.size(); ++j) {
     WormHead wh = wormHeads.at(j);
@@ -77,8 +84,13 @@ void RenderableWormHeads::createVertices() {
       headDirectionData.push_back(headDirection.y);
       headDirectionData.push_back(headDirection.z);
 
-      // sphericalVertexData[cartIdx] = headPos.x;
-      // sphericalVertexData[cartIdx + 1] = headPos.y;
+      float strokeWidth = (!wh.isMoving() || wh.isInGap()) ? wh.getWidth() : 0.0;
+      float arrowWidth = wh.isMoving() ? 0.0 : strokeWidth * 8;
+      float arrowLength = wh.isMoving() ? 0.0 : strokeWidth * 10;
+
+      appearanceData.push_back(strokeWidth);
+      appearanceData.push_back(arrowWidth);
+      appearanceData.push_back(arrowLength);
     }
   }
 };
@@ -130,9 +142,20 @@ void RenderableWormHeads::loadToGPU(bool sphericalCoords) {
   glEnableVertexAttribArray(3);
   glVertexAttribPointer(3, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
 
+  glBindBuffer(GL_ARRAY_BUFFER, appearanceBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    appearanceData.size()*sizeof(GLfloat),
+    appearanceData.data(),
+    GL_STATIC_DRAW
+  );
+  glEnableVertexAttribArray(4);
+  glVertexAttribPointer(4, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
+
   // Unbind
   glDisableVertexAttribArray(2);
   glDisableVertexAttribArray(3);
+  glDisableVertexAttribArray(4);
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -142,11 +165,13 @@ void RenderableWormHeads::attach() {
   Renderable::attach();
   glGenBuffers(1, &headCenterBuffer);
   glGenBuffers(1, &headDirectionBuffer);
+  glGenBuffers(1, &appearanceBuffer);
 }
 
 void RenderableWormHeads::detach() {
   glDeleteBuffers(1, &headDirectionBuffer);
   glDeleteBuffers(1, &headCenterBuffer);
+  glDeleteBuffers(1, &appearanceBuffer);
   Renderable::detach();
 }
 
@@ -154,9 +179,11 @@ void RenderableWormHeads::enableAttributes() {
   Renderable::enableAttributes();
   glEnableVertexAttribArray(2);
   glEnableVertexAttribArray(3);
+  glEnableVertexAttribArray(4);
 }
 
 void RenderableWormHeads::disableAttributes() {
+  glDisableVertexAttribArray(4);
   glDisableVertexAttribArray(3);
   glDisableVertexAttribArray(2);
   Renderable::disableAttributes();

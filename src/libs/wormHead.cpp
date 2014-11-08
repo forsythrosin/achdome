@@ -193,3 +193,11 @@ void WormHead::setGapTimer(int ticksBetweenGaps, int ticksInGap) {
   timeLeftBetweenGaps = ticksBetweenGaps;
   timeLeftInGap = ticksInGap;
 }
+
+void WormHead::setWidth(float width) {
+  this->width = width;
+}
+
+float WormHead::getWidth() {
+  return width;
+}

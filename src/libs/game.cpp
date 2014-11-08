@@ -6,6 +6,7 @@
 #include <iostream>
 
 Game::Game(int gameId, PlayerManager *playerManager, WormTracker *wormTracker) {
+  time = -1;
   this->gameId = gameId;
   this->gameOver = false;
 
@@ -40,10 +41,6 @@ int Game::getId() {
 
 bool Game::start() {
   time = 0;
-  return true;
-}
-
-bool Game::end() {
   return true;
 }
 
@@ -159,7 +156,10 @@ std::vector<int> Game::getKills(int playerId) {
 
 
 void Game::tick() {
-  wormTracker->tick(time++);
+  if (hasStarted() && !isOver()) {
+    time++;
+  }
+  wormTracker->tick(time);
   for (auto iter : gamePlayers) {
     GamePlayer *p = iter.second;
     p->tick();
@@ -203,4 +203,8 @@ int Game::getPoints(int playerId) {
 
 bool Game::isOver() {
   return gameOver;
+}
+
+bool Game::hasStarted() {
+  return time >= 0;
 }

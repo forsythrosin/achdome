@@ -97,6 +97,16 @@ class WormHead {
    */
   void setGapTimer(int ticksBetweenGaps, int ticksInGap);
   
+  /**
+   * Set width.
+   */
+  void setWidth(float width);
+
+  /**
+   * Get width.
+   */
+  float getWidth();
+
  private:
   glm::vec4 color;
   bool moving;
@@ -105,6 +115,7 @@ class WormHead {
   glm::dquat positionQuat;
   glm::dquat velocityQuat;
   double turnSpeed;
+  double width;
   int timeLeftBetweenGaps;
   int timeLeftInGap;
   GameConfig *gameConfig;

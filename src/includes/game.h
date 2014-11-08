@@ -24,7 +24,6 @@ class Game : WormEventListener, PlayerEventListener {
   int getKiller(int playerId);
   std::vector<int> getKills(int playerId);
   bool start();
-  bool end();
   std::vector<int> getParticipants();
   glm::vec2 getPosition(int playerId); // phi, theta
   int getPoints(int playerId);
@@ -34,6 +33,7 @@ class Game : WormEventListener, PlayerEventListener {
   int getNumberOfPlayersMoving();
   void tick();
   bool isOver();
+  bool hasStarted();
  private:
   WormTracker *wormTracker;
   PlayerManager *playerManager;
