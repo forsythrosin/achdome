@@ -69,7 +69,6 @@ bool Game::turnRight(int playerId, bool turn) {
 }
 
 void Game::onWormCollision (WormCollision wc) {
-
   int id = wc.collider;
   int killer = wc.collidee;
 
@@ -92,7 +91,10 @@ void Game::onPlayerDisconnect(int playerId) {
 
 
 bool Game::isAlive(int playerId) {
-  return true;
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return false;
+  }
+  return gamePlayers[playerId]->isAlive();
 }
 
 int Game::getNumberOfPlayers() {
@@ -146,15 +148,24 @@ bool Game::isParticipating(int playerId) {
 }
 
 int Game::getKiller(int playerId) {
-  return -1;
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return -1;
+  }
+  return gamePlayers[playerId]->getKiller();
 }
 
 bool Game::hasStartedMoving(int playerId) {
-  return false;
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return false;
+  }
+  return gamePlayers[playerId]->hasStartedMoving();
 }
 
 std::vector<int> Game::getKills(int playerId) {
-  return std::vector<int>();
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return std::vector<int>();
+  }
+  return gamePlayers[playerId]->getKillIds();
 }
 
 
