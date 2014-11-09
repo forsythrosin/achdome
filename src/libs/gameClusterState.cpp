@@ -1,5 +1,4 @@
 #include <gameClusterState.h>
-
 #include <renderableDome.h>
 #include <renderableWormArcs.h>
 #include <renderableWormHeads.h>
@@ -18,6 +17,9 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   renderableArcs = nullptr;
   renderableHeads = nullptr;
 
+  timeUni = nullptr;
+  collisionsUni = nullptr;
+
   renderSpace = rs;
   attached = false;
 }
@@ -30,6 +32,9 @@ GameClusterState::~GameClusterState() {
   if (wormArcs != nullptr) delete wormArcs;
   if (wormCollisions != nullptr) delete wormCollisions;
   if (wormHeads != nullptr) delete wormHeads;
+
+  if (timeUni != nullptr) delete timeUni;
+  if (collisionsUni != nullptr) delete collisionsUni;
 }
 
 void GameClusterState::attach() {
@@ -39,7 +44,7 @@ void GameClusterState::attach() {
 
   domeGrid = renderer->addRenderable(renderableDome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   domeWorms = renderer->addRenderable(renderableDome, GL_TRIANGLES, "domeShader.vert", "domeWormsShader.frag", true);
-  collision = renderer->addRenderable(renderableDome, GL_LINES, "domeShader.vert", "collisionShader.frag", true);
+  collision = renderer->addRenderable(renderableDome, GL_TRIANGLES, "domeShader.vert", "collisionShader.frag", true);
 
   renderableArcs->setWormArcs(wormArcs->getVal());
   wormLines = renderer->addRenderable(renderableArcs, GL_TRIANGLES, "wormShader.vert", "wormShader.frag", false);
@@ -47,8 +52,13 @@ void GameClusterState::attach() {
   wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
   timer.setVal(0);
+
   timeUni = new Uniform<float>("time");
   renderer->setUniform(wormDots, timeUni);
+  collisionsUni = new Uniform<std::vector<glm::vec4> >("collisions");
+  renderer->setUniform(collision, collisionsUni);
+  collisionCountUni = new Uniform<GLuint>("collisionCount");
+  renderer->setUniform(collision, collisionCountUni);
 
   attached = true;
 }
@@ -63,8 +73,8 @@ void GameClusterState::detach() {
   renderer->removeRenderable(collision);
   renderer->removeRenderable(wormLines);
   renderer->removeRenderable(wormDots);
-
   delete renderableDome;
+
   renderableDome = nullptr;
   delete renderableArcs;
   renderableArcs = nullptr;
@@ -72,6 +82,8 @@ void GameClusterState::detach() {
   renderableHeads = nullptr;
 
   delete timeUni;
+  timeUni = nullptr;
+  delete collisionsUni;
   timeUni = nullptr;
 
   attached = false;
@@ -101,8 +113,7 @@ void GameClusterState::preSync() {
   }
 }
 
-void GameClusterState::draw() {
-
+void GameClusterState::postSyncPreDraw() {
   // Copy current worm positions and colors
   std::vector<WormArc> arcs = wormArcs->getVal();
   std::vector<WormHead> heads = wormHeads->getVal();
@@ -111,10 +122,29 @@ void GameClusterState::draw() {
   renderableArcs->setWormArcs(arcs);
   renderableHeads->setWormHeads(heads);
 
-  timeUni->set(timer.getVal());
+  int tickNumber = timer.getVal();
+  timeUni->set(tickNumber);
 
-  renderer->render(wormDots);
+  for (auto c : collisions) {
+    collisionTimerQueue.push_back({tickNumber, c});
+  }
 
+  while ( !collisionTimerQueue.empty() && (tickNumber - collisionTimerQueue.front().first) >= COLLISION_DURATION) {
+    collisionTimerQueue.pop_front();
+  }
+
+  std::vector<glm::vec4> activeCollisions;
+  std::vector<glm::vec4> collisionColors;
+  for (auto pair : collisionTimerQueue) {
+    glm::vec3 pos = (glm::vec3) pair.second.getCartesianPosition();
+    float lifeTime = 1.0 - (float)(tickNumber - pair.first)/(float)COLLISION_DURATION;
+    activeCollisions.push_back(glm::vec4(pos.x, pos.y, pos.z, lifeTime));
+  }
+  collisionsUni->set(activeCollisions);
+  collisionCountUni->set((GLuint)activeCollisions.size());
+}
+
+void GameClusterState::draw() {
   // if (!heads.empty() && heads.at(0).isInGap()) {
   //   renderer->render(wormDots);
   // } else {
@@ -129,7 +159,8 @@ void GameClusterState::draw() {
   renderer->render(domeWorms, wormLines, stitchStep);
   // renderer->render(domeWorms, wormDots, stitchStep);
 
-  // renderer->render(collision);
+  renderer->render(wormDots);
+  renderer->render(collision);
 
   ++stitchStep;
 }

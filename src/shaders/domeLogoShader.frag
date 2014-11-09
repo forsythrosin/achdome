@@ -53,8 +53,8 @@ void main() {
   vec3 yAxis = cross(planeNormal, vec3(1.0, 0.0, 0.0));
   vec3 xAxis = cross(yAxis, planeNormal);
   
-  vec2 texCoord = vec2(dot(cartesianPos, xAxis),
-                       dot(cartesianPos, yAxis));
+  vec2 texCoord = vec2(dot(cartesianPos*7.5, xAxis),
+                       dot(cartesianPos*7.5, yAxis));
 
 
   float logoRadius = 3;

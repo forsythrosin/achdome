@@ -88,7 +88,6 @@ bool GameEngine::startLobby() {
   if (state == State::INTRO || state == State::GAME_OVER || state == State::TOURNAMENT_OVER) {
     if (currentGame != nullptr) {
       wormTracker->clear();
-      currentGame->end();
       delete currentGame;
       currentGame = nullptr;
     }
@@ -153,7 +152,7 @@ bool GameEngine::endGame() {
   if (state != State::GAME || currentGame == nullptr) {
     return false;
   }
-  wormTracker->saveCollisionBitmapToFile("wormData.ppm");
+  // wormTracker->saveCollisionBitmapToFile("wormData.ppm");
 
   // Copy points from GamePlayers to Players.
   std::vector<int> participants = currentGame->getParticipants();
@@ -328,7 +327,7 @@ float GameEngine::getSecondsLeftInCountdown() {
 }
 
 void GameEngine::tick() {
-  if (state == State::GAME && currentGame != nullptr) {
+  if (currentGame != nullptr) {
     currentGame->tick();
     if (currentGame->isOver()) {
       endGame();

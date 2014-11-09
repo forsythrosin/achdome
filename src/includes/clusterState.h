@@ -17,6 +17,7 @@ class ClusterState {
   virtual void detach() = 0;
 
   virtual void preSync() = 0;
+  virtual void postSyncPreDraw(){};
   virtual void draw() = 0;
   virtual void encode() = 0;
   virtual void decode() = 0;

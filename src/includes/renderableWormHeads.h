@@ -33,10 +33,12 @@ private:
   std::vector<glm::vec4> wormColors;
   std::vector<GLfloat> headCenterData;
   std::vector<GLfloat> headDirectionData;
+  std::vector<GLfloat> appearanceData;
 
   // additional GL handles
   GLuint headCenterBuffer;
   GLuint headDirectionBuffer;
+  GLuint appearanceBuffer;
 
   const GLuint VERTS_PER_ELEMENT = 3;
   const GLuint ELEMENTS_PER_HEAD = 2;

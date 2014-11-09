@@ -43,6 +43,15 @@ public:
   }
 };
 
+template <>
+class Uniform <GLuint> : public TemplateUniform <GLuint> {
+public:
+  Uniform(std::string n) : TemplateUniform<GLuint>(n) {};
+  void upload(){
+    glUniform1ui(location, value);
+  }
+};
+
 /**
  * vectors
  */
@@ -103,5 +112,15 @@ public:
   Uniform(std::string n) : TemplateUniform<std::vector<float> >(n) {};
   void upload(){
     glUniform1fv(location, value.size(), value.data());
+  }
+};
+
+template <>
+class Uniform <std::vector<glm::vec4> > : public TemplateUniform <std::vector<glm::vec4> > {
+public:
+  Uniform(std::string n) : TemplateUniform<std::vector<glm::vec4> >(n) {};
+  void upload(){
+    // TODO: reinterpret cast!
+    glUniform4fv(location, value.size(), reinterpret_cast<float*>(value.data()));
   }
 };

@@ -5,6 +5,7 @@
 #include <wormCollision.h>
 #include <wormHead.h>
 #include <uniformWrappers.h>
+#include <deque>
 
 class RenderableDome;
 class RenderableWormArcs;
@@ -22,6 +23,7 @@ class GameClusterState : public ClusterState {
   void reset();
 
   void preSync();
+  void postSyncPreDraw();
   void draw();
   void encode();
   void decode();
@@ -35,11 +37,16 @@ class GameClusterState : public ClusterState {
   int domeGrid, domeWorms, wormLines, wormDots, collision;
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;
+  std::deque<std::pair<int, WormCollision> > collisionTimerQueue;
   Uniform<float> *timeUni;
+  Uniform<std::vector<glm::vec4> > *collisionsUni;
+  Uniform<GLuint> *collisionCountUni;
 
   sgct::SharedBool *resetSignal;
   sgct::SharedVector<WormArc> *wormArcs;
   sgct::SharedVector<WormCollision> *wormCollisions;
   sgct::SharedVector<WormHead> *wormHeads;
   sgct::SharedInt timer;
+
+  const GLuint COLLISION_DURATION = 100; // frames
 };
