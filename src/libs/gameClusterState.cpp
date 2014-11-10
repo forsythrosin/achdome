@@ -3,14 +3,21 @@
 #include <renderableWormArcs.h>
 #include <renderableWormHeads.h>
 #include <clusterRenderSpace.h>
+#include <playerManager.h>
+#include <wormArc.h>
+#include <wormArcSyncData.h>
+#include <wormCollision.h>
+#include <wormCollisionSyncData.h>
+#include <wormHead.h>
+#include <wormHeadSyncData.h>
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr) {}
+GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr, nullptr) {}
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs) : ClusterState(gEngine, gameConfig) {
+GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs, PlayerManager *pm) : ClusterState(gEngine, gameConfig) {
   resetSignal = new sgct::SharedBool(false);
-  wormArcs = new sgct::SharedVector<WormArc>(gameConfig->maximumPlayers);
-  wormCollisions = new sgct::SharedVector<WormCollision>(gameConfig->maximumPlayers);
-  wormHeads = new sgct::SharedVector<WormHead>(gameConfig->maximumPlayers);
+  wormArcs = new sgct::SharedVector<WormArcSyncData>(gameConfig->maximumPlayers);
+  wormCollisions = new sgct::SharedVector<WormCollisionSyncData>(gameConfig->maximumPlayers);
+  wormHeads = new sgct::SharedVector<WormHeadSyncData>(gameConfig->maximumPlayers);
   timer.setVal(0);
 
   renderableDome = nullptr;
@@ -21,6 +28,7 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   collisionsUni = nullptr;
 
   renderSpace = rs;
+  playerManager = pm;
   attached = false;
 }
 
@@ -96,9 +104,28 @@ void GameClusterState::preSync() {
     std::vector<WormCollision> collisions = renderSpace->getCollisions();
     bool reset = renderSpace->getResetSignal();
 
-    wormArcs->setVal(arcs);
-    wormCollisions->setVal(collisions);
-    wormHeads->setVal(heads);
+    std::vector<WormArcSyncData> syncArcs;
+    for (WormArc arc : arcs) {
+      glm::vec4 color = playerManager->getColor(arc.getWormId());
+      syncArcs.push_back(WormArcSyncData(arc, color));
+    }
+
+    std::vector<WormCollisionSyncData> syncCollisions;
+    for (WormCollision collision : collisions) {
+      glm::vec4 color = playerManager->getColor(collision.collider);
+      syncCollisions.push_back(WormCollisionSyncData(collision, color));
+    }
+
+    std::vector<WormHeadSyncData> syncHeads;
+    for (WormHead head : heads) {
+      glm::vec4 color = playerManager->getColor(head.getWormId());
+      // todo: set arrow length and arrow width properly.
+      syncHeads.push_back(WormHeadSyncData(head, color, 0.1, 0.1));
+    }
+
+    wormArcs->setVal(syncArcs);
+    wormCollisions->setVal(syncCollisions);
+    wormHeads->setVal(syncHeads);
     timer.setVal(timer.getVal() + 1);
 
     resetSignal->setVal(reset);
@@ -115,17 +142,17 @@ void GameClusterState::preSync() {
 
 void GameClusterState::postSyncPreDraw() {
   // Copy current worm positions and colors
-  std::vector<WormArc> arcs = wormArcs->getVal();
-  std::vector<WormHead> heads = wormHeads->getVal();
-  std::vector<WormCollision> collisions = wormCollisions->getVal();
+  std::vector<WormArcSyncData> syncArcs = wormArcs->getVal();
+  std::vector<WormHeadSyncData> syncHeads = wormHeads->getVal();
+  std::vector<WormCollisionSyncData> syncCollisions = wormCollisions->getVal();
 
-  renderableArcs->setWormArcs(arcs);
-  renderableHeads->setWormHeads(heads);
+  renderableArcs->setWormArcs(syncArcs);
+  renderableHeads->setWormHeads(syncHeads);
 
   int tickNumber = timer.getVal();
   timeUni->set(tickNumber);
 
-  for (auto c : collisions) {
+  for (auto c : syncCollisions) {
     collisionTimerQueue.push_back({tickNumber, c});
   }
 
@@ -136,7 +163,7 @@ void GameClusterState::postSyncPreDraw() {
   std::vector<glm::vec4> activeCollisions;
   std::vector<glm::vec4> collisionColors;
   for (auto pair : collisionTimerQueue) {
-    glm::vec3 pos = (glm::vec3) pair.second.getCartesianPosition();
+    glm::vec3 pos = (glm::vec3) pair.second.getPosition();
     float lifeTime = 1.0 - (float)(tickNumber - pair.first)/(float)COLLISION_DURATION;
     activeCollisions.push_back(glm::vec4(pos.x, pos.y, pos.z, lifeTime));
   }

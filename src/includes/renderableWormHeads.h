@@ -1,7 +1,7 @@
 #pragma once
 
 #include <renderable.h>
-#include <wormHead.h>
+#include <wormHeadSyncData.h>
 #include <vector>
 
 class RenderableWormHeads : public Renderable {
@@ -9,9 +9,9 @@ public:
   RenderableWormHeads(int wormCount, GLfloat wormThickness);
   ~RenderableWormHeads();
 
-  const std::vector<WormHead> getWormHeads() const;
+  const std::vector<WormHeadSyncData> getWormHeads() const;
 
-  void setWormHeads(std::vector<WormHead> wormHeads);
+  void setWormHeads(std::vector<WormHeadSyncData> wormHeads);
   void setWormColors(std::vector<glm::vec3> wormColors);
   void setWormColors(std::vector<glm::vec4> wormColors);
 
@@ -29,7 +29,7 @@ protected:
 
 private:
   GLfloat wormThickness;
-  std::vector<WormHead> wormHeads;
+  std::vector<WormHeadSyncData> wormHeads;
   std::vector<glm::vec4> wormColors;
   std::vector<GLfloat> headCenterData;
   std::vector<GLfloat> headDirectionData;

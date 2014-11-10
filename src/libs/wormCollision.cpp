@@ -1,6 +1,7 @@
 #include <wormCollision.h>
 
-WormCollision::WormCollision(int collider, int collidee, glm::dquat position) {
+WormCollision::WormCollision(int collider, int collidee, glm::dquat position, int time) {
+  this->time = time;
   this->collider = collider;
   this->collidee = collidee;
   this->position = position;

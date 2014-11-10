@@ -20,10 +20,10 @@ RenderableWormArcs::RenderableWormArcs(int wormCount, int segsPerWorm) {
 
 RenderableWormArcs::~RenderableWormArcs() {};
 
-void RenderableWormArcs::setWormArcs(std::vector<WormArc> wormArcs) {
+void RenderableWormArcs::setWormArcs(std::vector<WormArcSyncData> wormArcs) {
   this->wormArcs = wormArcs;
   std::vector<glm::vec4> colors;
-  for (WormArc wa : wormArcs) {
+  for (WormArcSyncData wa : wormArcs) {
     colors.push_back(wa.getColor());
   }
   setWormColors(colors);
@@ -54,7 +54,7 @@ void RenderableWormArcs::createVertices() {
   cartesianVertexData.clear();
   sphericalVertexData.clear();
   for (int j = 0; j < wormArcs.size(); ++j) {
-    WormArc arc = wormArcs.at(j);
+    WormArcSyncData arc = wormArcs.at(j);
 
     // each vertex
     for (int i = 0; i < refVertsPerWorm; ++i) {
@@ -128,6 +128,6 @@ const GLuint RenderableWormArcs::getVertsPerElement() const {
   return VERTS_PER_ELEMENT;
 };
 
-const std::vector<WormArc> RenderableWormArcs::getWormArcs() const {
+const std::vector<WormArcSyncData> RenderableWormArcs::getWormArcs() const {
   return wormArcs;
 };

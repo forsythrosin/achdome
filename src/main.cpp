@@ -108,7 +108,7 @@ AdminGameController* agc;
 
     // ics = new IntroClusterState();
     lcs = new LobbyClusterState(gEngine, gameConfig, pm);
-    gcs = new GameClusterState(gEngine, gameConfig, renderSpace);
+    gcs = new GameClusterState(gEngine, gameConfig, renderSpace, pm);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
     gameControllers.push_back(keyboardGameController);

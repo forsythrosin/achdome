@@ -10,8 +10,8 @@
 /**
  * Construct a worm head
  */
-WormHead::WormHead(glm::vec4 c, GameConfig *gameConfig) {
-  color = c;
+WormHead::WormHead(int id, GameConfig *gameConfig) {
+  wormId = id;
   setEulerPosition(glm::dvec3(0.0));
   setEulerVelocity(glm::dvec3(0.0));
   this->gameConfig = gameConfig;
@@ -23,6 +23,10 @@ WormHead::WormHead(glm::vec4 c, GameConfig *gameConfig) {
 
   timeLeftInGap = 0;
   timeLeftBetweenGaps = 0;
+}
+
+int WormHead::getWormId() {
+  return wormId;
 }
 
 /**
@@ -88,13 +92,6 @@ std::string WormHead::toString() {
     velocityQuat.z << ")}";
 
   return ss.str();
-}
-
-/**
-* Get color
-*/
-glm::vec4 WormHead::getColor() {
-  return color;
 }
 
 /**
