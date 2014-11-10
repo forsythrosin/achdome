@@ -204,7 +204,7 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
     gameEngine->startTournament(action.ints.at("numberOfGames"));
     break;
   case ClientAction::END_TOURNAMENT:
-    std::cout << "Tournament started by admin " << sessionId << std::endl;
+    std::cout << "Tournament ended by admin " << sessionId << std::endl;
     gameEngine->endTournament();
     break;
   case ClientAction::END_GAME:

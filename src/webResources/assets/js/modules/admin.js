@@ -275,19 +275,21 @@ var setServerListeners = function ($container) {
     .on('gameStarted', function (err, res) {
       if (screen != "adminPanel") {
         renderAdminPanel($container, res);
+      } else {
+        updatePlayers($container, res);
       }
       $container.find('#startTournament, #numberOfGames').hide();
       $container.find('#endGame, #endTournament').show();
       $container.find('#state h1').text('Game started');
-      updatePlayers($container, res);
     })
     .on('lobby', function (err, res) {
       if (screen != "adminPanel") {
         renderAdminPanel($container, res);
+      } else {
+        updatePlayers($container, res);
       }
       $container.find('#startTournament, #numberOfGames').show();
       $container.find('#endGame, #endTournament').hide();
       $container.find('#state h1').text('In lobby');
-      updatePlayers($container, res);
     });
 };

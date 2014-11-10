@@ -50,7 +50,7 @@ void LobbyClusterState::draw() {
 
   // render grid lines
   renderer->render(domeGrid);
-  renderer->render(domeLogo);
+  // renderer->render(domeLogo);
 
   auto players = sharedPlayers->getVal();
   for (int offset = 0; offset < players.size(); ++offset) {
@@ -75,7 +75,7 @@ glm::mat4 LobbyClusterState::getMVP(int offset) {
   glm::mat4 mvp = renderer->getMVP();
   glm::mat4 translate = glm::translate(
     glm::mat4(1.0f),
-    playerListAnchor - glm::vec3(0.0, 0.0, offset)
+    playerListAnchor + glm::vec3(0.0, 0.0, offset)
   );
   glm::mat4 rot_back = glm::rotate(glm::mat4(1.0f), 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
   glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));

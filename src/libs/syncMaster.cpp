@@ -61,6 +61,15 @@ void SyncMaster::preSync() {
   }
 }
 
+void SyncMaster::postSyncPreDraw() {
+  if (!initDone) return;
+
+  if (ClusterState *cs = getClusterState()) {
+    attachState(cs);
+    cs->postSyncPreDraw();
+  }
+}
+
 void SyncMaster::encode() {
   if (!initDone) return;
 

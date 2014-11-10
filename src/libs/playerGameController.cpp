@@ -104,7 +104,20 @@ void PlayerGameController::performActions() {
         auto it2 = lives.find(playerId);
         bool wasAlive = it2->second;
         if (wasAlive && !isAlive) {
-          webServer->addMessage(sessionId, "{\"message\":\"died\", \"data\":{\"name\":\"Tomas\",\"color\":[0,255,0]}}");
+          int killerId = gameEngine->getKiller(playerId);
+          std::string killerName = gameEngine->getName(killerId);
+          glm::vec4 killerColor = gameEngine->getColor(killerId);
+          std::string message =
+            dataSerializationBuilder
+              ->add("message", "died")
+              ->add("data", dataSerializationBuilder->group()
+                ->add("killer", dataSerializationBuilder->group()
+                  ->add("id", killerId)
+                  ->add("name", killerName)
+                  ->add("color", killerColor)
+                )
+              )->build();
+          webServer->addMessage(sessionId, message);
         }
         it2->second = isAlive;
       }

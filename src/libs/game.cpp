@@ -6,6 +6,7 @@
 #include <iostream>
 
 Game::Game(int gameId, PlayerManager *playerManager, WormTracker *wormTracker) {
+  time = -1;
   this->gameId = gameId;
   this->gameOver = false;
 
@@ -43,10 +44,6 @@ bool Game::start() {
   return true;
 }
 
-bool Game::end() {
-  return true;
-}
-
 bool Game::turnLeft(int playerId, bool turn) {
   if (gamePlayers.find(playerId) == gamePlayers.end()) {
     return false;
@@ -69,7 +66,6 @@ bool Game::turnRight(int playerId, bool turn) {
 }
 
 void Game::onWormCollision (WormCollision wc) {
-
   int id = wc.collider;
   int killer = wc.collidee;
 
@@ -92,7 +88,10 @@ void Game::onPlayerDisconnect(int playerId) {
 
 
 bool Game::isAlive(int playerId) {
-  return true;
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return false;
+  }
+  return gamePlayers[playerId]->isAlive();
 }
 
 int Game::getNumberOfPlayers() {
@@ -146,20 +145,32 @@ bool Game::isParticipating(int playerId) {
 }
 
 int Game::getKiller(int playerId) {
-  return -1;
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return -1;
+  }
+  return gamePlayers[playerId]->getKiller();
 }
 
 bool Game::hasStartedMoving(int playerId) {
-  return false;
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return false;
+  }
+  return gamePlayers[playerId]->hasStartedMoving();
 }
 
 std::vector<int> Game::getKills(int playerId) {
-  return std::vector<int>();
+  if (gamePlayers.find(playerId) == gamePlayers.end()) {
+    return std::vector<int>();
+  }
+  return gamePlayers[playerId]->getKillIds();
 }
 
 
 void Game::tick() {
-  wormTracker->tick(time++);
+  if (hasStarted() && !isOver()) {
+    time++;
+  }
+  wormTracker->tick(time);
   for (auto iter : gamePlayers) {
     GamePlayer *p = iter.second;
     p->tick();
@@ -203,4 +214,8 @@ int Game::getPoints(int playerId) {
 
 bool Game::isOver() {
   return gameOver;
+}
+
+bool Game::hasStarted() {
+  return time >= 0;
 }
