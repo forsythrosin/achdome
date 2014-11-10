@@ -124,7 +124,7 @@ void RenderableWormArcs::createElements() {
   }
 };
 
-const GLuint RenderableWormArcs::getVertsPerElement() const {
+GLuint RenderableWormArcs::getVertsPerElement() const {
   return VERTS_PER_ELEMENT;
 };
 

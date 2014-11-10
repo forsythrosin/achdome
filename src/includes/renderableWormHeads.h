@@ -15,7 +15,7 @@ public:
   void setWormColors(std::vector<glm::vec3> wormColors);
   void setWormColors(std::vector<glm::vec4> wormColors);
 
-  const GLuint getVertsPerElement() const;
+  GLuint getVertsPerElement() const;
 
   void loadToGPU(bool sphericalCoords = false);
   void attach();

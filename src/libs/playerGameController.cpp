@@ -16,6 +16,8 @@ void PlayerGameController::performActions() {
       webServer->addBroadcast(sendMessage);
       std::cout << "State changed to Intro" << std::endl;
       break;
+    default:
+      break;
     }
 
     case GameEngine::LOBBY: {
@@ -180,6 +182,8 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
   case ClientAction::RIGHT_UP:
     playerId = playerIds.at(sessionId);
     gameEngine->turnRight(playerId, false);
+    break;
+  default:
     break;
   }
 }

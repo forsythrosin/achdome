@@ -103,6 +103,7 @@ bool PlayerManager::setPointsInGame(int playerId, int gameId, int points) {
     return false;
   }
   players[playerId]->setPointsInGame(gameId, points);
+  return true;
 }
 
 int PlayerManager::getPointsInGame(int playerId, int gameId) {

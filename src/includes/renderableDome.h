@@ -10,11 +10,11 @@ public:
   RenderableDome(int azmSegs, int inclSegs);
   ~RenderableDome();
 
-  const int getAzmSegs() const;
-  const int getInclSegs() const;
-  const int getRadius() const;
+  int getAzmSegs() const;
+  int getInclSegs() const;
+  int getRadius() const;
 
-  const GLuint getVertsPerElement() const;
+  GLuint getVertsPerElement() const;
 
 protected:
   void createVertices();

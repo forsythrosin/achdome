@@ -163,7 +163,7 @@ void RenderableWormHeads::disableAttributes() {
   Renderable::disableAttributes();
 }
 
-const GLuint RenderableWormHeads::getVertsPerElement() const {
+GLuint RenderableWormHeads::getVertsPerElement() const {
   return VERTS_PER_ELEMENT;
 };
 

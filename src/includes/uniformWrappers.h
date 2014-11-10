@@ -5,7 +5,7 @@
 class AbstractUniform {
 public:
   AbstractUniform(std::string n) : name(n), location(-1) {};
-
+  virtual ~AbstractUniform(){};
   virtual void upload() = 0;
   std::string getName() { return name; };
   void setLocation(GLuint l) { location = l; };
@@ -22,7 +22,7 @@ class TemplateUniform : public AbstractUniform {
 public:
   TemplateUniform(std::string n) : AbstractUniform(n), value(T()) {};
   void set(T t) { value = t; };
-
+  virtual ~TemplateUniform(){};
 protected:
   T value;
 };

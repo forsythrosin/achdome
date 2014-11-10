@@ -133,6 +133,7 @@ bool GameEngine::startTournament(int nGames) {
   nGamesInTournament = nGames;
   gameIndexInTournament = -1; // game not yet started.
   startCountdown();
+  return true;
 }
 
 /**
