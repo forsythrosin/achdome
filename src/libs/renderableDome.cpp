@@ -72,18 +72,18 @@ void RenderableDome::createElements() {
   }
 };
 
-const int RenderableDome::getAzmSegs() const {
+int RenderableDome::getAzmSegs() const {
   return azmSegs;
 };
 
-const int RenderableDome::getInclSegs() const {
+int RenderableDome::getInclSegs() const {
   return inclSegs;
 };
 
-const int RenderableDome::getRadius() const {
+int RenderableDome::getRadius() const {
   return R;
 };
 
-const GLuint RenderableDome::getVertsPerElement() const {
+GLuint RenderableDome::getVertsPerElement() const {
   return VERTS_PER_ELEMENT;
 };

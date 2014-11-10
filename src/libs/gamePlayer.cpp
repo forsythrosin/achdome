@@ -37,6 +37,7 @@ bool GamePlayer::kill(int killerId) {
   }
   alive = false;
   killer = killerId;
+  return true;
 }
 
 

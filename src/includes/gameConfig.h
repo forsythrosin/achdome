@@ -38,6 +38,7 @@ struct GameConfig{
   private:
 
   struct AbstractConfigEntity{
+    virtual ~AbstractConfigEntity(){};
     virtual void configFromJson(picojson::value) = 0;
     virtual void addConfigToJson(JsonBuilder*) = 0;
   };

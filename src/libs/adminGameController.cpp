@@ -152,6 +152,8 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
     case GameEngine::TOURNAMENT_OVER:
       state = "tournamentOver";
       break;
+    default:
+      break;
     }
     dataSerializationBuilder
       ->add("message", state)
@@ -202,12 +204,14 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
     gameEngine->startTournament(action.ints.at("numberOfGames"));
     break;
   case ClientAction::END_TOURNAMENT:
-    std::cout << "Tournament started by admin " << sessionId << std::endl;
+    std::cout << "Tournament ended by admin " << sessionId << std::endl;
     gameEngine->endTournament();
     break;
   case ClientAction::END_GAME:
     std::cout << "Game ended by admin " << sessionId << std::endl;
     gameEngine->endGame();
+    break;
+  default:
     break;
   }
 }
