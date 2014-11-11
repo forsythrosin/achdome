@@ -13,6 +13,7 @@ class RenderableWormHeads;
 class ClusterRenderSpace;
 class PlayerManager;
 class WormArcSyncData;
+class WormHeadAppearance;
 
 class WormCollisionSyncData;
 class WormHead;
@@ -44,6 +45,7 @@ class GameClusterState : public ClusterState {
   ClusterRenderSpace *renderSpace;
   PlayerManager *playerManager;
   std::deque<std::pair<int, WormCollisionSyncData> > collisionTimerQueue;
+  std::map<int, WormHeadAppearance*> wormHeadAppearances;
   Uniform<float> *timeUni;
   Uniform<std::vector<glm::vec4> > *collisionsUni;
   Uniform<GLuint> *collisionCountUni;

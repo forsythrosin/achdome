@@ -10,6 +10,8 @@
 #include <wormCollisionSyncData.h>
 #include <wormHead.h>
 #include <wormHeadSyncData.h>
+#include <wormHeadAppearance.h>
+
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr, nullptr) {}
 
@@ -118,9 +120,14 @@ void GameClusterState::preSync() {
 
     std::vector<WormHeadSyncData> syncHeads;
     for (WormHead head : heads) {
-      glm::vec4 color = playerManager->getColor(head.getWormId());
+      int id = head.getWormId();
+      glm::vec4 color = playerManager->getColor(id);
+
+      // todo:
+      //WormHeadAppearance headAppearance = *wormHeadAppearances[id];
+      WormHeadAppearance headAppearance(color, 0.1, 0.01, 0.06, 0.05);
       // todo: set arrow length and arrow width properly.
-      syncHeads.push_back(WormHeadSyncData(head, color, 0.1, 0.1));
+      syncHeads.push_back(WormHeadSyncData(head, headAppearance));
     }
 
     wormArcs->setVal(syncArcs);

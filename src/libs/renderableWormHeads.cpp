@@ -85,10 +85,12 @@ void RenderableWormHeads::createVertices() {
       headDirectionData.push_back(headDirection.y);
       headDirectionData.push_back(headDirection.z);
 
-      float strokeWidth = wh.getWidth();
+      float headDiameter = wh.getHeadDiameter();
+      float strokeWidth = wh.getStrokeWidth();
       float arrowWidth = wh.getArrowWidth();
       float arrowLength = wh.getArrowLength();
 
+      appearanceData.push_back(headDiameter);
       appearanceData.push_back(strokeWidth);
       appearanceData.push_back(arrowWidth);
       appearanceData.push_back(arrowLength);
@@ -122,6 +124,7 @@ void RenderableWormHeads::loadToGPU(bool sphericalCoords) {
   glBindVertexArray(vertexArray);
 
   GLuint vertexDim = 3;
+  GLuint appearanceDim = 4;
 
   glBindBuffer(GL_ARRAY_BUFFER, headCenterBuffer);
   glBufferData(
@@ -151,7 +154,7 @@ void RenderableWormHeads::loadToGPU(bool sphericalCoords) {
     GL_STATIC_DRAW
   );
   glEnableVertexAttribArray(4);
-  glVertexAttribPointer(4, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(4, appearanceDim, GL_FLOAT, GL_FALSE, 0, 0);
 
   // Unbind
   glDisableVertexAttribArray(2);
