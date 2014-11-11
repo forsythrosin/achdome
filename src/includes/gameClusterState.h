@@ -48,6 +48,7 @@ class GameClusterState : public ClusterState {
   std::map<int, WormHeadAppearance*> wormHeadAppearances;
   Uniform<float> *timeUni;
   Uniform<std::vector<glm::vec4> > *collisionsUni;
+  Uniform<std::vector<glm::vec4> > *collisionColorsUni;
   Uniform<GLuint> *collisionCountUni;
 
   sgct::SharedBool *resetSignal;
