@@ -196,5 +196,7 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
     playerId = playerIds.at(sessionId);
     gameEngine->turnRight(playerId, false);
     break;
+  default:
+    break;
   }
 }

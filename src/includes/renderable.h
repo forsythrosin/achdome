@@ -10,8 +10,8 @@ public:
   Renderable();
   virtual ~Renderable();
 
-  const int getVertexCount() const;
-  const int getElementCount() const;
+  int getVertexCount() const;
+  int getElementCount() const;
 
   const std::vector<GLfloat> getCartesianVertexData() const;
   const std::vector<GLfloat> getSphericalVertexData() const;
@@ -24,7 +24,7 @@ public:
   virtual void enableAttributes();
   virtual void disableAttributes();
 
-  virtual const GLuint getVertsPerElement() const = 0;
+  virtual GLuint getVertsPerElement() const = 0;
 
 protected:
   virtual void createVertices() = 0;

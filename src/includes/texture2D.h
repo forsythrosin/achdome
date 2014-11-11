@@ -35,7 +35,7 @@ public:
     delete[] data;
   }
 
-  const GLfloat get(GLuint i, GLuint j, GLuint k) const{
+  GLfloat get(GLuint i, GLuint j, GLuint k) const{
     return data[indexTranslation(i,j,k)];
   }
 
@@ -43,7 +43,7 @@ public:
     data[indexTranslation(i,j,k)] = v;
   }
 
-  operator const GLuint() const {
+  operator GLuint() const {
     return textureID;
   }
 

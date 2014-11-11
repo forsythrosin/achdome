@@ -43,7 +43,7 @@ void WormTracker::setPlayers(std::vector<GamePlayer*> gamePlayers) {
   clearPlayers();
   for (GamePlayer *gp : gamePlayers) {
     int id = gp->getId();
-    WormHead *wh = new WormHead(gp->getColor(), gameConfig);
+    WormHead *wh = new WormHead(id, gameConfig);
     wh->setWidth(width);
     wormHeads.insert({id, wh});
     setNewRandomGapTimer(id);
@@ -82,7 +82,7 @@ void WormTracker::tick(int time) {
       wh->tick();
       glm::dquat position = wh->getQuaternionPosition();
       if (!wh->isInGap()) {
-        arcs.push_back(WormArc(id, prevPosition, position, wh->getWidth(), time, wh->getColor()));
+        arcs.push_back(WormArc(id, prevPosition, position, wh->getWidth(), time));
       }
       if (wh->needsNewGapTimer()) {
         setNewRandomGapTimer(id);

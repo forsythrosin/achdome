@@ -39,7 +39,7 @@ public:
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   };
 
-  operator const GLuint() const {
+  operator GLuint() const {
     return framebufferId;
   }
 
@@ -47,7 +47,7 @@ public:
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   };
 
-  Texture2D const *const getTexture() const {
+  Texture2D const * getTexture() const {
     return texture;
   };
 

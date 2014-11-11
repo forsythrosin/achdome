@@ -6,7 +6,7 @@ in vec4 vColor;
 in vec3 center;
 in vec3 worldPos;
 in vec3 headDirection;
-in vec3 appearance;
+in vec4 appearance;
 
 out vec4 color;
 
@@ -29,9 +29,10 @@ float distanceToLineSegment(vec3 p, vec3 p0, vec3 p1) {
 }
 
 void main() {
-  float strokeWidth = appearance.x;
-  float arrowWidth = appearance.y;
-  float arrowLength = appearance.z;
+  float headDiameter = appearance.x;
+  float strokeWidth = appearance.y;
+  float arrowWidth = appearance.z;
+  float arrowLength = appearance.w;
 
   vec4 headColor = vColor;
   vec3 perpDirection = cross(center, headDirection);

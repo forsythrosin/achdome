@@ -22,6 +22,5 @@ class KeyboardGameController : public GameController {
   void startMoving();
   void turnLeft(bool turn);
   void turnRight(bool turn);
-  GameEngine *gameEngine;
   int playerId;
 };

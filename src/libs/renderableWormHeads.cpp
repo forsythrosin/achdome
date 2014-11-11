@@ -29,12 +29,13 @@ RenderableWormHeads::RenderableWormHeads(int wormCount, GLfloat wormThickness) {
 
 RenderableWormHeads::~RenderableWormHeads() {};
 
-void RenderableWormHeads::setWormHeads(std::vector<WormHead> wormHeads) {
+void RenderableWormHeads::setWormHeads(std::vector<WormHeadSyncData> wormHeads) {
   this->wormHeads = wormHeads;
   std::vector<glm::vec4> colors;
-  for (WormHead wh : wormHeads) {
+  for (WormHeadSyncData wh : wormHeads) {
     colors.push_back(wh.getColor());
-  }  setWormColors(colors);
+  }
+  setWormColors(colors);
   createVertices();
   createElements();
   update = true;
@@ -64,7 +65,7 @@ void RenderableWormHeads::createVertices() {
   appearanceData.clear();
 
   for (int j = 0; j < wormHeads.size(); ++j) {
-    WormHead wh = wormHeads.at(j);
+    WormHeadSyncData wh = wormHeads.at(j);
     glm::vec3 headPos = (glm::vec3) wh.getPosition();
     glm::vec3 headDirection = glm::normalize((glm::vec3) wh.getVelocity());
     glm::vec3 domeNormal = glm::normalize(headPos);
@@ -84,10 +85,12 @@ void RenderableWormHeads::createVertices() {
       headDirectionData.push_back(headDirection.y);
       headDirectionData.push_back(headDirection.z);
 
-      float strokeWidth = (!wh.isMoving() || wh.isInGap()) ? wh.getWidth() : 0.0;
-      float arrowWidth = wh.isMoving() ? 0.0 : strokeWidth * 8;
-      float arrowLength = wh.isMoving() ? 0.0 : strokeWidth * 10;
+      float headDiameter = wh.getHeadDiameter();
+      float strokeWidth = wh.getStrokeWidth();
+      float arrowWidth = wh.getArrowWidth();
+      float arrowLength = wh.getArrowLength();
 
+      appearanceData.push_back(headDiameter);
       appearanceData.push_back(strokeWidth);
       appearanceData.push_back(arrowWidth);
       appearanceData.push_back(arrowLength);
@@ -121,6 +124,7 @@ void RenderableWormHeads::loadToGPU(bool sphericalCoords) {
   glBindVertexArray(vertexArray);
 
   GLuint vertexDim = 3;
+  GLuint appearanceDim = 4;
 
   glBindBuffer(GL_ARRAY_BUFFER, headCenterBuffer);
   glBufferData(
@@ -150,7 +154,7 @@ void RenderableWormHeads::loadToGPU(bool sphericalCoords) {
     GL_STATIC_DRAW
   );
   glEnableVertexAttribArray(4);
-  glVertexAttribPointer(4, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(4, appearanceDim, GL_FLOAT, GL_FALSE, 0, 0);
 
   // Unbind
   glDisableVertexAttribArray(2);
@@ -189,10 +193,10 @@ void RenderableWormHeads::disableAttributes() {
   Renderable::disableAttributes();
 }
 
-const GLuint RenderableWormHeads::getVertsPerElement() const {
+GLuint RenderableWormHeads::getVertsPerElement() const {
   return VERTS_PER_ELEMENT;
 };
 
-const std::vector<WormHead> RenderableWormHeads::getWormHeads() const {
+const std::vector<WormHeadSyncData> RenderableWormHeads::getWormHeads() const {
   return wormHeads;
 };

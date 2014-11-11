@@ -8,7 +8,7 @@ class GameConfig;
 
 class WormHead {
  public:
-  WormHead(glm::vec4 color, GameConfig *gameConfig);
+  WormHead(int id, GameConfig *gameConfig);
   void tick();
   std::string toString();
 
@@ -23,9 +23,9 @@ class WormHead {
   void setEulerVelocity(glm::dvec3 pos);
 
   /**
-  * Get color
-  */
-  glm::vec4 getColor();
+   * Get worm id.
+   */
+  int getWormId();
 
   /**
    * Get position in cartesian coordinates
@@ -108,7 +108,7 @@ class WormHead {
   float getWidth();
 
  private:
-  glm::vec4 color;
+  int wormId;
   bool moving;
   bool turningLeft;
   bool turningRight;

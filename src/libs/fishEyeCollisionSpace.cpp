@@ -43,7 +43,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
             // hit boundary.
             if (collisions.find(wormId) == collisions.end()) {
               // no collision registered for this worm yet.
-              collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+              collisions.insert({wormId, WormCollision(wormId, pv.wormId, point, time)});
               std::cout << wormId << " is outside bounds at " << x << ", " << y << std::endl;
             } // else, do nothing if collision is already registered.
           } else if (pv.wormId == wormId) {
@@ -52,7 +52,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
               // Old pixel is older than previous frame
               if (collisions.find(wormId) == collisions.end()) {
                 // no collision registered for this worm yet
-                collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+                collisions.insert({wormId, WormCollision(wormId, pv.wormId, point, time)});
                 std::cout << wormId << " collided with itself at " << x << ", " << y << ". t1 = " << time << ", t0 = "<< pv.time << std::endl;
               } // else, do nothing if collision is already registered.
             } else {
@@ -61,7 +61,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
             // hit other worm.
             if (collisions.find(wormId) == collisions.end()) {
               // no collision registered for this worm yet.
-              collisions.insert({wormId, WormCollision(wormId, pv.wormId, point)});
+              collisions.insert({wormId, WormCollision(wormId, pv.wormId, point, time)});
               std::cout << wormId << " collided with " << pv.wormId << " at " << x << ", " << y << std::endl;
             }
 
@@ -69,7 +69,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
               // other worm currently being drawn here too,
               // and should also get a collision, if not yet inserted.
               if (collisions.find(pv.wormId) == collisions.end()) {
-                collisions.insert({wormId, WormCollision(pv.wormId, wormId, point)});
+                collisions.insert({wormId, WormCollision(pv.wormId, wormId, point, time)});
               }
             }
           }

@@ -26,11 +26,11 @@ const std::vector<GLuint> Renderable::getElementData() const {
   return elementData;
 }
 
-const int Renderable::getVertexCount() const {
+int Renderable::getVertexCount() const {
   return cartesianVertexData.size()/3;
 }
 
-const int Renderable::getElementCount() const {
+int Renderable::getElementCount() const {
   return elementData.size()/getVertsPerElement();
 }
 

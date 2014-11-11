@@ -24,6 +24,8 @@ struct GameConfig{
   float turnSpeed;
   int countdown;
 
+  int numAiPlayers;
+
   void parse(std::string);
   int maximumPlayers;
   std::string password;
@@ -38,6 +40,7 @@ struct GameConfig{
   private:
 
   struct AbstractConfigEntity{
+    virtual ~AbstractConfigEntity(){};
     virtual void configFromJson(picojson::value) = 0;
     virtual void addConfigToJson(JsonBuilder*) = 0;
   };
