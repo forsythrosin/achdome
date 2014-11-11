@@ -19,24 +19,21 @@ void PlayerGameController::performActions() {
     }
 
     case GameEngine::LOBBY: {
-      if (prevState == GameEngine::GAME) {
-        // If coming from game, loop through players already registered and send "registered" message
-        for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
-          sessionId = it->first;
-          playerId = it->second;
-          name = gameEngine->getName(playerId);
-          color = gameEngine->getColor(playerId);
-          sendMessage =
-            dataSerializationBuilder
-            ->add("message", "registered")
-            ->add("data", dataSerializationBuilder->group()
-                  ->add("id", playerId)
-                  ->add("name", name)
-                  ->add("color", color)
-                  )
-            ->build();
-          webServer->addMessage(sessionId, sendMessage);
-        }
+      for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+        sessionId = it->first;
+        playerId = it->second;
+        name = gameEngine->getName(playerId);
+        color = gameEngine->getColor(playerId);
+        sendMessage =
+          dataSerializationBuilder
+          ->add("message", "registered")
+          ->add("data", dataSerializationBuilder->group()
+                ->add("id", playerId)
+                ->add("name", name)
+                ->add("color", color)
+                )
+          ->build();
+        webServer->addMessage(sessionId, sendMessage);
       }
       std::cout << "State changed to Lobby" << std::endl;
       break;
@@ -105,15 +102,20 @@ void PlayerGameController::performActions() {
           int killerId = gameEngine->getKiller(playerId);
           std::string killerName = gameEngine->getName(killerId);
           glm::vec4 killerColor = gameEngine->getColor(killerId);
+          auto data = dataSerializationBuilder->group();
+          if (killerId != -1) {
+            data
+              ->add("killer", dataSerializationBuilder->group()
+              ->add("id", killerId)
+              ->add("name", killerName)
+              ->add("color", killerColor)
+            );
+          }
           std::string message =
             dataSerializationBuilder
               ->add("message", "died")
-              ->add("data", dataSerializationBuilder->group()
-                ->add("killer", dataSerializationBuilder->group()
-                  ->add("id", killerId)
-                  ->add("name", killerName)
-                  ->add("color", killerColor)
-                )
+              ->add("data", data
+                ->add("points", gameEngine->getPointsInGame(playerId))
               )->build();
           webServer->addMessage(sessionId, message);
         }

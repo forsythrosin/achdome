@@ -120,6 +120,8 @@ var renderMoving = function ($container, params) {
 };
 
 var renderDied = function ($container, params) {
+  params = params || {};
+  params.player = me;
   $container.html(died(params, options));
 };
 
@@ -286,8 +288,12 @@ var setServerListeners = function ($container) {
         var data = {};
         if (res !== undefined) {
           if (res.killer !== undefined) {
-            data.killer = res.killer;
-            data.killer.color = transformColor(res.killer.color);
+            if (res.killer.id == me.id) {
+              data.suicide = true;
+            } else {
+              data.killer = res.killer;
+              data.killer.color = transformColor(res.killer.color);
+            }
           }
           if (res.points !== undefined) {
             data.points = res.points;
