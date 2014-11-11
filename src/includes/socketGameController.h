@@ -12,7 +12,6 @@ public:
   virtual ~SocketGameController();
   virtual void performActions();
 protected:
-  GameEngine *gameEngine;
   Webserver *webServer;
   ActionResolver *actionResolver;
   DataSerializationBuilder *dataSerializationBuilder;

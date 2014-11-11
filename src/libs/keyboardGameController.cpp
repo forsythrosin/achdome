@@ -3,8 +3,7 @@
 #include "sgct.h"
 #include <iostream>
 
-KeyboardGameController::KeyboardGameController(GameEngine *ge) {
-  gameEngine = ge;
+KeyboardGameController::KeyboardGameController(GameEngine *ge) : GameController(ge){
   playerId = -1;
 }
 

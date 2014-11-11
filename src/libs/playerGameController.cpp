@@ -16,8 +16,6 @@ void PlayerGameController::performActions() {
       webServer->addBroadcast(sendMessage);
       std::cout << "State changed to Intro" << std::endl;
       break;
-    default:
-      break;
     }
 
     case GameEngine::LOBBY: {
