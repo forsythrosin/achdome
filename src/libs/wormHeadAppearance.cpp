@@ -30,6 +30,26 @@ glm::vec4 WormHeadAppearance::getColor() {
   return color;
 }
 
+void WormHeadAppearance::setDiameterCoefficient(float dc) {
+  diameterCoefficient = dc;
+}
+
+void WormHeadAppearance::setStrokeWidth(float sw) {
+  strokeWidth = sw;
+}
+
+void WormHeadAppearance::setArrowLength(float al) {
+  arrowLength = al;
+}
+
+void WormHeadAppearance::setArrowWidth(float aw) {
+  arrowWidth = aw;
+}
+
+void WormHeadAppearance::setColor(glm::vec4 c) {
+  color = c;
+}
+
 void WormHeadAppearance::tweenDiameterCoefficient(float destination, float duration) {
   // stop previous tween if any.
   Tweener::getInstance()->stopTween(diameterTween);

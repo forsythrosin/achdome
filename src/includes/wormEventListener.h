@@ -8,4 +8,5 @@ class WormEventListener {
   virtual ~WormEventListener(){};
   virtual void onWormCollision(WormCollision wc) {};
   virtual void onWormStarted(WormHead wh) {};
+  virtual void onWormSpawned(WormHead wh) {};
 };

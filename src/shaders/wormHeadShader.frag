@@ -44,8 +44,8 @@ void main() {
 
   vec3 p0 = center;
   vec3 p1 = center + headDirection * arrowLength;
-  vec3 p2 = center + headDirection * arrowLength * 0.5 - perpDirection * arrowWidth * 0.5;
-  vec3 p3 = center + headDirection * arrowLength * 0.5 + perpDirection * arrowWidth * 0.5;
+  vec3 p2 = center + headDirection * arrowLength * 0.667 - perpDirection * arrowWidth * 0.5;
+  vec3 p3 = center + headDirection * arrowLength * 0.667 + perpDirection * arrowWidth * 0.5;
 
   float minDist = min(min(distanceToLineSegment(worldPos, p0, p1),
                           distanceToLineSegment(worldPos, p1, p2)),

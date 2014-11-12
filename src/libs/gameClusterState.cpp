@@ -159,7 +159,7 @@ WormHeadAppearance* GameClusterState::getWormHeadAppearance(WormHead head) {
 
   WormHeadAppearance *headAppearance;
   if (wormHeadAppearances.count(id) == 0) {
-    wormHeadAppearances[id] = new WormHeadAppearance(color, 5.0, 0.01, 0.08, 0.06);
+    wormHeadAppearances[id] = new WormHeadAppearance(color, 0, 0, 0, 0);
   }
   return wormHeadAppearances[id];
 }
@@ -247,4 +247,20 @@ void GameClusterState::onWormStarted(WormHead head) {
   headAppearance->tweenStrokeWidth(0.005, 0.2);
   headAppearance->tweenArrowLength(0.0, 0.5);
   headAppearance->tweenArrowWidth(0.0, 0.2);
+}
+
+
+void GameClusterState::onWormSpawned(WormHead head) {
+  WormHeadAppearance *headAppearance = getWormHeadAppearance(head);
+  headAppearance->setDiameterCoefficient(0.0);
+  headAppearance->setStrokeWidth(0.0);
+  headAppearance->setArrowLength(0.0);
+  headAppearance->setArrowWidth(0.0);
+
+
+  headAppearance->tweenDiameterCoefficient(5.0, 0.3);
+  headAppearance->tweenStrokeWidth(0.005, 0.3);
+  headAppearance->tweenArrowLength(0.06, 0.3);
+  headAppearance->tweenArrowWidth(0.03, 0.3);
+
 }

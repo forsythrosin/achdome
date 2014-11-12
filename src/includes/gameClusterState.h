@@ -35,6 +35,7 @@ class GameClusterState : public ClusterState, public WormEventListener {
   void draw();
   void encode();
   void decode();
+  void onWormSpawned(WormHead head);
   void onWormStarted(WormHead head);
 
  private:
