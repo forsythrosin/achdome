@@ -9,5 +9,5 @@
   "maxTimeBetweenGaps": 400,
   "minTimeInGap": 10,
   "maxTimeInGap": 20,
-  "numAiPlayers": 99
+  "numAiPlayers": 0
 }
