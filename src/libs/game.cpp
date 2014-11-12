@@ -72,6 +72,7 @@ void Game::onWormCollision (WormCollision wc) {
   if (gamePlayers.find(id) != gamePlayers.end()) {
     wormTracker->stopWormHead(wc.collider);
     gamePlayers[id]->kill(wc.collidee);
+    playerManager->setPointsInGame(id, this->gameId, getPoints(id));
     
     if (gamePlayers.find(killer) != gamePlayers.end()) {
       gamePlayers[killer]->addKill(id);

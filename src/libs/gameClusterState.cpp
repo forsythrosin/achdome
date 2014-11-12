@@ -79,6 +79,8 @@ void GameClusterState::attach() {
   renderer->setUniform(collision, collisionsUni);
   collisionCountUni = new Uniform<GLuint>("collisionCount");
   renderer->setUniform(collision, collisionCountUni);
+  collisionColorsUni = new Uniform<std::vector<glm::vec4> >("collisionColors");
+  renderer->setUniform(collision, collisionColorsUni);
 
   attached = true;
 }
@@ -178,7 +180,7 @@ void GameClusterState::postSyncPreDraw() {
     collisionTimerQueue.push_back({tickNumber, c});
   }
 
-  while ( !collisionTimerQueue.empty() && (tickNumber - collisionTimerQueue.front().first) >= COLLISION_DURATION) {
+  while (!collisionTimerQueue.empty() && (tickNumber - collisionTimerQueue.front().first) >= COLLISION_DURATION) {
     collisionTimerQueue.pop_front();
   }
 
@@ -186,10 +188,13 @@ void GameClusterState::postSyncPreDraw() {
   std::vector<glm::vec4> collisionColors;
   for (auto pair : collisionTimerQueue) {
     glm::vec3 pos = (glm::vec3) pair.second.getPosition();
+    glm::vec4 color = pair.second.getColor();
     float lifeTime = 1.0 - (float)(tickNumber - pair.first)/(float)COLLISION_DURATION;
     activeCollisions.push_back(glm::vec4(pos.x, pos.y, pos.z, lifeTime));
+    collisionColors.push_back(color);
   }
   collisionsUni->set(activeCollisions);
+  collisionColorsUni->set(collisionColors);
   collisionCountUni->set((GLuint)activeCollisions.size());
 }
 

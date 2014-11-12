@@ -3,8 +3,7 @@
 #include <chrono>
 #include <thread>
 
-SocketGameController::SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb, std::string subProtocol) {
-  gameEngine = ge;
+SocketGameController::SocketGameController(GameEngine *ge, Webserver *ws, ActionResolver *ar, DataSerializationBuilder *dsb, std::string subProtocol) : GameController(ge){
   webServer = ws;
   actionResolver = ar;
   dataSerializationBuilder = dsb;

@@ -24,6 +24,8 @@ struct GameConfig{
   float turnSpeed;
   int countdown;
 
+  int numAiPlayers;
+
   void parse(std::string);
   int maximumPlayers;
   std::string password;

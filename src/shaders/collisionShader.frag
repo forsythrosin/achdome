@@ -1,6 +1,7 @@
 #version 330 core
 
 uniform vec4[100] collisions;
+uniform vec4[100] collisionColors;
 uniform uint collisionCount;
 
 in vec3 cartesianPos;
@@ -8,7 +9,7 @@ in vec3 cartesianPos;
 out vec4 color;
 
 void main() {
-  vec4 shockWaveColor = vec4(1.0, 1.0, 1.0, 0.0);
+  vec4 shockWaveColor = vec4(0.0, 0.0, 0.0, 0.0);
   float clampRadius = 0.5;
   float thickness = 0.025;
   uint i;
@@ -25,7 +26,8 @@ void main() {
     localShockwave *= (1.0 - smoothstep(shockwaveRadius - thickness, shockwaveRadius + thickness, distFromEpicentrum));
     localShockwave *= ((clampRadius - thickness)/distFromEpicentrum);
 
-    shockWaveColor.a += localShockwave;
+    vec4 localShockwaveColor = vec4(collisionColors[i].xyz, localShockwave);
+    shockWaveColor += localShockwave > 0 ? localShockwaveColor : vec4(0.0, 0.0, 0.0, 0.0);
   }
 
   color = shockWaveColor;

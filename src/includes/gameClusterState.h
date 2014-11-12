@@ -52,6 +52,7 @@ class GameClusterState : public ClusterState, public WormEventListener {
   std::map<int, WormHeadAppearance*> wormHeadAppearances;
   Uniform<float> *timeUni;
   Uniform<std::vector<glm::vec4> > *collisionsUni;
+  Uniform<std::vector<glm::vec4> > *collisionColorsUni;
   Uniform<GLuint> *collisionCountUni;
   WormHeadAppearance* getWormHeadAppearance(WormHead wh);
   
