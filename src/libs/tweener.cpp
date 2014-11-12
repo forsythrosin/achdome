@@ -18,11 +18,22 @@ Tweener* Tweener::getInstance() {
 }
 
 
-void Tweener::startTween(Tween tween) {
+int Tweener::startTween(Tween tween) {
   tween.tick(0.0);
   TrackedTween *tt = new TrackedTween(tween, sgct::Engine::getTime());
-  trackedTweens[nextTweenId++] = tt;
+  int id = nextTweenId++;
+  trackedTweens[id] = tt;
+  return id;
 }
+
+int Tweener::stopTween(int id) {
+  if (trackedTweens.count(id) > 0) {
+    TrackedTween *trackedTween = trackedTweens[id];
+    delete trackedTween;
+    trackedTweens.erase(id);
+  }
+}
+
 
 void Tweener::tick() {
   double currentTime = sgct::Engine::getTime();

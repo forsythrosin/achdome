@@ -33,7 +33,7 @@ float WormHeadSyncData::getHeadDiameter() {
 } 
 
 float WormHeadSyncData::getArrowWidth() {
-  return arrowLength;
+  return arrowWidth;
 } 
 
 float WormHeadSyncData::getArrowLength() {

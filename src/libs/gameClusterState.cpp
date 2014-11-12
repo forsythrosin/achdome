@@ -3,7 +3,7 @@
 #include <renderableWormArcs.h>
 #include <renderableWormHeads.h>
 #include <clusterRenderSpace.h>
-#include <playerManager.h>
+#include <gameEngine.h>
 #include <wormArc.h>
 #include <wormArcSyncData.h>
 #include <wormCollision.h>
@@ -11,11 +11,12 @@
 #include <wormHead.h>
 #include <wormHeadSyncData.h>
 #include <wormHeadAppearance.h>
+#include <wormTracker.h>
 
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr, nullptr) {}
+GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr, nullptr, nullptr) {}
 
-GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs, PlayerManager *pm) : ClusterState(gEngine, gameConfig) {
+GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs, GameEngine *ge, WormTracker *wt) : ClusterState(gEngine, gameConfig) {
   resetSignal = new sgct::SharedBool(false);
   wormArcs = new sgct::SharedVector<WormArcSyncData>(gameConfig->maximumPlayers);
   wormCollisions = new sgct::SharedVector<WormCollisionSyncData>(gameConfig->maximumPlayers);
@@ -30,7 +31,12 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   collisionsUni = nullptr;
 
   renderSpace = rs;
-  playerManager = pm;
+  gameEngine = ge;
+  wormTracker = wt;
+
+  if (wormTracker != nullptr) {
+    wormTracker->addEventListener(this);
+  }
   attached = false;
 }
 
@@ -45,6 +51,10 @@ GameClusterState::~GameClusterState() {
 
   if (timeUni != nullptr) delete timeUni;
   if (collisionsUni != nullptr) delete collisionsUni;
+
+  if (wormTracker != nullptr) {
+    wormTracker->removeEventListener(this);
+  }
 }
 
 void GameClusterState::attach() {
@@ -108,26 +118,20 @@ void GameClusterState::preSync() {
 
     std::vector<WormArcSyncData> syncArcs;
     for (WormArc arc : arcs) {
-      glm::vec4 color = playerManager->getColor(arc.getWormId());
+      glm::vec4 color = gameEngine->getColor(arc.getWormId());
       syncArcs.push_back(WormArcSyncData(arc, color));
     }
 
     std::vector<WormCollisionSyncData> syncCollisions;
     for (WormCollision collision : collisions) {
-      glm::vec4 color = playerManager->getColor(collision.collider);
+      glm::vec4 color = gameEngine->getColor(collision.collider);
       syncCollisions.push_back(WormCollisionSyncData(collision, color));
     }
 
     std::vector<WormHeadSyncData> syncHeads;
     for (WormHead head : heads) {
-      int id = head.getWormId();
-      glm::vec4 color = playerManager->getColor(id);
-
-      // todo:
-      //WormHeadAppearance headAppearance = *wormHeadAppearances[id];
-      WormHeadAppearance headAppearance(color, 0.1, 0.01, 0.06, 0.05);
-      // todo: set arrow length and arrow width properly.
-      syncHeads.push_back(WormHeadSyncData(head, headAppearance));
+      WormHeadAppearance *headAppearance = getWormHeadAppearance(head);
+      syncHeads.push_back(WormHeadSyncData(head, *headAppearance));
     }
 
     wormArcs->setVal(syncArcs);
@@ -145,6 +149,17 @@ void GameClusterState::preSync() {
   if (resetSignal->getVal()) {
     reset();
   }
+}
+
+WormHeadAppearance* GameClusterState::getWormHeadAppearance(WormHead head) {
+  int id = head.getWormId();
+  glm::vec4 color = gameEngine->getColor(id);
+
+  WormHeadAppearance *headAppearance;
+  if (wormHeadAppearances.count(id) == 0) {
+    wormHeadAppearances[id] = new WormHeadAppearance(color, 5.0, 0.01, 0.08, 0.06);
+  }
+  return wormHeadAppearances[id];
 }
 
 void GameClusterState::postSyncPreDraw() {
@@ -219,4 +234,12 @@ void GameClusterState::decode() {
   data->readVector(wormCollisions);
   data->readVector(wormHeads);
   data->readInt(&timer);
+}
+
+void GameClusterState::onWormStarted(WormHead head) {
+  WormHeadAppearance *headAppearance = getWormHeadAppearance(head);
+  headAppearance->tweenDiameterCoefficient(0.0, 0.5);
+  headAppearance->tweenStrokeWidth(0.005, 0.2);
+  headAppearance->tweenArrowLength(0.0, 0.5);
+  headAppearance->tweenArrowWidth(0.0, 0.2);
 }
