@@ -13,7 +13,7 @@ struct TrackedTween {
 class Tweener {
  public:
   int startTween(Tween t);
-  int stopTween(int);
+  void stopTween(int);
   static Tweener* getInstance();
   void tick();
  private:

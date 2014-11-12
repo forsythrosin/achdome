@@ -26,7 +26,7 @@ int Tweener::startTween(Tween tween) {
   return id;
 }
 
-int Tweener::stopTween(int id) {
+void Tweener::stopTween(int id) {
   if (trackedTweens.count(id) > 0) {
     TrackedTween *trackedTween = trackedTweens[id];
     delete trackedTween;
