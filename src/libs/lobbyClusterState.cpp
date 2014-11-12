@@ -25,7 +25,6 @@ LobbyClusterState::~LobbyClusterState() {
 }
 
 void LobbyClusterState::attach() {
-  domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   domeLogo = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeLogoShader.frag", true);
 
   timer.setVal(0);
@@ -36,7 +35,6 @@ void LobbyClusterState::attach() {
 }
 
 void LobbyClusterState::detach() {
-  renderer->removeRenderable(domeGrid);
   renderer->removeRenderable(domeLogo);
 
   delete timeUni;
@@ -49,7 +47,6 @@ void LobbyClusterState::draw() {
   timeUni->set(timer.getVal());
 
   // render grid lines
-  renderer->render(domeGrid);
   // renderer->render(domeLogo);
 
   auto players = sharedPlayers->getVal();

@@ -34,7 +34,6 @@ class LobbyClusterState : public ClusterState {
   sgct::SharedInt timer;
 
   RenderableDome *dome;
-  int domeGrid;
   int domeLogo;
   Uniform<float> *timeUni;
 

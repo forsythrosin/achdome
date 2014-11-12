@@ -59,6 +59,7 @@ class GameEngine {
 
   float getSecondsLeftInCountdown();
   float getSecondsLeftInGameOver();
+  float getSecondsSinceGameStarted();
 
   void tick();
 
@@ -86,6 +87,5 @@ class GameEngine {
   void printGameStatistics();
   void printTournamentStatistics();
   std::vector<int> getPlayedGameIdsInTournament();
-
-  
+  double gameStartTime = 0;
 };

@@ -1,3 +1,4 @@
+#include "sgct.h"
 #include <gameEngine.h>
 #include <wormTracker.h>
 #include <game.h>
@@ -16,6 +17,7 @@ GameEngine::GameEngine(WormTracker* wt, PlayerManager* pm, GameConfig *gameConfi
   nextGameId = 0;
   wormTracker = wt;
   this->gameConfig = gameConfig;
+  gameStartTime = sgct::Engine::getTime();
 }
 
 /**
@@ -146,6 +148,7 @@ void GameEngine::startGame() {
   assert(currentGame != nullptr);
 
   currentGame->start();
+  gameStartTime = sgct::Engine::getTime();
   state = State::GAME;
 }
 
@@ -355,4 +358,14 @@ void GameEngine::tick() {
 
 GameEngine::State GameEngine::getGameState() {
   return state;
+}
+
+
+float GameEngine::getSecondsSinceGameStarted() {
+  if (state == GAME || state == GAME_OVER || state == TOURNAMENT_OVER) {
+    double currentTime = sgct::Engine::getTime();
+    return currentTime - gameStartTime;
+  } else {
+    return -1;
+  }
 }
