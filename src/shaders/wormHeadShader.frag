@@ -19,13 +19,12 @@ float distanceToLineSegment(vec3 p, vec3 p0, vec3 p1) {
 
   vec3 projected = p0 + (t - t0)*v;
   float distToLine = length(projected - p);
-  
+
   float distToP0 = distance(p, p0);
   float distToP1 = distance(p, p1);
   float insideInterval = step(t0, t) * step(t, t1);
   float dist = mix(min(distToP0, distToP1), distToLine, insideInterval);
-
-  return mix(distToP0, dist, step(0.00001, distance(p0, p1)));
+  return distance(p0,p1) > 0.00001 ? dist : distToP0;
 }
 
 float aastep(float threshold, float value) {
