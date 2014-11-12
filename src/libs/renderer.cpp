@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <renderConfig.h>
+#include "sgct/SGCTSettings.h"
 
 Renderer::Renderer(sgct::Engine *gEngine) {
   this->gEngine = gEngine;
@@ -160,6 +161,16 @@ void Renderer::resetFBO(int configId) {
 void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_MULTISAMPLE);
+
+  glEnable( GL_LINE_SMOOTH );
+  glEnable( GL_POLYGON_SMOOTH );
+  glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+  glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+
+  sgct::SGCTSettings *settings = sgct::SGCTSettings::instance();
+  settings->setDefaultFXAAState(true);
+  settings->setDefaultNumberOfAASamples(8);
 
   RenderConfig renderConfig = renderConfigs.at(configId);
   Renderable *renderable = renderConfig.renderable;
@@ -190,7 +201,7 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
     RenderConfig renderConfig = renderConfigs.at(configId);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, *(renderConfigFBO.framebuffers.at(stitchStep)->getTexture()));
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, *(renderConfigFBO.framebuffers.at(stitchStep)->getTexture()));
 
     glUniform1i(renderConfig.textureLocation, 0);
   }

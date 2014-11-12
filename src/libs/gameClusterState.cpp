@@ -184,6 +184,7 @@ void GameClusterState::postSyncPreDraw() {
 }
 
 void GameClusterState::draw() {
+
   // if (!heads.empty() && heads.at(0).isInGap()) {
   //   renderer->render(wormDots);
   // } else {
