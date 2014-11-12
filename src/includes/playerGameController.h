@@ -11,4 +11,6 @@ protected:
   std::map<int, int> sessionIds;
   std::map<int, int> playerIds;
   std::map<int, bool> lives;
+  void addGameResults(DataSerializationBuilder* builder, std::vector<int> playerIds);
+  void addTournamentResults(DataSerializationBuilder* builder, std::vector<int> playerIds);
 };

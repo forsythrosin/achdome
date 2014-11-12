@@ -43,7 +43,10 @@ class GameEngine {
   std::vector<Player*> getPlayers();
   bool isAlive(int playerId);
   int getKiller(int playerId);
+  int getGameIndexInTournament();
+  int getNGamesInTournament();
   int getPointsInGame(int playerId);
+  int getPointsInTournament(int playerId);
   std::vector<int> getKills(int playerId);
   bool hasStartedMoving(int playerId);
 
@@ -79,7 +82,6 @@ class GameEngine {
   int getCurrentGameId();
   int gameIndexInTournament;
   int nGamesInTournament;
-  int getGameIndexInTournament();
 
   void printGameStatistics();
   void printTournamentStatistics();

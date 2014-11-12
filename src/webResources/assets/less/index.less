@@ -270,5 +270,41 @@
   }
 }
 
+#gameOver, #tournamentOver {
+  h1 {
+    font-size: 200%;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+}
+
+.topList {
+  margin-bottom: 20px;
+}
+
+.score {
+  max-width: 350px;
+  margin: 0 auto;
+  font-family: @header-typeface;
+  text-transform: uppercase;
+  overflow: hidden;
+  font-size: 130%;
+
+  .position {
+    float: left;
+    width: 50px;
+    text-align: center;
+  }
+
+  .playerName {
+    float: left;
+  }
+
+  .points {
+    float: right;
+    padding-right: 15px;
+  }
+}
+
 @import "portrait";
 @import "landscape";
