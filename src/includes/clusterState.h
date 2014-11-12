@@ -39,6 +39,8 @@ class ClusterState {
 
   struct SubState{
     virtual ~SubState(){};
+    virtual void attach(){};
+    virtual void detach(){};
     virtual void preSync(){};
     virtual void postSyncPreDraw(){};
     virtual void draw(){};

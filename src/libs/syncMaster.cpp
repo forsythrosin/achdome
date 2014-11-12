@@ -42,6 +42,10 @@ void SyncMaster::detachAll() {
     ClusterState *s = it.second;
     if (s->isAttached()) {
       s->detach();
+
+      if(auto subState = s->getActiveSubState()){
+        subState->detach();
+      }
     }
   }
 }
@@ -51,6 +55,10 @@ void SyncMaster::attachState(ClusterState *cs) {
   if (!cs->isAttached()) {
     detachAll();
     cs->attach(gameState);
+
+    if(auto subState = cs->getActiveSubState()){
+      subState->attach();
+    }
   }
 }
 
