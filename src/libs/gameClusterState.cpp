@@ -87,6 +87,8 @@ void GameClusterState::attach() {
 
 void GameClusterState::reset() {
   renderer->resetFBO(wormLines);
+  // detach();
+  // attach();
 }
 
 void GameClusterState::detach() {

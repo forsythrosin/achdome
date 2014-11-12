@@ -18,6 +18,7 @@ public:
 
     // init config
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, *texture, 0);
+    // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *texture, 0);
 
     // fail check
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE && "failed to init FBO");
@@ -27,8 +28,12 @@ public:
   };
 
   ~FBO() {
-    glDeleteFramebuffers(1, &framebufferId);
+    activate();
+    glClearColor(0.0,0.0,0.0,0.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     delete texture;
+    glDeleteFramebuffers(1, &framebufferId);
   };
 
   void activate() {

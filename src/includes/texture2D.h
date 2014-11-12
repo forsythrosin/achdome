@@ -9,6 +9,7 @@ public:
     glGenTextures(1, &textureID);
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
+    // glBindTexture(GL_TEXTURE_2D, textureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     data = new GLfloat[h*w*d];
 
@@ -22,6 +23,8 @@ public:
     }
 
     glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, w, h, false);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -49,14 +52,14 @@ public:
 
   void operator()(GLenum texture) {
     glActiveTexture(texture);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, w, h, false);
   }
 
   void download() {
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glReadPixels(0, 0, this->w, this->h, GL_RGBA, GL_FLOAT, data);
+    // glReadBuffer(GL_COLOR_ATTACHMENT0);
+    // glBindTexture(GL_TEXTURE_2D, textureID);
+    // glReadPixels(0, 0, this->w, this->h, GL_RGBA, GL_FLOAT, data);
   }
 
 private:

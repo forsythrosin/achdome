@@ -117,16 +117,22 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
 
   RenderConfig &renderConfig = renderConfigs.at(configId);
 
+  GLint screenFBO;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &screenFBO);
+
   // Generate FBOs
   if (renderConfig.framebuffers.size() < stitchStep + 1) {
     int fboWidth, fboHeight;
     gEngine->getActiveViewportSize(fboWidth, fboHeight);
     renderConfig.framebuffers.push_back(new FBO(fboWidth, fboHeight));
+
+    // if we are attaching for the first time -> clear FBO
+    renderConfig.framebuffers.at(stitchStep)->activate();
+    glClearColor(0.0,0.0,0.0,0.0);
+    glClear(GL_COLOR_BUFFER_BIT);
   }
 
   // Unbind screen FBO, render to our FBO, then bind back to screen FBO.
-  GLint screenFBO;
-  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &screenFBO);
   renderConfig.framebuffers.at(stitchStep)->activate();
   render(configId);
   glBindFramebuffer(GL_FRAMEBUFFER, screenFBO);
@@ -134,7 +140,7 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
 
 
 /**
- * Resets FBO (for all stitchSteps) of a specified RenderCongig 
+ * Resets FBO (for all stitchSteps) of a specified RenderCongig
  */
 void Renderer::resetFBO(int configId) {
   auto rcIt = renderConfigs.find(configId);
@@ -161,12 +167,13 @@ void Renderer::resetFBO(int configId) {
 void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_MULTISAMPLE);
 
-  glEnable( GL_LINE_SMOOTH );
-  glEnable( GL_POLYGON_SMOOTH );
-  glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-  glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+  // FXAA
+  glEnable(GL_MULTISAMPLE);
+  glEnable(GL_LINE_SMOOTH);
+  // glEnable(GL_POLYGON_SMOOTH);
+  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+  // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
   sgct::SGCTSettings *settings = sgct::SGCTSettings::instance();
   settings->setDefaultFXAAState(true);
@@ -202,6 +209,7 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, *(renderConfigFBO.framebuffers.at(stitchStep)->getTexture()));
+    // glBindTexture(GL_TEXTURE_2D, *(renderConfigFBO.framebuffers.at(stitchStep)->getTexture()));
 
     glUniform1i(renderConfig.textureLocation, 0);
   }
