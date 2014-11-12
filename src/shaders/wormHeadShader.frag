@@ -28,6 +28,11 @@ float distanceToLineSegment(vec3 p, vec3 p0, vec3 p1) {
   return dist;
 }
 
+float aastep(float threshold, float value) {
+  float afwidth = 0.7 * length(vec2(dFdx(value), dFdy(value)));
+  return smoothstep(threshold-afwidth, threshold+afwidth, value);
+}
+
 void main() {
   float headDiameter = appearance.x;
   float strokeWidth = appearance.y;
@@ -39,14 +44,16 @@ void main() {
 
   vec3 p0 = center;
   vec3 p1 = center + headDirection * arrowLength;
-  vec3 p2 = center + headDirection * arrowLength * 0.5 - perpDirection * arrowWidth * 0.5;
-  vec3 p3 = center + headDirection * arrowLength * 0.5 + perpDirection * arrowWidth * 0.5;
+  vec3 p2 = center + headDirection * arrowLength * 0.667 - perpDirection * arrowWidth * 0.5;
+  vec3 p3 = center + headDirection * arrowLength * 0.667 + perpDirection * arrowWidth * 0.5;
 
   float minDist = min(min(distanceToLineSegment(worldPos, p0, p1),
                           distanceToLineSegment(worldPos, p1, p2)),
                           distanceToLineSegment(worldPos, p1, p3));
 
-  headColor.a = 1.0 - step(strokeWidth, minDist);
+  float insideArrow = 1.0 - aastep(strokeWidth, minDist);
+  float insideHead = 1.0 - aastep(headDiameter, distance(worldPos, p0));
+  headColor.a = max(insideArrow, insideHead);
 
   color = headColor;
 }

@@ -10,10 +10,25 @@ class WormHeadAppearance {
   float getArrowWidth();
   float getStrokeWidth();
   glm::vec4 getColor();
+
+  void setDiameterCoefficient(float dc);
+  void setArrowLength(float al);
+  void setArrowWidth(float aw);
+  void setStrokeWidth(float sw);
+  void setColor(glm::vec4 c);
+
+  void tweenDiameterCoefficient(float destination, float duration);
+  void tweenStrokeWidth(float destination, float duration);
+  void tweenArrowWidth(float destination, float duration);
+  void tweenArrowLength(float destination, float duration);
  private:
   float diameterCoefficient;
   float arrowLength;
   float arrowWidth;
   float strokeWidth;
   glm::vec4 color;
+  int diameterTween = -1;
+  int strokeWidthTween = -1;
+  int arrowWidthTween = -1;
+  int arrowLengthTween = -1;
 };

@@ -13,6 +13,7 @@
 #include <keyboardGameController.h>
 #include <rainbowColorTheme.h>
 #include <uniformDistributor.h>
+#include <dumbAIController.h>
 
 // Render states
 #include <clusterState.h>
@@ -39,6 +40,7 @@ GameEngine *gameEngine;
 ClusterRenderSpace *renderSpace;
 std::vector<GameController*> gameControllers;
 KeyboardGameController *keyboardGameController;
+DumbAIController *dumbAIController;
 SyncMaster *syncMaster;
 GameConfig *gameConfig;
 LobbyClusterState *lcs;
@@ -108,9 +110,14 @@ AdminGameController* agc;
 
     // ics = new IntroClusterState();
     lcs = new LobbyClusterState(gEngine, gameConfig, pm);
-    gcs = new GameClusterState(gEngine, gameConfig, renderSpace, pm);
+    gcs = new GameClusterState(gEngine, gameConfig, renderSpace, gameEngine, wt);
 
     keyboardGameController = new KeyboardGameController(gameEngine);
+    if(gameConfig->numAiPlayers > 0){
+      dumbAIController = new DumbAIController(gameEngine, gameConfig->numAiPlayers);
+      gameControllers.push_back(dumbAIController);
+    }
+
     gameControllers.push_back(keyboardGameController);
   } else {
     // isSlave:
@@ -185,6 +192,9 @@ void mouseButtonCallback(int button, int action) {
 }
 
 void myCleanUpFun() {
+  if(dumbAIController){
+    delete dumbAIController;
+  }
   delete gameEngine;
   delete renderSpace;
   delete keyboardGameController;

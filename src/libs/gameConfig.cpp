@@ -10,6 +10,7 @@ GameConfig::GameConfig() {
   wormSpeed = 0.002;
   turnSpeed = 0.1;
   countdown = 10;
+  numAiPlayers = 0;
   maximumPlayers = 100;
   countdownDuration = 5;
   gameOverDuration = 5;
@@ -31,7 +32,8 @@ GameConfig::GameConfig() {
     new ConfigEntity<double, int>("minTimeBetweenGaps", minTimeBetweenGaps),
     new ConfigEntity<double, int>("maxTimeBetweenGaps", maxTimeBetweenGaps),
     new ConfigEntity<double, int>("minTimeInGap", minTimeInGap),
-    new ConfigEntity<double, int>("maxTimeInGap", maxTimeInGap)
+    new ConfigEntity<double, int>("maxTimeInGap", maxTimeInGap),
+    new ConfigEntity<double, int>("numAiPlayers", numAiPlayers)
   };
 
 }

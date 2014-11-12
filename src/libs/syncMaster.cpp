@@ -47,9 +47,10 @@ void SyncMaster::detachAll() {
 }
 
 void SyncMaster::attachState(ClusterState *cs) {
+  GameEngine::State gameState = static_cast<GameEngine::State>(state.getVal());
   if (!cs->isAttached()) {
     detachAll();
-    cs->attach();
+    cs->attach(gameState);
   }
 }
 
@@ -58,6 +59,10 @@ void SyncMaster::preSync() {
 
   if (ClusterState *cs = getClusterState()) {
     cs->preSync();
+
+    if(auto subState = cs->getActiveSubState()){
+      subState->preSync();
+    }
   }
 }
 
@@ -67,6 +72,10 @@ void SyncMaster::postSyncPreDraw() {
   if (ClusterState *cs = getClusterState()) {
     attachState(cs);
     cs->postSyncPreDraw();
+
+    if(auto subState = cs->getActiveSubState()){
+      subState->postSyncPreDraw();
+    }
   }
 }
 
@@ -82,6 +91,10 @@ void SyncMaster::encode() {
 
   if (ClusterState *cs = getClusterState()) {
     cs->encode();
+
+    if(auto subState = cs->getActiveSubState()){
+      subState->encode();
+    }
   }
 }
 
@@ -94,6 +107,10 @@ void SyncMaster::decode() {
 
   if (ClusterState *cs = getClusterState()) {
     cs->decode();
+
+    if(auto subState = cs->getActiveSubState()){
+      subState->decode();
+    }
   }
 }
 
@@ -103,5 +120,9 @@ void SyncMaster::draw() {
   if (ClusterState *cs = getClusterState()) {
     attachState(cs);
     cs->draw();
+
+    if(auto subState = cs->getActiveSubState()){
+      subState->draw();
+    }
   }
 }

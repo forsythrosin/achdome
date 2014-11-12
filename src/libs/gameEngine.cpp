@@ -323,6 +323,11 @@ glm::vec2 GameEngine::getPosition(int playerId) {
   return currentGame->getPosition(playerId);
 }
 
+
+int GameEngine::getPointsInGame(int playerId) {
+  return playerManager->getPointsInGame(playerId, getCurrentGameId());
+}
+
 float GameEngine::getSecondsLeftInCountdown() {
   return countdownSecondsLeft;
 }

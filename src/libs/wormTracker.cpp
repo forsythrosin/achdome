@@ -47,6 +47,11 @@ void WormTracker::setPlayers(std::vector<GamePlayer*> gamePlayers) {
     wh->setWidth(width);
     wormHeads.insert({id, wh});
     setNewRandomGapTimer(id);
+
+    for (WormEventListener *wel : eventListeners) {
+      wel->onWormSpawned(*wh);
+    }
+
   }
   distributor->distribute(wormHeads);
 }
@@ -118,6 +123,9 @@ bool WormTracker::startWormHead(int id) {
   auto it = wormHeads.find(id);
   if (it != wormHeads.end()) {
     it->second->start();
+    for (WormEventListener *wel : eventListeners) {
+      wel->onWormStarted(*(it->second));
+    }
     return true;
   }
   return false;
