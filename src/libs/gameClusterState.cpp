@@ -180,12 +180,13 @@ void GameClusterState::postSyncPreDraw() {
     glm::vec4 gray(1.0, 1.0, 1.0, 0.1*std::min(1.0f, std::max(gameTime - 1.0f, 0.0f)));
     gridColorUni->set(gray);
   } else if (gameTime >= 0) {
-    glm::vec4 green(0.0, 1.0, 0.0, 1.0 - std::min(1.0f, gameTime));
+    glm::vec4 green(0.0, 1.0, 0.0, 0.7*(1.0 - std::min(1.0f, gameTime)));
     gridColorUni->set(green);
   } else if (countdown <= 1) {
-    gridColorUni->set(glm::vec4(1.0, 1.0, 0.0, 0.6 * fmod(countdown, 1.0)));
+    glm::vec4 yellow(1.0, 1.0, 0.0, 0.5 * fmod(countdown, 1.0));
+    gridColorUni->set(yellow);
   } else {
-    gridColorUni->set(glm::vec4(1.0, 0.0, 0.0, 0.6 * fmod(countdown, 1.0)));
+    gridColorUni->set(glm::vec4(1.0, 0.0, 0.0, 0.5 * fmod(countdown, 1.0)));
   }
 
   for (auto c : syncCollisions) {
