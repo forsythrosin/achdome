@@ -4,6 +4,9 @@
 #include <vector>
 #include <uniformWrappers.h>
 
+class Font;
+class TextTexture2D;
+class RenderablePanel;
 class Player;
 class PlayerManager;
 class RenderableDome;
@@ -33,10 +36,17 @@ class LobbyClusterState : public ClusterState {
   sgct::SharedString playerName;
   sgct::SharedInt timer;
 
+  Font *font;
+  TextTexture2D *text;
+
+  RenderablePanel *renderablePanel;
+  
   RenderableDome *dome;
   int domeGrid;
   int domeLogo;
+  int panel;
   Uniform<float> *timeUni;
+  Uniform<GLint> *textUni;
 
   glm::vec3 playerListAnchor;
   const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(0.0f, 7.5f, 1.0f);
