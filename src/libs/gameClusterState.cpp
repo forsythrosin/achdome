@@ -70,10 +70,10 @@ void GameClusterState::attach() {
   renderableHeads->setWormHeads(wormHeads->getVal());
   wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
-  gridColorUni = new Uniform<glm::vec4>("gridColor");
   timeUni = new Uniform<float>("gameTime");
-  renderer->setUniform(domeGrid, gridColorUni);
 
+  gridColorUni = new Uniform<glm::vec4>("gridColor");
+  renderer->setUniform(domeGrid, gridColorUni);
   collisionsUni = new Uniform<std::vector<glm::vec4> >("collisions");
   renderer->setUniform(collision, collisionsUni);
   collisionCountUni = new Uniform<GLuint>("collisionCount");
@@ -182,13 +182,13 @@ void GameClusterState::postSyncPreDraw() {
     glm::vec4 gray(1.0, 1.0, 1.0, 0.1*std::min(1.0f, std::max(gameTime - 1.0f, 0.0f)));
     gridColorUni->set(gray);
   } else if (gameTime >= 0) {
-    glm::vec4 green(0.0, 1.0, 0.0, 0.7*(1.0 - std::min(1.0f, gameTime)));
+    glm::vec4 green(0.3, 0.7, 0.0, 0.7*(1.0 - std::min(1.0f, gameTime)));
     gridColorUni->set(green);
   } else if (countdown <= 1) {
-    glm::vec4 yellow(1.0, 1.0, 0.0, 0.5 * fmod(countdown, 1.0));
+    glm::vec4 yellow(0.7, 0.7, 0.0, 0.5 * fmod(countdown, 1.0));
     gridColorUni->set(yellow);
   } else {
-    gridColorUni->set(glm::vec4(1.0, 0.0, 0.0, 0.5 * fmod(countdown, 1.0)));
+    gridColorUni->set(glm::vec4(0.7, 0.3, 0.0, 0.5 * fmod(countdown, 1.0)));
   }
 
   for (auto c : syncCollisions) {
