@@ -49,9 +49,10 @@ class GameClusterState : public ClusterState, public WormEventListener {
   ClusterRenderSpace *renderSpace;
   GameEngine *gameEngine;
   WormTracker *wormTracker;
-  std::deque<std::pair<int, WormCollisionSyncData> > collisionTimerQueue;
+  std::deque<std::pair<float, WormCollisionSyncData> > collisionTimerQueue;
   std::map<int, WormHeadAppearance*> wormHeadAppearances;
   Uniform<float> *timeUni;
+  Uniform<glm::vec4> *gridColorUni;
   Uniform<std::vector<glm::vec4> > *collisionsUni;
   Uniform<std::vector<glm::vec4> > *collisionColorsUni;
   Uniform<GLuint> *collisionCountUni;
@@ -61,7 +62,9 @@ class GameClusterState : public ClusterState, public WormEventListener {
   sgct::SharedVector<WormArcSyncData> *wormArcs;
   sgct::SharedVector<WormCollisionSyncData> *wormCollisions;
   sgct::SharedVector<WormHeadSyncData> *wormHeads;
-  sgct::SharedInt timer;
+  sgct::SharedFloat countdownSecondsLeft;
+  sgct::SharedFloat gameSecondsPassed;
+  //  sgct::SharedInt timer;
 
-  const GLuint COLLISION_DURATION = 100; // frames
+  const float COLLISION_DURATION = 1.2; // seconds
 };

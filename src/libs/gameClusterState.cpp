@@ -12,6 +12,7 @@
 #include <wormHeadSyncData.h>
 #include <wormHeadAppearance.h>
 #include <wormTracker.h>
+#include <cmath>
 
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr, nullptr, nullptr) {}
@@ -21,7 +22,6 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   wormArcs = new sgct::SharedVector<WormArcSyncData>(gameConfig->maximumPlayers);
   wormCollisions = new sgct::SharedVector<WormCollisionSyncData>(gameConfig->maximumPlayers);
   wormHeads = new sgct::SharedVector<WormHeadSyncData>(gameConfig->maximumPlayers);
-  timer.setVal(0);
 
   renderableDome = nullptr;
   renderableArcs = nullptr;
@@ -49,7 +49,6 @@ GameClusterState::~GameClusterState() {
   if (wormCollisions != nullptr) delete wormCollisions;
   if (wormHeads != nullptr) delete wormHeads;
 
-  if (timeUni != nullptr) delete timeUni;
   if (collisionsUni != nullptr) delete collisionsUni;
 
   if (wormTracker != nullptr) {
@@ -71,10 +70,10 @@ void GameClusterState::attach() {
   renderableHeads->setWormHeads(wormHeads->getVal());
   wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
-  timer.setVal(0);
+  gridColorUni = new Uniform<glm::vec4>("gridColor");
+  timeUni = new Uniform<float>("gameTime");
+  renderer->setUniform(domeGrid, gridColorUni);
 
-  timeUni = new Uniform<float>("time");
-  renderer->setUniform(wormDots, timeUni);
   collisionsUni = new Uniform<std::vector<glm::vec4> >("collisions");
   renderer->setUniform(collision, collisionsUni);
   collisionCountUni = new Uniform<GLuint>("collisionCount");
@@ -105,8 +104,6 @@ void GameClusterState::detach() {
   delete renderableHeads;
   renderableHeads = nullptr;
 
-  delete timeUni;
-  timeUni = nullptr;
   delete collisionsUni;
   timeUni = nullptr;
 
@@ -141,7 +138,9 @@ void GameClusterState::preSync() {
     wormArcs->setVal(syncArcs);
     wormCollisions->setVal(syncCollisions);
     wormHeads->setVal(syncHeads);
-    timer.setVal(timer.getVal() + 1);
+
+    countdownSecondsLeft.setVal(gameEngine->getSecondsLeftInCountdown());
+    gameSecondsPassed.setVal(gameEngine->getSecondsSinceGameStarted());
 
     resetSignal->setVal(reset);
     renderSpace->clear();
@@ -171,18 +170,32 @@ void GameClusterState::postSyncPreDraw() {
   std::vector<WormArcSyncData> syncArcs = wormArcs->getVal();
   std::vector<WormHeadSyncData> syncHeads = wormHeads->getVal();
   std::vector<WormCollisionSyncData> syncCollisions = wormCollisions->getVal();
+  float countdown = countdownSecondsLeft.getVal();
+  float gameTime = gameSecondsPassed.getVal();
 
   renderableArcs->setWormArcs(syncArcs);
   renderableHeads->setWormHeads(syncHeads);
 
-  int tickNumber = timer.getVal();
-  timeUni->set(tickNumber);
+  timeUni->set(gameTime);
 
-  for (auto c : syncCollisions) {
-    collisionTimerQueue.push_back({tickNumber, c});
+  if (gameTime >= 1) {
+    glm::vec4 gray(1.0, 1.0, 1.0, 0.1*std::min(1.0f, std::max(gameTime - 1.0f, 0.0f)));
+    gridColorUni->set(gray);
+  } else if (gameTime >= 0) {
+    glm::vec4 green(0.0, 1.0, 0.0, 0.7*(1.0 - std::min(1.0f, gameTime)));
+    gridColorUni->set(green);
+  } else if (countdown <= 1) {
+    glm::vec4 yellow(1.0, 1.0, 0.0, 0.5 * fmod(countdown, 1.0));
+    gridColorUni->set(yellow);
+  } else {
+    gridColorUni->set(glm::vec4(1.0, 0.0, 0.0, 0.5 * fmod(countdown, 1.0)));
   }
 
-  while (!collisionTimerQueue.empty() && (tickNumber - collisionTimerQueue.front().first) >= COLLISION_DURATION) {
+  for (auto c : syncCollisions) {
+    collisionTimerQueue.push_back({gameTime, c});
+  }
+
+  while (!collisionTimerQueue.empty() && (gameTime - collisionTimerQueue.front().first) >= COLLISION_DURATION) {
     collisionTimerQueue.pop_front();
   }
 
@@ -191,7 +204,7 @@ void GameClusterState::postSyncPreDraw() {
   for (auto pair : collisionTimerQueue) {
     glm::vec3 pos = (glm::vec3) pair.second.getPosition();
     glm::vec4 color = pair.second.getColor();
-    float lifeTime = 1.0 - (float)(tickNumber - pair.first)/(float)COLLISION_DURATION;
+    float lifeTime = 1.0 - (float)(gameTime - pair.first)/COLLISION_DURATION;
     activeCollisions.push_back(glm::vec4(pos.x, pos.y, pos.z, lifeTime));
     collisionColors.push_back(color);
   }
@@ -230,7 +243,9 @@ void GameClusterState::encode() {
   data->writeVector(wormArcs);
   data->writeVector(wormCollisions);
   data->writeVector(wormHeads);
-  data->writeInt(&timer);
+
+  data->writeFloat(&countdownSecondsLeft);
+  data->writeFloat(&gameSecondsPassed);
 }
 
 void GameClusterState::decode() {
@@ -241,7 +256,10 @@ void GameClusterState::decode() {
   data->readVector(wormArcs);
   data->readVector(wormCollisions);
   data->readVector(wormHeads);
-  data->readInt(&timer);
+
+  data->readFloat(&countdownSecondsLeft);
+  data->readFloat(&gameSecondsPassed);
+
 }
 
 void GameClusterState::onWormStarted(WormHead head) {
