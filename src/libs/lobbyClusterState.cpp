@@ -22,7 +22,7 @@ LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConf
   renderablePanel = new RenderablePanel(glm::vec3(0.5, 1, 3), 5, 2);
   renderablePanel->setColor(glm::vec4(1.0,0,0,0));
   font = new Font("fonts/Comfortaa-Light.ttf", 100);
-  text = new TextTexture2D(font, "testText");
+  text = new TextTexture2D(font, "wat");
   attached = false;
 }
 
@@ -60,28 +60,20 @@ void LobbyClusterState::draw() {
   timeUni->set(timer.getVal());
 
 
-  auto texture = text->getTexture();
-  (*texture)(GL_TEXTURE10);
-  textUni->set(10);
-
   // render grid lines
   renderer->render(domeGrid);
   // renderer->render(domeLogo);
-
-  renderer->render(panel);
   
   auto players = sharedPlayers->getVal();
   for (int offset = 0; offset < players.size(); ++offset) {
     Player &player = players.at(offset);
     std::string playerName = player.getName();
     std::transform(playerName.begin(), playerName.end(), playerName.begin(), ::toupper);
-    
-    sgct_text::print3d(
-      sgct_text::FontManager::instance()->getFont("Comfortaa", 50),
-      getMVP(offset),
-      player.getColor(),
-      playerName.c_str()
-    );
+    text->setText(playerName);
+    auto texture = text->getTexture();
+    (*texture)(GL_TEXTURE10);
+    textUni->set(10);
+    renderer->render(panel);
   }
 }
 
