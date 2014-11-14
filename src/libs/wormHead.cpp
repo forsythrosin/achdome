@@ -15,7 +15,8 @@ WormHead::WormHead(int id, GameConfig *gameConfig) {
   setEulerPosition(glm::dvec3(0.0));
   setEulerVelocity(glm::dvec3(0.0));
   this->gameConfig = gameConfig;
-  
+
+  this->width = gameConfig->wormWidth;
   moving = false;
   turningLeft = false;
   turningRight = false;
@@ -196,5 +197,5 @@ void WormHead::setWidth(float width) {
 }
 
 float WormHead::getWidth() {
-  return width;
+  return gameConfig->wormWidth;
 }

@@ -9,6 +9,7 @@
 #include <wormEventListener.h>
 #include <wormHeadDistributor.h>
 #include <iostream>
+#include <stdio.h>
 #include <gamePlayer.h>
 #include <gameConfig.h>
 

@@ -166,7 +166,9 @@ void Renderer::resetFBO(int configId) {
  */
 void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+  glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // FXAA
   glEnable(GL_MULTISAMPLE);

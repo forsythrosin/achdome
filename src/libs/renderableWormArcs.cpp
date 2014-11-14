@@ -1,21 +1,25 @@
 #include <renderableWormArcs.h>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/ext.hpp>
 #include <cassert>
 #include <iostream>
 
 RenderableWormArcs::RenderableWormArcs(int wormCount, int segsPerWorm) {
-  assert(segsPerWorm != 0);
-
-  this->segsPerWorm = segsPerWorm;
-  vertsPerWorm = (segsPerWorm + 1)*2; // e.g. 3 segs need 8 vertices -> 6 triangles
-  vertexCount = wormCount*vertsPerWorm;
-  elementCount = wormCount*segsPerWorm*2; // 2 triangles per segment
+  vertexCount = wormCount*VERTS_PER_ARC;
+  elementCount = wormCount*ELEMENTS_PER_ARC;
 
   sphericalVertexData.reserve(vertexCount*2);
   cartesianVertexData.reserve(vertexCount*3);
   vertexColorData.reserve(vertexCount*4);
   elementData.reserve(elementCount*VERTS_PER_ELEMENT);
-  
+
+  arcFrontData.reserve(vertexCount*3);
+  arcBackData.reserve(vertexCount*3);
+  arcWidthData.reserve(vertexCount);
+
+  arcFrontBuffer = -1;
+  arcBackBuffer = -1;
+  arcWidthBuffer = -1;
 };
 
 RenderableWormArcs::~RenderableWormArcs() {};
@@ -38,7 +42,7 @@ void RenderableWormArcs::setWormColors(std::vector<glm::vec4> wormColors) {
   for (int j = 0; j < wormColors.size(); ++j) {
     glm::vec4 color = wormColors.at(j);
 
-    for (int i = 0; i < vertsPerWorm; ++i) {
+    for (int i = 0; i < VERTS_PER_ARC; ++i) {
       vertexColorData.push_back(color[0]);
       vertexColorData.push_back(color[1]);
       vertexColorData.push_back(color[2]);
@@ -50,79 +54,140 @@ void RenderableWormArcs::setWormColors(std::vector<glm::vec4> wormColors) {
 };
 
 void RenderableWormArcs::createVertices() {
-  float refVertsPerWorm = segsPerWorm + 1;
   cartesianVertexData.clear();
-  sphericalVertexData.clear();
+  arcFrontData.clear();
+  arcBackData .clear();
+  arcWidthData.clear();
+
   for (int j = 0; j < wormArcs.size(); ++j) {
-    WormArcSyncData arc = wormArcs.at(j);
+    WormArcSyncData wa = wormArcs.at(j);
+    glm::vec3 backPos = (glm::vec3) wa.getCartesianLerp(0.0);
+    glm::vec3 midPos = (glm::vec3) wa.getCartesianLerp(0.5);
+    glm::vec3 frontPos = (glm::vec3) wa.getCartesianLerp(1.0);
 
-    // each vertex
-    for (int i = 0; i < refVertsPerWorm; ++i) {
+    glm::vec3 arcDirection = glm::normalize(frontPos - backPos);
+    glm::vec3 domeNormal = glm::normalize(midPos);
 
-      double t = (double)i/(double)segsPerWorm;
-      glm::dvec3 pos = arc.getCartesianLerp(t);
+    GLfloat arcWidth = wa.getWidth();
 
-      // Calculate "spread" vectors on the dome surface
-      int iNext = (i + 1);
-      bool isLast = iNext >= refVertsPerWorm;
-      // If last ref vert, take prev vert. Else next vert
-      iNext = isLast ? i - 1 : iNext;
-      double tNext = (double)iNext / (double)segsPerWorm;
-      // If last ref vert, flip vector sign
-      glm::dvec3 toNext = isLast ?
-          -arc.getCartesianLerp(tNext) : arc.getCartesianLerp(tNext);
+    for (int i = 0; i < VERTS_PER_ARC; ++i) {
+      glm::vec3 quadPoint = midPos + glm::rotate(arcDirection, i*360.0f/VERTS_PER_ARC, domeNormal);
 
-      glm::dvec3 dSpreadVec = glm::normalize(glm::cross(pos, toNext));
-      glm::vec3 spreadVec(dSpreadVec);
-      glm::vec3 posSpread0 = glm::vec3(pos) + spreadVec*arc.getWidth()*0.5f;
-      glm::vec3 posSpread1 = glm::vec3(pos) - spreadVec*arc.getWidth()*0.5f;
-      
-      cartesianVertexData.push_back(posSpread0.x);
-      cartesianVertexData.push_back(posSpread0.y);
-      cartesianVertexData.push_back(posSpread0.z);
+      cartesianVertexData.push_back(quadPoint.x);
+      cartesianVertexData.push_back(quadPoint.y);
+      cartesianVertexData.push_back(quadPoint.z);
 
-      cartesianVertexData.push_back(posSpread1.x);
-      cartesianVertexData.push_back(posSpread1.y);
-      cartesianVertexData.push_back(posSpread1.z);
+      arcFrontData.push_back(frontPos.x);
+      arcFrontData.push_back(frontPos.y);
+      arcFrontData.push_back(frontPos.z);
 
-      sphericalVertexData.push_back(posSpread0.x != 0.0 ? atan(posSpread0.y / posSpread0.x) : glm::half_pi<double>());
-      sphericalVertexData.push_back(acos(posSpread0.z/glm::length(posSpread0)));
-      sphericalVertexData.push_back(posSpread1.x != 0.0 ? atan(posSpread1.y / posSpread1.x) : glm::half_pi<double>());
-      sphericalVertexData.push_back(acos(posSpread1.z/glm::length(posSpread1)));
+      arcBackData.push_back(backPos.x);
+      arcBackData.push_back(backPos.y);
+      arcBackData.push_back(backPos.z);
+
+      arcWidthData.push_back(arcWidth);
     }
   }
 };
 
 /**
- * Create triangles for each worm segment. Elements are evaluated as follows:
- *
- * currentLeft         nextLeft         ...
- *      |                 |              |
- * currentRef -------- nextRef -------- ...
- *      |                 |              |
- * currentRight        nextRight        ...
- *
+ * Index the quads
  */
 void RenderableWormArcs::createElements() {
   elementData.clear();
-  for (int j = 0; j < wormArcs.size(); ++j) {
-    for (int i = 0; i < segsPerWorm; ++i) {
-      // vertices
-      int currentLeft = j*vertsPerWorm + i*2;
-      int currentRight = j*vertsPerWorm + i*2 + 1;
-      int nextLeft = j*vertsPerWorm + i*2 + 2;
-      int nextRight = j*vertsPerWorm + i*2 + 3;
+  for (int i = 0; i < wormArcs.size(); ++i) {
+    int first = i*VERTS_PER_ARC;
+    int second = i*VERTS_PER_ARC + 1;
+    int third = i*VERTS_PER_ARC + 2;
+    int fourth = i*VERTS_PER_ARC + 3;
 
-      elementData.push_back(currentLeft);
-      elementData.push_back(currentRight);
-      elementData.push_back(nextRight);
+    elementData.push_back(first);
+    elementData.push_back(second);
+    elementData.push_back(third);
 
-      elementData.push_back(currentLeft);
-      elementData.push_back(nextRight);
-      elementData.push_back(nextLeft);
-    }
+    elementData.push_back(first);
+    elementData.push_back(third);
+    elementData.push_back(fourth);
   }
 };
+
+/**
+ * Overridden to upload attributes specific to wormHeads
+ */
+void RenderableWormArcs::loadToGPU(bool sphericalCoords) {
+  Renderable::loadToGPU(sphericalCoords);
+  glBindVertexArray(vertexArray);
+
+  GLuint vertexDim = 3;
+  GLuint widthDim = 1;
+
+  glBindBuffer(GL_ARRAY_BUFFER, arcFrontBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    arcFrontData.size()*sizeof(GLfloat),
+    arcFrontData.data(),
+    GL_STATIC_DRAW
+  );
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, arcBackBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    arcBackData.size()*sizeof(GLfloat),
+    arcBackData.data(),
+    GL_STATIC_DRAW
+  );
+  glEnableVertexAttribArray(3);
+  glVertexAttribPointer(3, vertexDim, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, arcWidthBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    arcWidthData.size()*sizeof(GLfloat),
+    arcWidthData.data(),
+    GL_STATIC_DRAW
+  );
+  glEnableVertexAttribArray(4);
+  glVertexAttribPointer(4, widthDim, GL_FLOAT, GL_FALSE, 0, 0);
+
+  // Unbind
+  glDisableVertexAttribArray(2);
+  glDisableVertexAttribArray(3);
+  glDisableVertexAttribArray(4);
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void RenderableWormArcs::attach() {
+  Renderable::attach();
+  glGenBuffers(1, &arcFrontBuffer);
+  glGenBuffers(1, &arcBackBuffer);
+  glGenBuffers(1, &arcWidthBuffer);
+}
+
+void RenderableWormArcs::detach() {
+  glDeleteBuffers(1, &arcWidthBuffer);
+  glDeleteBuffers(1, &arcBackBuffer);
+  glDeleteBuffers(1, &arcFrontBuffer);
+  Renderable::detach();
+}
+
+void RenderableWormArcs::enableAttributes() {
+  Renderable::enableAttributes();
+  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(3);
+  glEnableVertexAttribArray(4);
+}
+
+void RenderableWormArcs::disableAttributes() {
+  glDisableVertexAttribArray(4);
+  glDisableVertexAttribArray(3);
+  glDisableVertexAttribArray(2);
+  Renderable::disableAttributes();
+}
+
 
 GLuint RenderableWormArcs::getVertsPerElement() const {
   return VERTS_PER_ELEMENT;
