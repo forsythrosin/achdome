@@ -43,6 +43,14 @@ public:
     data[indexTranslation(i,j,k)] = v;
   }
 
+  GLuint getWidth(){
+    return w;
+  }
+
+  GLuint getHeight(){
+    return h;
+  }
+  
   operator GLuint() const {
     return textureID;
   }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sgct.h"
+#include <texture2D.h>
 
 class AbstractUniform {
 public:
@@ -8,13 +9,13 @@ public:
   virtual ~AbstractUniform(){};
   virtual void upload() = 0;
   std::string getName() { return name; };
-  void setLocation(GLuint l) { location = l; };
-
+  void setLocation(GLint l) { location = l; };
+  GLint getLocation() { return location; };
   bool needsUpdate = false;
 
 protected:
   std::string name;
-  GLuint location;
+  GLint location;
 };
 
 template <typename T>
@@ -131,4 +132,24 @@ public:
   void upload(){
     glUniform4fv(location, value.size(), reinterpret_cast<float*>(value.data()));
   }
+};
+
+
+
+
+template <>
+class Uniform <Texture2D*> : public TemplateUniform <Texture2D*> {
+public:
+  Uniform(std::string n) : TemplateUniform<Texture2D*>(n) {};
+  void upload(){
+    (*value)(textureBucket);
+    glUniform1i(location, textureLocation);
+  }
+  void setTextureLocation(GLint texLoc, GLenum texBucket){
+    textureLocation = texLoc;
+    textureBucket = texBucket;
+  }
+private:
+  GLint textureLocation;
+  GLenum textureBucket;
 };

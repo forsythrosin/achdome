@@ -37,7 +37,9 @@ void LobbyClusterState::attach() {
   panel = renderer->addRenderable(renderablePanel, GL_TRIANGLES, "uiPanelShader.vert", "textShader.frag", false);
   timer.setVal(0);
   timeUni = new Uniform<float>("time");
-  textUni = new Uniform<GLint>("text");
+  textUni = new Uniform<Texture2D*>("text");
+  textUni->setTextureLocation(10, GL_TEXTURE10);
+
   
   renderer->setUniform(panel, textUni);
   renderer->setUniform(domeLogo, timeUni);
@@ -70,9 +72,7 @@ void LobbyClusterState::draw() {
     std::string playerName = player.getName();
     std::transform(playerName.begin(), playerName.end(), playerName.begin(), ::toupper);
     text->setText(playerName);
-    auto texture = text->getTexture();
-    (*texture)(GL_TEXTURE10);
-    textUni->set(10);
+    textUni->set(text->getTexture());
     renderer->render(panel);
   }
 }

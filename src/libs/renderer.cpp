@@ -178,7 +178,9 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   glUniformMatrix4fv(renderConfig.matrixLocation, 1, GL_FALSE, &MVP[0][0]);
 
   for (auto pair : renderConfig.uniforms) {
-    pair.second->upload();
+    if(pair.second->getLocation() != -1){
+      pair.second->upload();
+    }
   }
 
   if (configWithFBOId > -1 && renderConfigs.find(configWithFBOId) != renderConfigs.end()) {

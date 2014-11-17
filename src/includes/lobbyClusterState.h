@@ -46,7 +46,7 @@ class LobbyClusterState : public ClusterState {
   int domeLogo;
   int panel;
   Uniform<float> *timeUni;
-  Uniform<GLint> *textUni;
+  Uniform<Texture2D*> *textUni;
 
   glm::vec3 playerListAnchor;
   const glm::vec3 DEFAULT_PLAYER_LIST_ANCHOR = glm::vec3(0.0f, 7.5f, 1.0f);

@@ -9,42 +9,7 @@
 #include <vector>
 #include <texture2D.h>
 #include <stdexcept>
-
-class Font{
-public:
-  Font(std::string pathToFont, int h){
-    this->height=h;
- 
-    if (FT_Init_FreeType( &library )){
-      throw std::runtime_error("FT_Init_FreeType failed");
-    }
-    
- 
-    if (FT_New_Face( library, pathToFont.c_str(), 0, &face )){
-      throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
-    }
-    
-    FT_Set_Char_Size( face, height << 6, height << 6, 96, 96);
-  }
-  
-  ~Font(){
-    FT_Done_Face(face);
-    FT_Done_FreeType(library);
-  }
-
-  FT_Library getLibrary(){
-    return library;
-  }
-
-  FT_Face getFace(){
-    return face;
-  }
-private:
-  FT_Library library;
-  FT_Face face;
-  int height;
-};
-
+#include <map>
 
 class GlyphStore{
 public:
@@ -78,57 +43,42 @@ private:
 };
 
 
-class TextTexture2D {
+class Font{
 public:
-  TextTexture2D(Font *f, std::string text){
-    this->font = f;
-    setText(text);
-  }
-  void setText(std::string text){
-    text = UTF8toISO8859_1(text.c_str());
-    auto characters = std::vector<GlyphStore*>();
-    int height = 0;
-    int width = 0;
-    for(int i = 0; i < text.size(); i++){
-      auto characterTexture = generateGlyphStore(text[i]);
-      height = std::max(height, characterTexture->getHeight());
-      width += characterTexture->getWidth();
-      characters.push_back(characterTexture);
+  Font(std::string pathToFont, int h){
+    this->height=h;
+ 
+    if (FT_Init_FreeType( &library )){
+      throw std::runtime_error("FT_Init_FreeType failed");
     }
-    if(texture){
-      delete texture;
+    
+ 
+    if (FT_New_Face( library, pathToFont.c_str(), 0, &face )){
+      throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
     }
-    texture = new Texture2D(width, height);
-
-    int stringCoordX = 0;
-
-    for(auto glyphIndex = 0u; glyphIndex < characters.size(); glyphIndex++){
-      auto currentGlyph = characters[glyphIndex];
-      
-      for (unsigned int i = 0; i < currentGlyph->getWidth(); ++i) {
-        for (unsigned int j = 0; j < currentGlyph->getHeight(); ++j){
-          texture->set(i+stringCoordX, j, 0, currentGlyph->get(i, j));
-          texture->set(i+stringCoordX, j, 1, currentGlyph->get(i, j));
-          texture->set(i+stringCoordX, j, 2, currentGlyph->get(i, j));
-          texture->set(i+stringCoordX, j, 3, currentGlyph->get(i, j));
-        }
-      }
-      stringCoordX += currentGlyph->getWidth();
-      delete currentGlyph;
-    }
-  }
-
-  Texture2D* getTexture(){
-    return texture;
+    
+    FT_Set_Char_Size( face, height << 6, height << 6, 96, 96);
   }
   
-private:
-  Font *font;
-  Texture2D *texture = nullptr;
-  
+  ~Font(){
+    FT_Done_Face(face);
+    FT_Done_FreeType(library);
+    for(auto glyphIt : glyphCache){
+      delete glyphIt.second;
+    }
+  }
+
+  FT_Library getLibrary(){
+    return library;
+  }
+
+  FT_Face getFace(){
+    return face;
+  }
   GlyphStore* generateGlyphStore(unsigned char c){
-    auto face = font->getFace();
-    auto library = font->getLibrary();
+    if(glyphCache.count(c) != 0){
+      return glyphCache[c];
+    }
     if(FT_Load_Glyph( face, FT_Get_Char_Index( face, c ), FT_LOAD_DEFAULT ))
       throw std::runtime_error("FT_Load_Glyph failed");
  
@@ -151,43 +101,109 @@ private:
         glyphTexture->set(i, j, (float)bitmap.buffer[i + bitmap.width*j]/256.0);
       }
     }
+    glyphCache[c] = glyphTexture;
     return glyphTexture;
   }
 
+private:
+  FT_Library library;
+  FT_Face face;
+  int height;
+  std::map<unsigned char, GlyphStore*> glyphCache;
+};
+
+
+
+
+class TextTexture2D {
+public:
+  TextTexture2D(Font *f, std::string text){
+    this->font = f;
+    setText(text);
+  }
+  void setText(std::string text){
+    text = UTF8toISO8859_1(text.c_str());
+    if(textCache.count(text) > 0){
+      texture = textCache[text];
+      return;
+    }
+    else{
+      texture = nullptr;
+    }
+
+    auto characters = std::vector<GlyphStore*>();
+    int height = 0;
+    int width = 0;
+    for(int i = 0; i < text.size(); i++){
+      auto characterTexture = font->generateGlyphStore(text[i]);
+      height = std::max(height, characterTexture->getHeight());
+      width += characterTexture->getWidth();
+      characters.push_back(characterTexture);
+    }
+
+    texture = new Texture2D(width, height);
+    textCache[text] = texture;
+    int stringCoordX = 0;
+
+    for(auto glyphIndex = 0u; glyphIndex < characters.size(); glyphIndex++){
+      auto currentGlyph = characters[glyphIndex];
+      
+      for (unsigned int i = 0; i < currentGlyph->getWidth(); ++i) {
+        for (unsigned int j = 0; j < currentGlyph->getHeight(); ++j){
+          texture->set(i+stringCoordX, j, 0, currentGlyph->get(i, j));
+          texture->set(i+stringCoordX, j, 1, currentGlyph->get(i, j));
+          texture->set(i+stringCoordX, j, 2, currentGlyph->get(i, j));
+          texture->set(i+stringCoordX, j, 3, currentGlyph->get(i, j));
+        }
+      }
+      stringCoordX += currentGlyph->getWidth();
+    }
+  }
+
+  Texture2D* getTexture(){
+    return texture;
+  }
+  
+private:
+  Font *font;
+  Texture2D *texture = nullptr;
+
+  std::map<std::string, Texture2D*> textCache;
+  
   std::string UTF8toISO8859_1(const char * in){
     std::string out;
     if (in == NULL)
-        return out;
+      return out;
 
     unsigned int codepoint;
     while (*in != 0)
-    {
+      {
         unsigned char ch = static_cast<unsigned char>(*in);
         if (ch <= 0x7f)
-            codepoint = ch;
+          codepoint = ch;
         else if (ch <= 0xbf)
-            codepoint = (codepoint << 6) | (ch & 0x3f);
+          codepoint = (codepoint << 6) | (ch & 0x3f);
         else if (ch <= 0xdf)
-            codepoint = ch & 0x1f;
+          codepoint = ch & 0x1f;
         else if (ch <= 0xef)
-            codepoint = ch & 0x0f;
+          codepoint = ch & 0x0f;
         else
-            codepoint = ch & 0x07;
+          codepoint = ch & 0x07;
         ++in;
         if (((*in & 0xc0) != 0x80) && (codepoint <= 0x10ffff))
-        {
+          {
             if (codepoint <= 255)
-            {
+              {
                 out.append(1, static_cast<char>(codepoint));
-            }
+              }
             else
-            {
+              {
                 // do whatever you want for out-of-bounds characters
-            }
-        }
-    }
+              }
+          }
+      }
     return out;
-}
+  }
 
 };
 

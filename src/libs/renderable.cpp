@@ -26,6 +26,13 @@ const std::vector<GLuint> Renderable::getElementData() const {
   return elementData;
 }
 
+glm::mat4 Renderable::getModelMatrix() const{
+  return modelMatrix;
+}
+void Renderable::setModelMatrix(glm::mat4 matrix){
+  modelMatrix = matrix;
+}
+
 int Renderable::getVertexCount() const {
   return cartesianVertexData.size()/3;
 }
@@ -38,7 +45,7 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   // Determine entity dimensions
   int vertexDim = sphericalCoords ? 2 : 3;
   int colorDim = 4;
-
+ 
   auto positionData = (vertexDim == 2 ? sphericalVertexData : cartesianVertexData);
 
   glBindVertexArray(vertexArray);
@@ -111,3 +118,4 @@ void Renderable::disableAttributes() {
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(0);
 }
+
