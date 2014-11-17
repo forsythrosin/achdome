@@ -58,6 +58,15 @@ public:
     }
     
     FT_Set_Char_Size( face, height << 6, height << 6, 96, 96);
+    unsigned char i = 0 ;
+    int maxHeight = 0;
+    do {
+      auto glyph = generateGlyphStore(i);
+      maxHeight = std::max(maxHeight, glyph->getHeight());
+    }
+    while ( ++i ) ;
+    fontMaxHeight = maxHeight;
+
   }
   
   ~Font(){
@@ -68,13 +77,10 @@ public:
     }
   }
 
-  FT_Library getLibrary(){
-    return library;
+  int getFontHeight(){
+    return fontMaxHeight;
   }
-
-  FT_Face getFace(){
-    return face;
-  }
+  
   GlyphStore* generateGlyphStore(unsigned char c){
     if(glyphCache.count(c) != 0){
       return glyphCache[c];
@@ -109,6 +115,7 @@ private:
   FT_Library library;
   FT_Face face;
   int height;
+  int fontMaxHeight;
   std::map<unsigned char, GlyphStore*> glyphCache;
 };
 
@@ -132,11 +139,10 @@ public:
     }
 
     auto characters = std::vector<GlyphStore*>();
-    int height = 0;
+    int height = font->getFontHeight();
     int width = 0;
     for(int i = 0; i < text.size(); i++){
       auto characterTexture = font->generateGlyphStore(text[i]);
-      height = std::max(height, characterTexture->getHeight());
       width += characterTexture->getWidth();
       characters.push_back(characterTexture);
     }
@@ -147,13 +153,13 @@ public:
 
     for(auto glyphIndex = 0u; glyphIndex < characters.size(); glyphIndex++){
       auto currentGlyph = characters[glyphIndex];
-      
+      int heightCorrection = height - currentGlyph->getHeight();
       for (unsigned int i = 0; i < currentGlyph->getWidth(); ++i) {
         for (unsigned int j = 0; j < currentGlyph->getHeight(); ++j){
-          texture->set(i+stringCoordX, j, 0, currentGlyph->get(i, j));
-          texture->set(i+stringCoordX, j, 1, currentGlyph->get(i, j));
-          texture->set(i+stringCoordX, j, 2, currentGlyph->get(i, j));
-          texture->set(i+stringCoordX, j, 3, currentGlyph->get(i, j));
+          texture->set(i+stringCoordX, j+heightCorrection, 0, currentGlyph->get(i, j));
+          texture->set(i+stringCoordX, j+heightCorrection, 1, currentGlyph->get(i, j));
+          texture->set(i+stringCoordX, j+heightCorrection, 2, currentGlyph->get(i, j));
+          texture->set(i+stringCoordX, j+heightCorrection, 3, currentGlyph->get(i, j));
         }
       }
       stringCoordX += currentGlyph->getWidth();
