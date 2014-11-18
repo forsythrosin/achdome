@@ -28,7 +28,10 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   renderableHeads = nullptr;
 
   timeUni = nullptr;
+  gridColorUni = nullptr;
   collisionsUni = nullptr;
+  collisionCountUni = nullptr;
+  collisionColorsUni = nullptr;
 
   renderSpace = rs;
   gameEngine = ge;
@@ -49,7 +52,11 @@ GameClusterState::~GameClusterState() {
   if (wormCollisions != nullptr) delete wormCollisions;
   if (wormHeads != nullptr) delete wormHeads;
 
+  if (timeUni != nullptr) delete timeUni;
+  if (gridColorUni != nullptr) delete gridColorUni;
   if (collisionsUni != nullptr) delete collisionsUni;
+  if (collisionCountUni != nullptr) delete collisionCountUni;
+  if (collisionColorsUni != nullptr) delete collisionColorsUni;
 
   if (wormTracker != nullptr) {
     wormTracker->removeEventListener(this);
@@ -104,8 +111,16 @@ void GameClusterState::detach() {
   delete renderableHeads;
   renderableHeads = nullptr;
 
-  delete collisionsUni;
+  delete timeUni;
   timeUni = nullptr;
+  delete gridColorUni;
+  gridColorUni = nullptr;
+  delete collisionsUni;
+  collisionsUni = nullptr;
+  delete collisionCountUni;
+  collisionCountUni = nullptr;
+  delete collisionColorsUni;
+  collisionColorsUni = nullptr;
 
   attached = false;
 }

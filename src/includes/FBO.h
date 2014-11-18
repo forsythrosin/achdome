@@ -14,7 +14,7 @@ public:
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
 
     // create texture
-    texture = new Texture2D(w, h);
+    texture = new Texture2D(w, h, true);
 
     // init config
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, *texture, 0);

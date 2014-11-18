@@ -2,14 +2,18 @@
 
 class Texture2D{
 public:
-  Texture2D(GLuint w, GLuint h){
+  Texture2D(GLuint w, GLuint h, bool multisample = false){
     this->w = w;
     this->h = h;
+    this->multisample = multisample;
     d = 4;
     glGenTextures(1, &textureID);
 
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
-    // glBindTexture(GL_TEXTURE_2D, textureID);
+    if (multisample) {
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
+    } else {
+      glBindTexture(GL_TEXTURE_2D, textureID);
+    }
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     data = new GLfloat[h*w*d];
 
@@ -22,8 +26,11 @@ public:
       }
     }
 
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, w, h, false);
-    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
+    if (multisample) {
+      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, w, h, false);
+    } else {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
+    }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -53,27 +60,33 @@ public:
   GLuint getHeight(){
     return h;
   }
-  
+
   operator GLuint() const {
     return textureID;
   }
 
   void operator()(GLenum texture) {
     glActiveTexture(texture);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, w, h, false);
+    if (multisample) {
+      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
+      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, w, h, false);
+    } else {
+      glBindTexture(GL_TEXTURE_2D, textureID);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
+    }
   }
 
   void download() {
-    // glReadBuffer(GL_COLOR_ATTACHMENT0);
-    // glBindTexture(GL_TEXTURE_2D, textureID);
-    // glReadPixels(0, 0, this->w, this->h, GL_RGBA, GL_FLOAT, data);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glReadPixels(0, 0, this->w, this->h, GL_RGBA, GL_FLOAT, data);
   }
 
 private:
   GLuint w, h, d;
   GLuint textureID;
   GLfloat *data;
+  bool multisample;
   GLuint indexTranslation(GLuint i, GLuint j, GLuint k) const {
     return j*w*d + i*d + k;
   }
