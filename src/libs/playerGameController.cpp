@@ -208,30 +208,40 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
     }
     break;
   case ClientAction::START_MOVING:
-    playerId = playerIds.at(sessionId);
-    if (gameEngine->startMoving(playerId)) {
-      sendMessage = dataSerializationBuilder->add("message", "moving")->build();
-      webServer->addMessage(sessionId, sendMessage);
-    }
-    else {
-      std::cout << "Don't start moving player " << playerId << std::endl;
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      if (gameEngine->startMoving(playerId)) {
+        sendMessage = dataSerializationBuilder->add("message", "moving")->build();
+        webServer->addMessage(sessionId, sendMessage);
+      }
+      else {
+        std::cout << "Don't start moving player " << playerId << std::endl;
+      }
     }
     break;
   case ClientAction::LEFT_DOWN:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnLeft(playerId, true);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnLeft(playerId, true);
+    }
     break;
   case ClientAction::LEFT_UP:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnLeft(playerId, false);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnLeft(playerId, false);
+    }
     break;
   case ClientAction::RIGHT_DOWN:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnRight(playerId, true);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnRight(playerId, true);
+    }
     break;
   case ClientAction::RIGHT_UP:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnRight(playerId, false);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnRight(playerId, false);
+    }
     break;
   default:
     break;
