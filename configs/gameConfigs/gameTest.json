@@ -7,7 +7,7 @@
   "password": "pwd",
   "minTimeBetweenGaps": 200,
   "maxTimeBetweenGaps": 400,
-  "minTimeInGap": 10,
+  "minTimeInGap": 20,
   "maxTimeInGap": 20,
   "numAiPlayers": 0
 }
