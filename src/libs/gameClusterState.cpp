@@ -229,20 +229,12 @@ void GameClusterState::postSyncPreDraw() {
 }
 
 void GameClusterState::draw() {
-
-  // if (!heads.empty() && heads.at(0).isInGap()) {
-  //   renderer->render(wormDots);
-  // } else {
-  //   renderer->renderToFBO(wormDots, stitchStep);
-  // }
-
   // render wormLines to FBO
   renderer->renderToFBO(wormLines, stitchStep);
   // render grid lines
   renderer->render(domeGrid);
   // render FBO as texture on dome
   renderer->render(domeWorms, wormLines, stitchStep);
-  // renderer->render(domeWorms, wormDots, stitchStep);
 
   renderer->render(wormDots);
   renderer->render(collision);
@@ -292,7 +284,6 @@ void GameClusterState::onWormSpawned(WormHead head) {
   headAppearance->setStrokeWidth(0.0);
   headAppearance->setArrowLength(0.0);
   headAppearance->setArrowWidth(0.0);
-
 
   headAppearance->tweenDiameterCoefficient(5.0, 0.3);
   headAppearance->tweenStrokeWidth(0.005, 0.3);

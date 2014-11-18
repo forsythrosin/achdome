@@ -44,7 +44,9 @@ class GameClusterState : public ClusterState, public WormEventListener {
   RenderableWormArcs *renderableArcs;
   RenderableWormHeads *renderableHeads;
 
+  // render handles
   int domeGrid, domeWorms, wormLines, wormDots, collision;
+
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;
   GameEngine *gameEngine;
@@ -57,7 +59,7 @@ class GameClusterState : public ClusterState, public WormEventListener {
   Uniform<std::vector<glm::vec4> > *collisionColorsUni;
   Uniform<GLuint> *collisionCountUni;
   WormHeadAppearance* getWormHeadAppearance(WormHead wh);
-  
+
   sgct::SharedBool *resetSignal;
   sgct::SharedVector<WormArcSyncData> *wormArcs;
   sgct::SharedVector<WormCollisionSyncData> *wormCollisions;

@@ -141,7 +141,7 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
 
 
 /**
- * Resets FBO (for all stitchSteps) of a specified RenderCongig
+ * Resets FBO (for all stitchSteps) of a specified RenderConfig
  */
 void Renderer::resetFBO(int configId) {
   auto rcIt = renderConfigs.find(configId);
