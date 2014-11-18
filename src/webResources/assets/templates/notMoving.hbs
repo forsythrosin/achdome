@@ -16,15 +16,23 @@
         if (button) {
           var time = Math.round({{time}});
           if (time > 0) {
-            var timerWrapper = document.createElement('div');
+            var infoWrapper = document.createElement('div');
+            var info = document.createElement('div');
+            info.classList.add('info');
             var timer = document.createElement('div');
             var t = document.createTextNode(time);
             timer.classList.add('timer');
             timer.appendChild(t);
-            timerWrapper.classList.add('timerWrapper');
-            timerWrapper.appendChild(timer);
+            var round = document.createElement('div');
+            var r = document.createTextNode('Round ' + {{round}} + '/' + {{rounds}});
+            round.classList.add('round');
+            round.appendChild(r);
+            info.appendChild(round);
+            info.appendChild(timer);
+            infoWrapper.classList.add('infoWrapper');
+            infoWrapper.appendChild(info);
             button.classList.add('disabled');
-            button.appendChild(timerWrapper);
+            button.appendChild(infoWrapper);
             var iv = setInterval(function() {
               if (--time <= 0) {
                 clearInterval(iv);

@@ -9,16 +9,19 @@ var register = require('../../templates/register.hbs'),
     notMoving = require('../../templates/notMoving.hbs'),
     moving = require('../../templates/moving.hbs'),
     died = require('../../templates/died.hbs'),
+    gameOver = require('../../templates/gameOver.hbs'),
+    tournamentOver = require('../../templates/tournamentOver.hbs'),
     disconnected = require('../../templates/disconnected.hbs');
 
 // Partials
 var _color = require('../../templates/partials/color.hbs'),
     _player = require('../../templates/partials/player.hbs'),
     _identifier = require('../../templates/partials/identifier.hbs'),
-    _logotype = require('../../templates/partials/logotype.hbs');
+    _logotype = require('../../templates/partials/logotype.hbs'),
+    _topList = require('../../templates/partials/topList.hbs'),
+    _score = require('../../templates/partials/score.hbs')
 
-var waitForCountdown = 2; // seconds
-
+var waitForCountdown = 2; // A bit more time than it takes to finish the logotype animation
 
 $(function () {
   var $body = $('body');
@@ -41,6 +44,8 @@ var options = {
     player: _player,
     identifier: _identifier,
     logotype: _logotype,
+    topList: _topList,
+    score: _score
   }
 };
 
@@ -123,6 +128,14 @@ var renderDied = function ($container, params) {
   params = params || {};
   params.player = me;
   $container.html(died(params, options));
+};
+
+var renderGameOver = function ($container, params) {
+  $container.html(gameOver(params, options));
+};
+
+var renderTournamentOver = function ($container, params) {
+  $container.html(tournamentOver(params, options));
 };
 
 var setButtonListeners = function ($container) {
@@ -300,6 +313,64 @@ var setServerListeners = function ($container) {
           }
         }
         renderDied($container, data);
+      }
+    }).on('gameOver', function (err, res) {
+      if (err) {
+        console.warn(err);
+      } else if (res !== undefined && res.players !== undefined) {
+        var data = {
+          topList: [],
+          round: res.round,
+          rounds: res.rounds
+        };
+        var foundMe = false;
+        var maxPlayers = 5;
+        Object.keys(res.players).forEach(function (key) {
+          if (key >= maxPlayers) return false;
+          var p = res.players[key];
+          foundMe = foundMe || p.player.id == me.id;
+          p.player.color = transformColor(p.player.color);
+          data.topList.push(p);
+        });
+        if (!foundMe && res.players[me.id] !== undefined) {
+          Object.keys(res.players).forEach(function (key) {
+            var p = res.players[key];
+            if (p.player.id == me.id) {
+              p.player.color = transformColor(p.player.color);
+              data.myScore = p;
+              return false;
+            }
+          });
+        }
+        renderGameOver($container, data);
+      }
+    }).on('tournamentOver', function (err, res) {
+      if (err) {
+        console.warn(err);
+      } else if (res !== undefined && res.players !== undefined) {
+        var data = {
+          topList: []
+        };
+        var foundMe = false;
+        var maxPlayers = 5;
+        Object.keys(res.players).forEach(function (key) {
+          if (key >= maxPlayers) return false;
+          var p = res.players[key];
+          foundMe = foundMe || p.player.id == me.id;
+          p.player.color = transformColor(p.player.color);
+          data.topList.push(p);
+        });
+        if (!foundMe && res.players[me.id] !== undefined) {
+          Object.keys(res.players).forEach(function (key) {
+            var p = res.players[key];
+            if (p.player.id == me.id) {
+              p.player.color = transformColor(p.player.color);
+              data.myScore = p;
+              return false;
+            }
+          });
+        }
+        renderTournamentOver($container, data);
       }
     });
 };

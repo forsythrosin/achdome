@@ -29,7 +29,6 @@ struct GameConfig{
   void parse(std::string);
   int maximumPlayers;
   std::string password;
-  float countdownDuration;
   float gameOverDuration;
 
   int minTimeBetweenGaps;

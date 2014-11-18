@@ -45,6 +45,8 @@ void PlayerGameController::performActions() {
       dataSerializationBuilder
         ->add("message", "countdown")
         ->add("data", dataSerializationBuilder->group()
+          ->add("round", gameEngine->getGameIndexInTournament() + 1)
+          ->add("rounds", gameEngine->getNGamesInTournament())
           ->add("time", time)
           ->add("players", players)
         );
@@ -85,6 +87,41 @@ void PlayerGameController::performActions() {
       }
 
       std::cout << "State changed to Game" << std::endl;
+      break;
+    }
+    case GameEngine::GAME_OVER: {
+      DataSerializationBuilder *data = dataSerializationBuilder->group();
+      dataSerializationBuilder
+        ->add("message", "gameOver")
+        ->add("data", data
+          ->add("round", gameEngine->getGameIndexInTournament() + 1)
+          ->add("rounds", gameEngine->getNGamesInTournament())
+        );
+      addGameResults(data, gameEngine->getCurrentGameParticipants());
+      std::string message = dataSerializationBuilder->build();
+      for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+        sessionId = it->first;
+        playerId = it->second;
+        if (gameEngine->isInCurrentGame(playerId)) {
+          webServer->addMessage(sessionId, message);
+        }
+      }
+      break;
+    }
+    case GameEngine::TOURNAMENT_OVER: {
+      DataSerializationBuilder *data = dataSerializationBuilder->group();
+      dataSerializationBuilder
+        ->add("message", "tournamentOver")
+        ->add("data", data);
+      addTournamentResults(data, gameEngine->getCurrentGameParticipants());
+      std::string message = dataSerializationBuilder->build();
+      for (auto it = playerIds.begin(); it != playerIds.end(); it++) {
+        sessionId = it->first;
+        playerId = it->second;
+        if (gameEngine->isInCurrentGame(playerId)) {
+          webServer->addMessage(sessionId, message);
+        }
+      }
       break;
     }
     }
@@ -171,32 +208,78 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
     }
     break;
   case ClientAction::START_MOVING:
-    playerId = playerIds.at(sessionId);
-    if (gameEngine->startMoving(playerId)) {
-      sendMessage = dataSerializationBuilder->add("message", "moving")->build();
-      webServer->addMessage(sessionId, sendMessage);
-    }
-    else {
-      std::cout << "Don't start moving player " << playerId << std::endl;
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      if (gameEngine->startMoving(playerId)) {
+        sendMessage = dataSerializationBuilder->add("message", "moving")->build();
+        webServer->addMessage(sessionId, sendMessage);
+      }
+      else {
+        std::cout << "Don't start moving player " << playerId << std::endl;
+      }
     }
     break;
   case ClientAction::LEFT_DOWN:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnLeft(playerId, true);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnLeft(playerId, true);
+    }
     break;
   case ClientAction::LEFT_UP:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnLeft(playerId, false);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnLeft(playerId, false);
+    }
     break;
   case ClientAction::RIGHT_DOWN:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnRight(playerId, true);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnRight(playerId, true);
+    }
     break;
   case ClientAction::RIGHT_UP:
-    playerId = playerIds.at(sessionId);
-    gameEngine->turnRight(playerId, false);
+    if (playerIds.count(sessionId) != 0){
+      playerId = playerIds.at(sessionId);
+      gameEngine->turnRight(playerId, false);
+    }
     break;
   default:
     break;
+  }
+}
+
+void PlayerGameController::addGameResults(DataSerializationBuilder *builder, std::vector<int> ids) {
+  DataSerializationBuilder *players = dataSerializationBuilder->group();
+  std::sort(ids.begin(), ids.end(), [this](int id1, int id2){ return gameEngine->getPointsInGame(id1) > gameEngine->getPointsInGame(id2); });
+  builder->add("players", players);
+  for (int i = 0; i < ids.size(); i++) {
+    int id = ids[i];
+    players->add(std::to_string(i), dataSerializationBuilder->group()
+      ->add("player", dataSerializationBuilder->group()
+        ->add("id", id)
+        ->add("name", gameEngine->getName(id))
+        ->add("color", gameEngine->getColor(id))
+      )
+      ->add("position", i + 1)
+      ->add("points", gameEngine->getPointsInGame(id))
+    );
+  }
+}
+
+void PlayerGameController::addTournamentResults(DataSerializationBuilder *builder, std::vector<int> ids) {
+  DataSerializationBuilder *players = dataSerializationBuilder->group();
+  std::sort(ids.begin(), ids.end(), [this](int id1, int id2){ return gameEngine->getPointsInTournament(id1) > gameEngine->getPointsInTournament(id2); });
+  builder->add("players", players);
+  for (int i = 0; i < ids.size(); i++) {
+    int id = ids[i];
+    players->add(std::to_string(i), dataSerializationBuilder->group()
+      ->add("player", dataSerializationBuilder->group()
+        ->add("id", id)
+        ->add("name", gameEngine->getName(id))
+        ->add("color", gameEngine->getColor(id))
+      )
+      ->add("position", i + 1)
+      ->add("points", gameEngine->getPointsInTournament(id))
+    );
   }
 }

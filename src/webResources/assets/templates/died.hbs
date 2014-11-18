@@ -1,13 +1,16 @@
 <div id="died">
-  <h1 style="color: {{> color player.color}}">{{points}}</h1>
-  <h2>Points</h2>
-  {{#if suicide}}
-    <h3>You killed</h3>
-    <h3>Yourself</h3>
+  {{#if killer}}
+    <h3>Killed by</h3>
+    {{> player killer}}
   {{else}}
-    {{#if killer}}
-      <h3>Killed by</h3>
-      {{> player killer}}
+    {{#if suicide}}
+      <h3>You killed</h3>
+      <h3>Yourself</h3>
+    {{else}}
+      <h3>You hit</h3>
+      <h3>the wall</h3>
     {{/if}}
   {{/if}}
+  <h1 style="color: {{> color player.color}}">{{points}}</h1>
+  <h2>Points</h2>
 </div>

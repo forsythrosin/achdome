@@ -199,10 +199,12 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
       gameConfig->maxTimeInGap = action.ints.at("maxTimeInGap");
     }
     break;
-  case ClientAction::START_TOURNAMENT:
+  case ClientAction::START_TOURNAMENT: {
     std::cout << "Tournament started by admin " << sessionId << std::endl;
-    gameEngine->startTournament(action.ints.at("numberOfGames"));
+    int numberOfGames = (action.ints.count("numberOfGames") > 0) ? action.ints.at("numberOfGames") : 1;
+    gameEngine->startTournament(numberOfGames);
     break;
+  }
   case ClientAction::END_TOURNAMENT:
     std::cout << "Tournament ended by admin " << sessionId << std::endl;
     gameEngine->endTournament();

@@ -110,7 +110,10 @@ void GameEngine::startCountdown() {
   gameIndexInTournament++;
   assert(gameIndexInTournament < nGamesInTournament);
 
-  float duration = gameConfig->countdownDuration;
+  float duration = gameConfig->countdown;
+  if (currentGame != nullptr) {
+    delete currentGame;
+  }
   currentGame = new Game(nextGameId++, playerManager, wormTracker);
   state = State::COUNTDOWN;
 
@@ -218,8 +221,6 @@ void GameEngine::startGameOver() {
   std::cout << "Start game over state." << std::endl;
 
   printGameStatistics();
-  delete currentGame;
-  currentGame = nullptr;
   
   gameOverSecondsLeft = duration;
   Tween gameOverTween(gameOverSecondsLeft, [this, duration](double t) {
@@ -275,8 +276,6 @@ void GameEngine::startTournamentOver() {
   
   printGameStatistics();
   printTournamentStatistics();
-  delete currentGame;
-  currentGame = nullptr;
 
   std::cout << "Start tournament over state.";
 
@@ -326,9 +325,22 @@ glm::vec2 GameEngine::getPosition(int playerId) {
   return currentGame->getPosition(playerId);
 }
 
+int GameEngine::getGameIndexInTournament() {
+  return gameIndexInTournament;
+}
+
+int GameEngine::getNGamesInTournament() {
+  return nGamesInTournament;
+}
+
 
 int GameEngine::getPointsInGame(int playerId) {
   return playerManager->getPointsInGame(playerId, getCurrentGameId());
+}
+
+int GameEngine::getPointsInTournament(int playerId) {
+  std::vector<int> gameIds = getPlayedGameIdsInTournament();
+  return playerManager->getPointsInGames(playerId, gameIds);
 }
 
 float GameEngine::getSecondsLeftInCountdown() {
