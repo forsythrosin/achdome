@@ -2,6 +2,7 @@
   "wormWidth": 0.005,
   "wormSpeed": 0.002,
   "turnSpeed": 0.1,
+  "nonLethalGameTicks": 180,
   "countdown": 5,
   "maximumPlayers": 100,
   "password": "pwd",
@@ -9,5 +10,5 @@
   "maxTimeBetweenGaps": 400,
   "minTimeInGap": 20,
   "maxTimeInGap": 20,
-  "numAiPlayers": 99
+  "numAiPlayers": 0
 }

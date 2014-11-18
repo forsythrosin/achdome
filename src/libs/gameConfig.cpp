@@ -23,6 +23,7 @@ GameConfig::GameConfig() {
     new ConfigEntity<double, float>("wormWidth", wormWidth),
     new ConfigEntity<double, float>("wormSpeed", wormSpeed),
     new ConfigEntity<double, float>("turnSpeed", turnSpeed),
+    new ConfigEntity<double, int>("nonLethalGameTicks", nonLethalGameTicks),
     new ConfigEntity<double, int>("countdown", countdown),
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
     new ConfigEntity<std::string>("password", password),

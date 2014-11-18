@@ -97,15 +97,20 @@ void WormTracker::tick(int time) {
     heads.push_back(*wh);
   }
 
-  std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
-  
+  // always add heads to render
   renderSpace->addHeads(heads);
-  renderSpace->addArcs(arcs);
-  renderSpace->addCollisions(collisions);
 
-  for (WormEventListener *wel : eventListeners) {
-    for (WormCollision c : collisions) {
-      wel->onWormCollision(c);
+  // if we are past the initial no-collision state, run full simulation
+  if (time > gameConfig->nonLethalGameTicks) {
+    std::vector<WormCollision> collisions = collisionSpace->addArcs(arcs);
+
+    renderSpace->addArcs(arcs);
+    renderSpace->addCollisions(collisions);
+
+    for (WormEventListener *wel : eventListeners) {
+      for (WormCollision c : collisions) {
+        wel->onWormCollision(c);
+      }
     }
   }
 }

@@ -22,6 +22,7 @@ struct GameConfig{
   float wormWidth;
   float wormSpeed;
   float turnSpeed;
+  int nonLethalGameTicks;
   int countdown;
 
   int numAiPlayers;
