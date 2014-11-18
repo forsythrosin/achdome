@@ -2,6 +2,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <wormArc.h>
 #include <iostream>
+#include <stdio.h>
 
 WormArc::WormArc(int id, glm::dquat firstQuat, glm::dquat secondQuat, float width, int time) {
   this->wormId = id;
