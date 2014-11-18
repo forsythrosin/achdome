@@ -9,6 +9,7 @@ GameConfig::GameConfig() {
   wormWidth = 0.005;
   wormSpeed = 0.002;
   turnSpeed = 0.1;
+  nonLethalGameTicks = 180;
   countdown = 5;
   numAiPlayers = 0;
   maximumPlayers = 100;
