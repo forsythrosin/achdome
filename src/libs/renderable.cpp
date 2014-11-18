@@ -26,6 +26,13 @@ const std::vector<GLuint> Renderable::getElementData() const {
   return elementData;
 }
 
+glm::mat4 Renderable::getModelMatrix() const{
+  return modelMatrix;
+}
+void Renderable::setModelMatrix(glm::mat4 matrix){
+  modelMatrix = matrix;
+}
+
 int Renderable::getVertexCount() const {
   return cartesianVertexData.size()/3;
 }
@@ -111,3 +118,4 @@ void Renderable::disableAttributes() {
   glDisableVertexAttribArray(1);
   glDisableVertexAttribArray(0);
 }
+

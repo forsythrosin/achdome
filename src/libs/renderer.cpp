@@ -2,6 +2,7 @@
 #include <shaderUtils.h>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 #include <renderConfig.h>
 #include "sgct/SGCTSettings.h"
 
@@ -198,7 +199,9 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   glUniformMatrix4fv(renderConfig.matrixLocation, 1, GL_FALSE, &MVP[0][0]);
 
   for (auto pair : renderConfig.uniforms) {
-    pair.second->upload();
+    if(pair.second->getLocation() != -1){
+      pair.second->upload();
+    }
   }
 
   if (configWithFBOId > -1 && renderConfigs.find(configWithFBOId) != renderConfigs.end()) {
@@ -226,15 +229,17 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.indexBuffer);
 
   // Draw!
+  int elementCount = renderable->getElementCount();
+  int vertsPerElement = renderable->getVertsPerElement();
   glDrawElements(
     renderConfig.mode,
-    renderable->getElementCount()*renderable->getVertsPerElement(),
+    elementCount*vertsPerElement,
     GL_UNSIGNED_INT,
     0
   );
 
   // Clean up + unbind
-  renderConfig.renderable->disableAttributes();
+  renderable->disableAttributes();
   glBindVertexArray(0);
   sgct::ShaderManager::instance()->unBindShaderProgram();
   glDisable(GL_BLEND);

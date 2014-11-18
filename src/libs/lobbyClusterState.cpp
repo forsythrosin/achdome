@@ -3,6 +3,10 @@
 #include <playerManager.h>
 #include <algorithm>
 #include <renderableDome.h>
+#include <texture2D.h>
+#include <textTexture2D.h>
+#include <renderableLobbyName.h>
+#include <stdio.h>
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : LobbyClusterState(gEngine, gameConfig, nullptr) {
   attached = false;
@@ -15,6 +19,9 @@ LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConf
   timer.setVal(0);
   setPlayerListAnchor(DEFAULT_PLAYER_LIST_ANCHOR);
   dome = new RenderableDome(50, 20);
+  renderablePanel = new RenderableLobbyName();
+  font = new Font("fonts/Comfortaa-Light.ttf", 100);
+  text = new TextTexture2D(font, "wat");
 
   attached = false;
 }
@@ -26,9 +33,14 @@ LobbyClusterState::~LobbyClusterState() {
 
 void LobbyClusterState::attach() {
   domeLogo = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeLogoShader.frag", true);
+  panel = renderer->addRenderable(renderablePanel, GL_TRIANGLES, "uiPanelShader.vert", "textShader.frag", false);
 
   timer.setVal(0);
   timeUni = new Uniform<float>("time");
+  textUni = new Uniform<Texture2D*>("text");
+  textUni->setTextureLocation(10, GL_TEXTURE10);
+
+  renderer->setUniform(panel, textUni);
   renderer->setUniform(domeLogo, timeUni);
 
   attached = true;
@@ -36,6 +48,7 @@ void LobbyClusterState::attach() {
 
 void LobbyClusterState::detach() {
   renderer->removeRenderable(domeLogo);
+  renderer->removeRenderable(panel);
 
   delete timeUni;
   timeUni = nullptr;
@@ -46,21 +59,25 @@ void LobbyClusterState::detach() {
 void LobbyClusterState::draw() {
   timeUni->set(timer.getVal());
 
+
   // render grid lines
   // renderer->render(domeLogo);
 
   auto players = sharedPlayers->getVal();
-  for (int offset = 0; offset < players.size(); ++offset) {
+  int totalPlayers = players.size();
+  for (int offset = 0; offset < totalPlayers; ++offset) {
     Player &player = players.at(offset);
     std::string playerName = player.getName();
     std::transform(playerName.begin(), playerName.end(), playerName.begin(), ::toupper);
 
-    sgct_text::print3d(
-      sgct_text::FontManager::instance()->getFont("Comfortaa", 50),
-      getMVP(offset),
-      player.getColor(),
-      playerName.c_str()
-    );
+    text->setText(playerName);
+    Texture2D *texture = text->getTexture();
+    textUni->set(texture);
+
+    float ratio = ((float)texture->getWidth())/texture->getHeight();
+    renderablePanel->setColor(player.getColor());
+    renderablePanel->update(offset, totalPlayers, ratio);
+    renderer->render(panel);
   }
 }
 

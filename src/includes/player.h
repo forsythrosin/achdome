@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+#define MAX_NAME_LENGTH 50
+
 class Player {
  public:
   Player(int id, glm::vec4 color, std::string name);
@@ -19,7 +21,7 @@ class Player {
  private:
   int id;
   glm::vec4 color;
-  char name[50];
+  char name[MAX_NAME_LENGTH];
   bool connected;
   std::map<int, int> points;
 };
