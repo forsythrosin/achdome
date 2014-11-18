@@ -17,9 +17,12 @@ int Player::getId() {
 }
 
 void Player::setName(std::string name) {
-  const size_t size = std::extent<decltype(this->name)>::value;
-  std::fill(this->name, this->name+size, 0);
-  std::copy(name.begin(), name.end(), this->name);
+  std::fill(this->name, this->name + MAX_NAME_LENGTH, 0);
+  std::copy(
+    name.begin(),
+    name.length() > MAX_NAME_LENGTH ? name.begin() + MAX_NAME_LENGTH : name.end(),
+    this->name
+  );
 }
 
 std::string Player::getName() {

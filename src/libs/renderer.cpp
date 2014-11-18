@@ -2,6 +2,7 @@
 #include <shaderUtils.h>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 #include <renderConfig.h>
 
 Renderer::Renderer(sgct::Engine *gEngine) {
@@ -133,7 +134,7 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
 
 
 /**
- * Resets FBO (for all stitchSteps) of a specified RenderCongig 
+ * Resets FBO (for all stitchSteps) of a specified RenderCongig
  */
 void Renderer::resetFBO(int configId) {
   auto rcIt = renderConfigs.find(configId);
@@ -207,15 +208,17 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderConfig.indexBuffer);
 
   // Draw!
+  int elementCount = renderable->getElementCount();
+  int vertsPerElement = renderable->getVertsPerElement();
   glDrawElements(
     renderConfig.mode,
-    renderable->getElementCount()*renderable->getVertsPerElement(),
+    elementCount*vertsPerElement,
     GL_UNSIGNED_INT,
     0
   );
 
   // Clean up + unbind
-  renderConfig.renderable->disableAttributes();
+  renderable->disableAttributes();
   glBindVertexArray(0);
   sgct::ShaderManager::instance()->unBindShaderProgram();
   glDisable(GL_BLEND);

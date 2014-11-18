@@ -5,24 +5,24 @@
 #include <renderableDome.h>
 #include <texture2D.h>
 #include <textTexture2D.h>
-#include <renderablePanel.h>
+#include <renderableLobbyName.h>
+#include <stdio.h>
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : LobbyClusterState(gEngine, gameConfig, nullptr) {
   attached = false;
 }
 
 LobbyClusterState::LobbyClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, PlayerManager *playerManager) : ClusterState(gEngine, gameConfig) {
-  
   this->playerManager = playerManager;
   sharedPlayers = new sgct::SharedVector<Player>(100);
   // playerName.setVal("");
   timer.setVal(0);
   setPlayerListAnchor(DEFAULT_PLAYER_LIST_ANCHOR);
   dome = new RenderableDome(50, 20);
-  renderablePanel = new RenderablePanel(glm::vec3(0.5, 1, 3), 5, 2);
-  renderablePanel->setColor(glm::vec4(1.0,0,0,0));
+  renderablePanel = new RenderableLobbyName();
   font = new Font("fonts/Comfortaa-Light.ttf", 100);
   text = new TextTexture2D(font, "wat");
+
   attached = false;
 }
 
@@ -35,12 +35,12 @@ void LobbyClusterState::attach() {
   domeGrid = renderer->addRenderable(dome, GL_LINES, "domeShader.vert", "domeGridShader.frag", true);
   domeLogo = renderer->addRenderable(dome, GL_TRIANGLES, "domeShader.vert", "domeLogoShader.frag", true);
   panel = renderer->addRenderable(renderablePanel, GL_TRIANGLES, "uiPanelShader.vert", "textShader.frag", false);
+
   timer.setVal(0);
   timeUni = new Uniform<float>("time");
   textUni = new Uniform<Texture2D*>("text");
   textUni->setTextureLocation(10, GL_TEXTURE10);
 
-  
   renderer->setUniform(panel, textUni);
   renderer->setUniform(domeLogo, timeUni);
 
@@ -65,14 +65,21 @@ void LobbyClusterState::draw() {
   // render grid lines
   renderer->render(domeGrid);
   // renderer->render(domeLogo);
-  
+
   auto players = sharedPlayers->getVal();
-  for (int offset = 0; offset < players.size(); ++offset) {
+  int totalPlayers = players.size();
+  for (int offset = 0; offset < totalPlayers; ++offset) {
     Player &player = players.at(offset);
     std::string playerName = player.getName();
     std::transform(playerName.begin(), playerName.end(), playerName.begin(), ::toupper);
+
     text->setText(playerName);
-    textUni->set(text->getTexture());
+    Texture2D *texture = text->getTexture();
+    textUni->set(texture);
+
+    float ratio = ((float)texture->getWidth())/texture->getHeight();
+    renderablePanel->setColor(player.getColor());
+    renderablePanel->update(offset, totalPlayers, ratio);
     renderer->render(panel);
   }
 }

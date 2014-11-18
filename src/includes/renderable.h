@@ -39,7 +39,7 @@ protected:
   std::vector<GLuint> elementData;
 
   glm::mat4 modelMatrix = glm::mat4(1.0);
-  
+
   // GL handles
   GLuint vertexArray;
   GLuint positionBuffer, indexBuffer, colorBuffer;

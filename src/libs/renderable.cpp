@@ -45,7 +45,7 @@ void Renderable::loadToGPU(bool sphericalCoords) {
   // Determine entity dimensions
   int vertexDim = sphericalCoords ? 2 : 3;
   int colorDim = 4;
- 
+
   auto positionData = (vertexDim == 2 ? sphericalVertexData : cartesianVertexData);
 
   glBindVertexArray(vertexArray);

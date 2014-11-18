@@ -6,7 +6,7 @@
 
 class Font;
 class TextTexture2D;
-class RenderablePanel;
+class RenderableLobbyName;
 class Player;
 class PlayerManager;
 class RenderableDome;
@@ -39,8 +39,8 @@ class LobbyClusterState : public ClusterState {
   Font *font;
   TextTexture2D *text;
 
-  RenderablePanel *renderablePanel;
-  
+  RenderableLobbyName *renderablePanel;
+
   RenderableDome *dome;
   int domeGrid;
   int domeLogo;

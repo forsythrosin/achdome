@@ -1,9 +1,8 @@
 #include <renderablePanel.h>
 #include <iostream>
-RenderablePanel::RenderablePanel(glm::vec3 pos, float width, float height)
-  : pos(pos), width(width), height(height){
-  anchor = UI_PLANE_POS;
+#include <stdio.h>
 
+RenderablePanel::RenderablePanel() {
   vertexCount = VERTEX_COUNT;
   elementCount = ELEMENT_COUNT;
 
@@ -19,47 +18,49 @@ RenderablePanel::RenderablePanel(glm::vec3 pos, float width, float height)
 
 RenderablePanel::~RenderablePanel() {};
 
+void RenderablePanel::createVertices() {
+  createVertices(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.0));
+}
+
 /**
  * Vertex placement
  */
-void RenderablePanel::createVertices() {
-  // top left
+void RenderablePanel::createVertices(glm::vec3 posTL, glm::vec3 posTR, glm::vec3 posBL, glm::vec3 posBR) {
+
   cartesianVertexData.clear();
   textureCoordinates.clear();
-  
-  cartesianVertexData.push_back(pos.x);
-  cartesianVertexData.push_back(pos.y);
-  cartesianVertexData.push_back(pos.z);
+
+  // top left
+  cartesianVertexData.push_back(posTL.x);
+  cartesianVertexData.push_back(posTL.y);
+  cartesianVertexData.push_back(posTL.z);
 
   textureCoordinates.push_back(0.0);
   textureCoordinates.push_back(0.0);
-  
 
   // top right
-  cartesianVertexData.push_back(pos.x + width);
-  cartesianVertexData.push_back(pos.y);
-  cartesianVertexData.push_back(pos.z);
+  cartesianVertexData.push_back(posTR.x);
+  cartesianVertexData.push_back(posTR.y);
+  cartesianVertexData.push_back(posTR.z);
 
   textureCoordinates.push_back(1.0);
   textureCoordinates.push_back(0.0);
 
-  
   // bottom left
-  cartesianVertexData.push_back(pos.x);
-  cartesianVertexData.push_back(pos.y);
-  cartesianVertexData.push_back(pos.z - height);
+  cartesianVertexData.push_back(posBL.x);
+  cartesianVertexData.push_back(posBL.y);
+  cartesianVertexData.push_back(posBL.z);
 
   textureCoordinates.push_back(0.0);
   textureCoordinates.push_back(1.0);
-  
+
   // bottom right
-  cartesianVertexData.push_back(pos.x + width);
-  cartesianVertexData.push_back(pos.y);
-  cartesianVertexData.push_back(pos.z - height);
+  cartesianVertexData.push_back(posBR.x);
+  cartesianVertexData.push_back(posBR.y);
+  cartesianVertexData.push_back(posBR.z);
 
   textureCoordinates.push_back(1.0);
   textureCoordinates.push_back(1.0);
-
 };
 
 /**
@@ -92,31 +93,6 @@ void RenderablePanel::setColor (glm::vec4 color) {
   }
 };
 
-void RenderablePanel::setPos(glm::vec3 pos) {
-  this->pos = pos;
-};
-
-
-void RenderablePanel::setWidth(float width) {
-  this->width = width;
-};
-
-void RenderablePanel::setHeight(float height) {
-  this->height = height;
-};
-
-void RenderablePanel::setAnchor (glm::vec3 anchor) {
-  assert(anchor.x >= 0.0 && anchor.x <= 1.0 &&
-         anchor.z >= 0.0 && anchor.z <= 1.0 &&
-         "anchor must be in range [(0.0, 0.0), (1.0, 1.0)]");
-
-  this->anchor.x = anchor.x;
-  this->anchor.z = anchor.z;
-
-  createVertices();
-  update = true;
-};
-
 void RenderablePanel::attach(){
   Renderable::attach();
   glGenBuffers(1, &textureCoordBuffer);
@@ -141,42 +117,24 @@ void RenderablePanel::loadToGPU(bool sphericalCoords){
   Renderable::loadToGPU(sphericalCoords);
   glBindVertexArray(vertexArray);
   int texDim = 2;
-  
+
   glBindBuffer(GL_ARRAY_BUFFER, textureCoordBuffer);
   glBufferData(
-               GL_ARRAY_BUFFER,
-               textureCoordinates.size()*sizeof(GLfloat),
-               textureCoordinates.data(),
-               GL_STATIC_DRAW
-               );
-  std::cout << "uploading texture data to gpu " << textureCoordinates.size()  << std::endl;
+    GL_ARRAY_BUFFER,
+    textureCoordinates.size()*sizeof(GLfloat),
+    textureCoordinates.data(),
+    GL_STATIC_DRAW
+  );
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2, texDim, GL_FLOAT, GL_FALSE, 0, 0);
 
   glDisableVertexAttribArray(2);
-  
+
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-glm::vec3 RenderablePanel::getPos() const {
-  return pos;
-};
-
 GLuint RenderablePanel::getVertsPerElement() const {
-  return 3;
+  return VERTS_PER_ELEMENT;
 };
-
-float RenderablePanel::getWidth() const {
-  return width;
-};
-
-float RenderablePanel::getHeight() const {
-  return height;
-};
-
-glm::vec3 RenderablePanel::getAnchor() const {
-  return anchor;
-};
-
