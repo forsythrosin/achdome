@@ -2,12 +2,12 @@
   "wormWidth": 0.005,
   "wormSpeed": 0.002,
   "turnSpeed": 0.1,
-  "countdown": 10,
+  "countdown": 5,
   "maximumPlayers": 100,
   "password": "pwd",
   "minTimeBetweenGaps": 200,
   "maxTimeBetweenGaps": 400,
   "minTimeInGap": 10,
   "maxTimeInGap": 20,
-  "numAiPlayers": 99
+  "numAiPlayers": 0
 }

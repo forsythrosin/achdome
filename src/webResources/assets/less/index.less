@@ -132,19 +132,27 @@
     cursor: pointer;
     .transition(background 0.2s);
 
-    .timerWrapper {
+    .infoWrapper {
       display: table;
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.5);
 
-      .timer {
+      .info {
         display: table-cell;
         vertical-align: middle;
         text-align: center;
         color: white;
         font-family: @header-typeface;
-        font-size: 100px;
+        text-transform: uppercase;
+
+        .round {
+          font-size: 200%;
+        }
+
+        .timer {
+          font-size: 500%;
+        }
       }
     }
   }
@@ -245,11 +253,11 @@
 
   h1 {
     font-size: 400%;
+    margin-top: 30px;
   }
 
   h2 {
     font-size: 150%;
-    margin-bottom: 30px;
   }
 
   h3 {

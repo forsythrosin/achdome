@@ -110,7 +110,7 @@ void GameEngine::startCountdown() {
   gameIndexInTournament++;
   assert(gameIndexInTournament < nGamesInTournament);
 
-  float duration = gameConfig->countdownDuration;
+  float duration = gameConfig->countdown;
   if (currentGame != nullptr) {
     delete currentGame;
   }

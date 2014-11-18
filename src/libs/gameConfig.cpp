@@ -9,10 +9,9 @@ GameConfig::GameConfig() {
   wormWidth = 0.005;
   wormSpeed = 0.002;
   turnSpeed = 0.1;
-  countdown = 10;
+  countdown = 5;
   numAiPlayers = 0;
   maximumPlayers = 100;
-  countdownDuration = 5;
   gameOverDuration = 5;
   password = "default";
   minTimeBetweenGaps = 200;
@@ -27,7 +26,6 @@ GameConfig::GameConfig() {
     new ConfigEntity<double, int>("countdown", countdown),
     new ConfigEntity<double, int>("maximumPlayers", maximumPlayers),
     new ConfigEntity<std::string>("password", password),
-    new ConfigEntity<double, float>("countdownDuration", countdownDuration),
     new ConfigEntity<double, float>("gameOverDuration", gameOverDuration),
     new ConfigEntity<double, int>("minTimeBetweenGaps", minTimeBetweenGaps),
     new ConfigEntity<double, int>("maxTimeBetweenGaps", maxTimeBetweenGaps),

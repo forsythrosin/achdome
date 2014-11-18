@@ -45,6 +45,8 @@ void PlayerGameController::performActions() {
       dataSerializationBuilder
         ->add("message", "countdown")
         ->add("data", dataSerializationBuilder->group()
+          ->add("round", gameEngine->getGameIndexInTournament() + 1)
+          ->add("rounds", gameEngine->getNGamesInTournament())
           ->add("time", time)
           ->add("players", players)
         );
