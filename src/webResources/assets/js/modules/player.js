@@ -80,7 +80,8 @@ var resizeDome = function($body) {
 };
 
 var renderDisconnected = function ($container, params) {
-  $container.html(disconnected(params, options));
+  $container.html(disconnected({settings: {name:'Server disconnected', color:[128,128,128,1]}}, options));
+  logotypeAnimator.animate(1, 0);
 };
 
 var renderRegister = function ($container, params) {
