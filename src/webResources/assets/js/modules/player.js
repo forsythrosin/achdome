@@ -246,7 +246,9 @@ var setServerListeners = function ($container) {
         console.warn(err);
       } else {
         var data = {
-          time: 0
+          time: 0,
+          round: res.round,
+          rounds: res.rounds
         };
         if (res !== undefined) {
           if (res.time !== undefined) {
