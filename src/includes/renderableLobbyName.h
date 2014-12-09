@@ -55,7 +55,7 @@ public:
 
 private:
   const int MAX_PLAYERS = 100;
-  const int NAMES_PER_COLUMN = 10;
+  const int NAMES_PER_COLUMN = 20;
   const float COLUMN_START_ANGLE = glm::half_pi<float>()*0.75f;
   const float COLUMN_END_ANGLE = glm::half_pi<float>()*0.25f;
 

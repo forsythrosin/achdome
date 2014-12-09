@@ -18,7 +18,7 @@
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig) : GameClusterState(gEngine, gameConfig, nullptr, nullptr, nullptr) {}
 
 GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig, ClusterRenderSpace *rs, GameEngine *ge, WormTracker *wt) : ClusterState(gEngine, gameConfig) {
-  resetSignal = new sgct::SharedBool(false);
+  resetSignal = new sgct::SharedInt(0);
   wormArcs = new sgct::SharedVector<WormArcSyncData>(gameConfig->maximumPlayers);
   wormCollisions = new sgct::SharedVector<WormCollisionSyncData>(gameConfig->maximumPlayers);
   wormHeads = new sgct::SharedVector<WormHeadSyncData>(gameConfig->maximumPlayers);
@@ -157,16 +157,14 @@ void GameClusterState::preSync() {
     countdownSecondsLeft.setVal(gameEngine->getSecondsLeftInCountdown());
     gameSecondsPassed.setVal(gameEngine->getSecondsSinceGameStarted());
 
-    resetSignal->setVal(reset);
+    if (reset) {
+      resetSignal->setVal(resetSignal->getVal() + 1);
+    }
     renderSpace->clear();
   }
 
   // Reset stitch step
   stitchStep = 0;
-
-  if (resetSignal->getVal()) {
-    reset();
-  }
 }
 
 WormHeadAppearance* GameClusterState::getWormHeadAppearance(WormHead head) {
@@ -181,6 +179,12 @@ WormHeadAppearance* GameClusterState::getWormHeadAppearance(WormHead head) {
 }
 
 void GameClusterState::postSyncPreDraw() {
+  if (resetSignal->getVal() > localResets) {
+    std::cout << "resetting" << std::endl;
+    ++localResets;
+    reset();
+  }
+
   // Copy current worm positions and colors
   std::vector<WormArcSyncData> syncArcs = wormArcs->getVal();
   std::vector<WormHeadSyncData> syncHeads = wormHeads->getVal();
@@ -246,7 +250,11 @@ void GameClusterState::encode() {
   // get things from renderSpace and send it to everyone.
   sgct::SharedData *data = sgct::SharedData::instance();
 
-  data->writeBool(resetSignal);
+  if (resetSignal->getVal()) {
+    std::cout << "reset = " << resetSignal->getVal() << std::endl;
+  }
+
+  data->writeInt(resetSignal);
   data->writeVector(wormArcs);
   data->writeVector(wormCollisions);
   data->writeVector(wormHeads);
@@ -259,7 +267,10 @@ void GameClusterState::decode() {
   // read from buffer and insert data to GameRenderers.
   sgct::SharedData *data = sgct::SharedData::instance();
 
-  data->writeBool(resetSignal);
+  data->readInt(resetSignal);
+  if (resetSignal->getVal()) {
+    std::cout << "reset = " << resetSignal->getVal() << std::endl;
+  }
   data->readVector(wormArcs);
   data->readVector(wormCollisions);
   data->readVector(wormHeads);

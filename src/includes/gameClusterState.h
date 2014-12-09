@@ -60,7 +60,8 @@ class GameClusterState : public ClusterState, public WormEventListener {
   Uniform<GLuint> *collisionCountUni;
   WormHeadAppearance* getWormHeadAppearance(WormHead wh);
 
-  sgct::SharedBool *resetSignal;
+  sgct::SharedInt *resetSignal;
+  int localResets = 0;
   sgct::SharedVector<WormArcSyncData> *wormArcs;
   sgct::SharedVector<WormCollisionSyncData> *wormCollisions;
   sgct::SharedVector<WormHeadSyncData> *wormHeads;
