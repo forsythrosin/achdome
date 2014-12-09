@@ -142,7 +142,7 @@ var setButtonListeners = function ($container) {
   $container
     .on('click', '#play', function () {
       var $name = $container.find('input[name="name"]');
-      var name = $name.val();
+      var name = $name.val().toUpperCase();
       if (name) {
         server.register(name);
         $name.removeClass('warning');
