@@ -54,14 +54,17 @@ public:
   };
 
 private:
+  const float mPi = 3.14159265358979323846;
+  const float mPi2 = 1.57079632679489661923;
+
   const int MAX_PLAYERS = 100;
-  const int NAMES_PER_COLUMN = 20;
-  const float COLUMN_START_ANGLE = glm::half_pi<float>()*0.75f;
-  const float COLUMN_END_ANGLE = glm::half_pi<float>()*0.25f;
+  const int NAMES_PER_COLUMN = 10;
+  const float COLUMN_START_ANGLE = mPi2*0.75f;
+  const float COLUMN_END_ANGLE = mPi2*0.25f;
 
   const float COLUMN_ANGLE = COLUMN_START_ANGLE - COLUMN_END_ANGLE;
   const int NUMBER_OF_COLUMNS = MAX_PLAYERS/NAMES_PER_COLUMN;
-  const float MAX_NAME_WIDTH = cos(COLUMN_START_ANGLE)*glm::pi<float>()*2.0f/(NUMBER_OF_COLUMNS);
+  const float MAX_NAME_WIDTH = cos(COLUMN_START_ANGLE)*mPi*2.0f / (NUMBER_OF_COLUMNS);
   const float VERTICAL_OFFSET_ANGLE = COLUMN_ANGLE/NAMES_PER_COLUMN;
   const float TEXT_PANEL_HEIGHT = VERTICAL_OFFSET_ANGLE;
   const float MAX_RATIO = MAX_NAME_WIDTH/TEXT_PANEL_HEIGHT;

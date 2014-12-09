@@ -10,6 +10,7 @@
 #include <texture2D.h>
 #include <stdexcept>
 #include <map>
+#include <algorithm>
 
 class GlyphStore{
 public:

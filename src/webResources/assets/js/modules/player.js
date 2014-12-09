@@ -80,7 +80,8 @@ var resizeDome = function($body) {
 };
 
 var renderDisconnected = function ($container, params) {
-  $container.html(disconnected(params, options));
+  $container.html(disconnected({settings: {name:'Server disconnected', color:[128,128,128,1]}}, options));
+  logotypeAnimator.animate(1, 0);
 };
 
 var renderRegister = function ($container, params) {
@@ -142,7 +143,7 @@ var setButtonListeners = function ($container) {
   $container
     .on('click', '#play', function () {
       var $name = $container.find('input[name="name"]');
-      var name = $name.val();
+      var name = $name.val().toUpperCase();
       if (name) {
         server.register(name);
         $name.removeClass('warning');

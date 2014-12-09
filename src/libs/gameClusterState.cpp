@@ -250,10 +250,6 @@ void GameClusterState::encode() {
   // get things from renderSpace and send it to everyone.
   sgct::SharedData *data = sgct::SharedData::instance();
 
-  if (resetSignal->getVal()) {
-    std::cout << "reset = " << resetSignal->getVal() << std::endl;
-  }
-
   data->writeInt(resetSignal);
   data->writeVector(wormArcs);
   data->writeVector(wormCollisions);
@@ -268,9 +264,6 @@ void GameClusterState::decode() {
   sgct::SharedData *data = sgct::SharedData::instance();
 
   data->readInt(resetSignal);
-  if (resetSignal->getVal()) {
-    std::cout << "reset = " << resetSignal->getVal() << std::endl;
-  }
   data->readVector(wormArcs);
   data->readVector(wormCollisions);
   data->readVector(wormHeads);
