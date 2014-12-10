@@ -31,6 +31,8 @@ class PlayerManager {
   int getPointsInGame(int playerId, int gameId);
   int getPointsInGames(int playerId, std::vector<int> gameIds);
 private:
+  // player -> gameId -> points
+  std::map<int, std::map<int, int> > pointMap;
   std::map<int, Player*> players;
   std::string generatePlayerName();
   int nextPlayerId = 0;
