@@ -99,18 +99,33 @@ bool PlayerManager::setColor(int playerId, glm::vec4 color) {
 }
 
 bool PlayerManager::setPointsInGame(int playerId, int gameId, int points) {
+  // if player does not exist, return false.
   if (players.find(playerId) == players.end()) {
     return false;
   }
-  players[playerId]->setPointsInGame(gameId, points);
+  // if no entries are stored for this player, create a bucket.
+  if (pointMap.find(playerId) == pointMap.end()) {
+    pointMap[playerId] = std::map<int, int>();
+  }
+
+  pointMap[playerId][gameId] = points;
   return true;
 }
 
 int PlayerManager::getPointsInGame(int playerId, int gameId) {
+  // make sure player exists.
   if (players.find(playerId) == players.end()) {
     return -1;
   }
-  return players[playerId]->getPointsInGame(gameId);
+  // make sure there is a bucket
+  if (pointMap.find(playerId) == pointMap.end()) {
+    return -1;
+  }
+  // make sure player participated
+  if (pointMap[playerId].find(gameId) == pointMap[playerId].end()) {
+    return -1;
+  }
+  return pointMap[playerId][gameId];
 }
 
 int PlayerManager::getPointsInGames(int playerId, std::vector<int> gameIds) {
@@ -120,7 +135,7 @@ int PlayerManager::getPointsInGames(int playerId, std::vector<int> gameIds) {
   int totalPoints = 0;
   bool participated = false;
   for (int gameId : gameIds) {
-    int p = players[playerId]->getPointsInGame(gameId);
+    int p = getPointsInGame(playerId, gameId);
     if (p != -1) {
       totalPoints += p;
       participated = true;
