@@ -9,11 +9,7 @@ public:
     d = 4;
     glGenTextures(1, &textureID);
 
-    if (multisample) {
-      glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
-    } else {
-      glBindTexture(GL_TEXTURE_2D, textureID);
-    }
+    glBindTexture(GL_TEXTURE_2D, textureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     data = new GLfloat[h*w*d];
 
@@ -26,13 +22,9 @@ public:
       }
     }
 
-    if (multisample) {
-      glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, w, h, false);
-    } else {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
-    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, data);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // enforce no texture wrap

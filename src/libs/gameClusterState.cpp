@@ -233,6 +233,7 @@ void GameClusterState::postSyncPreDraw() {
 }
 
 void GameClusterState::draw() {
+
   // render wormLines to FBO
   renderer->renderToFBO(wormLines, stitchStep);
   // render grid lines
