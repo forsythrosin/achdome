@@ -24,6 +24,7 @@ RenderableDome::~RenderableDome() {};
 void RenderableDome::createVertices() {
   cartesianVertexData.clear();
   sphericalVertexData.clear();
+  vertexColorData.clear();
   for (int j = 0; j <= inclSegs; ++j) {
     float theta = glm::half_pi<float>()*(float)j/inclSegs;
     for (int i = 0; i < azmSegs; ++i) {
@@ -31,6 +32,7 @@ void RenderableDome::createVertices() {
       int cartIdx = (j*azmSegs + i)*3;
       int sphereIdx = (j*azmSegs + i)*2;
 
+      
       // (θ, φ) to (x, y, z)
       // x
       cartesianVertexData.push_back(R*glm::sin(theta)*glm::cos(phi));
@@ -41,8 +43,15 @@ void RenderableDome::createVertices() {
 
       sphericalVertexData.push_back(phi);
       sphericalVertexData.push_back(theta);
+
+      vertexColorData.push_back(0.0);
+      vertexColorData.push_back(0.0);
+      vertexColorData.push_back(0.0);
+      vertexColorData.push_back(0.0);
     }
   }
+  
+  
 };
 
 /**

@@ -16,12 +16,9 @@ class Player {
   glm::vec4 getColor();
   bool isConnected();
   bool disconnect();
-  void setPointsInGame(int gameId, int points);
-  int getPointsInGame(int gameId);
  private:
   int id;
   glm::vec4 color;
   char name[MAX_NAME_LENGTH];
   bool connected;
-  std::map<int, int> points;
 };
