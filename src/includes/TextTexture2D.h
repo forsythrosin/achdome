@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <map>
 #include <algorithm>
-
+#include <iostream>
 class GlyphStore{
 public:
   GlyphStore(int w, int h){
@@ -95,17 +95,24 @@ public:
       throw std::runtime_error("FT_Get_Glyph failed");
  
     // Convert The Glyph To A Bitmap.
+    int advanceX = glyph->advance.x / 65536.0;
+    
     FT_Glyph_To_Bitmap( &glyph, ft_render_mode_normal, 0, 1 );
     FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+
+    int bearing = bitmap_glyph->left; 
+    if(bearing < 0) {
+      bearing = 0;
+    }
  
     // This Reference Will Make Accessing The Bitmap Easier.
     FT_Bitmap& bitmap=bitmap_glyph->bitmap;
     
-    GlyphStore *glyphTexture = new GlyphStore(bitmap.width, bitmap.rows);
+    GlyphStore *glyphTexture = new GlyphStore(advanceX, bitmap.rows);
     
     for(int j=0; j < bitmap.rows; j++) {
       for(int i=0; i < bitmap.width; i++){
-        glyphTexture->set(i, j, (float)bitmap.buffer[i + bitmap.width*j]/256.0);
+        glyphTexture->set(i+bearing, j, (float)bitmap.buffer[i + bitmap.width*j]/256.0);
       }
     }
     glyphCache[c] = glyphTexture;
