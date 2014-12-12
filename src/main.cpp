@@ -64,6 +64,8 @@ AdminGameController* agc;
 
   gEngine = new sgct::Engine( argc, argv );
 
+  //gEngine->setStatsGraphVisibility(true);
+  //gEngine->setDisplayInfoVisibility(true);
   gEngine->setInitOGLFunction( myInitOGLFun );
   gEngine->setDrawFunction( myDrawFun );
   gEngine->setPreSyncFunction( myPreSyncFun );
@@ -74,6 +76,7 @@ AdminGameController* agc;
 
   sgct::SharedData::instance()->setEncodeFunction( myEncodeFun );
   sgct::SharedData::instance()->setDecodeFunction( myDecodeFun );
+  //sgct::SharedData::instance()->setCompression(true);
   gEngine->setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
   syncMaster = new SyncMaster();
@@ -98,7 +101,7 @@ AdminGameController* agc;
     gameEngine = new GameEngine(wt, pm, gameConfig);
 
     webServer = new Webserver();
-    webServer->start(8000);
+    webServer->start(80);
 
     actionResolver = new JsonActionResolver();
     dataSerializationBuilder = new JsonBuilder();
@@ -161,7 +164,7 @@ void myPreSyncFun() {
   }
   Tweener::getInstance()->tick();
   syncMaster->preSync();
-  gEngine->checkForOGLErrors();
+  //gEngine->checkForOGLErrors();
 }
 
 void myPostSyncPreDrawFun() {
