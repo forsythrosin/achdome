@@ -44,7 +44,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
             if (collisions.find(wormId) == collisions.end()) {
               // no collision registered for this worm yet.
               collisions.insert({wormId, WormCollision(wormId, pv.wormId, point, time)});
-              std::cout << wormId << " is outside bounds at " << x << ", " << y << std::endl;
+              //std::cout << wormId << " is outside bounds at " << x << ", " << y << std::endl;
             } // else, do nothing if collision is already registered.
           } else if (pv.wormId == wormId) {
             // hit self.
@@ -53,7 +53,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
               if (collisions.find(wormId) == collisions.end()) {
                 // no collision registered for this worm yet
                 collisions.insert({wormId, WormCollision(wormId, pv.wormId, point, time)});
-                std::cout << wormId << " collided with itself at " << x << ", " << y << ". t1 = " << time << ", t0 = "<< pv.time << std::endl;
+                //std::cout << wormId << " collided with itself at " << x << ", " << y << ". t1 = " << time << ", t0 = "<< pv.time << std::endl;
               } // else, do nothing if collision is already registered.
             } else {
             }// else, do nothing: (resistant to pixels drawn on current and previous frame)
@@ -62,7 +62,7 @@ std::vector<WormCollision> FisheyeCollisionSpace::addArcs(std::vector<WormArc> a
             if (collisions.find(wormId) == collisions.end()) {
               // no collision registered for this worm yet.
               collisions.insert({wormId, WormCollision(wormId, pv.wormId, point, time)});
-              std::cout << wormId << " collided with " << pv.wormId << " at " << x << ", " << y << std::endl;
+              //std::cout << wormId << " collided with " << pv.wormId << " at " << x << ", " << y << std::endl;
             }
 
             if (pv.time == time) {

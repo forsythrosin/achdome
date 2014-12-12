@@ -80,7 +80,6 @@ void Game::onWormCollision (WormCollision wc) {
   }
 
   updateGameOver();
-  std::cout << "COLLISION!" << std::endl;
 }
 
 void Game::onPlayerDisconnect(int playerId) {

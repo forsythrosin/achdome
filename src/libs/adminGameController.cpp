@@ -119,9 +119,9 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
   DataSerializationBuilder *data;
 
   if (action.strings.count("password") == 0 || action.strings.at("password") != gameConfig->password) {
-    std::cout << "Refused admin " << sessionId << std::endl;
+    //std::cout << "Refused admin " << sessionId << std::endl;
     if (action.strings.count("password") > 0) {
-      std::cout << "with password " << '"' << action.strings.at("password") << '"' << " != " << '"' << gameConfig->password << '"' << std::endl;
+      //std::cout << "with password " << '"' << action.strings.at("password") << '"' << " != " << '"' << gameConfig->password << '"' << std::endl;
     }
     sendMessage =
       dataSerializationBuilder
@@ -165,52 +165,52 @@ void AdminGameController::handleAction(int sessionId, ClientAction action) {
     break;
   }
   case ClientAction::UPDATE_SETTINGS:
-    std::cout << "Settings updated by admin " << sessionId << std::endl;
+    //std::cout << "Settings updated by admin " << sessionId << std::endl;
     if (action.floats.count("wormWidth") > 0) {
-      std::cout << "wormWidth = " << action.floats.at("wormWidth") << std::endl;
+      //std::cout << "wormWidth = " << action.floats.at("wormWidth") << std::endl;
       gameConfig->wormWidth = action.floats.at("wormWidth");
     }
     if (action.floats.count("wormSpeed") > 0) {
-      std::cout << "wormSpeed = " << action.floats.at("wormSpeed") << std::endl;
+      //std::cout << "wormSpeed = " << action.floats.at("wormSpeed") << std::endl;
       gameConfig->wormSpeed = action.floats.at("wormSpeed");
     }
     if (action.floats.count("turnSpeed") > 0) {
-      std::cout << "turnSpeed = " << action.floats.at("turnSpeed") << std::endl;
+      //std::cout << "turnSpeed = " << action.floats.at("turnSpeed") << std::endl;
       gameConfig->turnSpeed = action.floats.at("turnSpeed");
     }
     if (action.ints.count("countdown") > 0) {
-      std::cout << "countdown = " << action.ints.at("countdown") << std::endl;
+      //std::cout << "countdown = " << action.ints.at("countdown") << std::endl;
       gameConfig->countdown = action.ints.at("countdown");
     }
     if (action.ints.count("minTimeBetweenGaps") > 0) {
-      std::cout << "minTimeBetweenGaps = " << action.ints.at("minTimeBetweenGaps") << std::endl;
+      //std::cout << "minTimeBetweenGaps = " << action.ints.at("minTimeBetweenGaps") << std::endl;
       gameConfig->minTimeBetweenGaps = action.ints.at("minTimeBetweenGaps");
     }
     if (action.ints.count("maxTimeBetweenGaps") > 0) {
-      std::cout << "maxTimeBetweenGaps = " << action.ints.at("maxTimeBetweenGaps") << std::endl;
+      //std::cout << "maxTimeBetweenGaps = " << action.ints.at("maxTimeBetweenGaps") << std::endl;
       gameConfig->maxTimeBetweenGaps = action.ints.at("maxTimeBetweenGaps");
     }
     if (action.ints.count("minTimeInGap") > 0) {
-      std::cout << "minTimeInGap = " << action.ints.at("minTimeInGap") << std::endl;
+      //std::cout << "minTimeInGap = " << action.ints.at("minTimeInGap") << std::endl;
       gameConfig->minTimeInGap = action.ints.at("minTimeInGap");
     }
     if (action.ints.count("maxTimeInGap") > 0) {
-      std::cout << "maxTimeInGap = " << action.ints.at("maxTimeInGap") << std::endl;
+      //std::cout << "maxTimeInGap = " << action.ints.at("maxTimeInGap") << std::endl;
       gameConfig->maxTimeInGap = action.ints.at("maxTimeInGap");
     }
     break;
   case ClientAction::START_TOURNAMENT: {
-    std::cout << "Tournament started by admin " << sessionId << std::endl;
+    //std::cout << "Tournament started by admin " << sessionId << std::endl;
     int numberOfGames = (action.ints.count("numberOfGames") > 0) ? action.ints.at("numberOfGames") : 1;
     gameEngine->startTournament(numberOfGames);
     break;
   }
   case ClientAction::END_TOURNAMENT:
-    std::cout << "Tournament ended by admin " << sessionId << std::endl;
+    //std::cout << "Tournament ended by admin " << sessionId << std::endl;
     gameEngine->endTournament();
     break;
   case ClientAction::END_GAME:
-    std::cout << "Game ended by admin " << sessionId << std::endl;
+    //std::cout << "Game ended by admin " << sessionId << std::endl;
     gameEngine->endGame();
     break;
   default:

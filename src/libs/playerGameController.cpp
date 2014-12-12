@@ -14,7 +14,7 @@ void PlayerGameController::performActions() {
     case GameEngine::INTRO: {
       sendMessage = dataSerializationBuilder->add("message", "register")->build();
       webServer->addBroadcast(sendMessage);
-      std::cout << "State changed to Intro" << std::endl;
+      //std::cout << "State changed to Intro" << std::endl;
       break;
     }
 
@@ -35,7 +35,7 @@ void PlayerGameController::performActions() {
           ->build();
         webServer->addMessage(sessionId, sendMessage);
       }
-      std::cout << "State changed to Lobby" << std::endl;
+      //std::cout << "State changed to Lobby" << std::endl;
       break;
     }
 
@@ -86,7 +86,7 @@ void PlayerGameController::performActions() {
         }
       }
 
-      std::cout << "State changed to Game" << std::endl;
+      //std::cout << "State changed to Game" << std::endl;
       break;
     }
     case GameEngine::GAME_OVER: {
@@ -204,7 +204,7 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
         webServer->addMessage(sessionId, sendMessage);
       }
       sessionIds.erase(playerId);
-      std::cout << "Unregister player " << playerId << std::endl;
+      //std::cout << "Unregister player " << playerId << std::endl;
     }
     break;
   case ClientAction::START_MOVING:
@@ -215,7 +215,7 @@ void PlayerGameController::handleAction(int sessionId, ClientAction action) {
         webServer->addMessage(sessionId, sendMessage);
       }
       else {
-        std::cout << "Don't start moving player " << playerId << std::endl;
+        //std::cout << "Don't start moving player " << playerId << std::endl;
       }
     }
     break;
