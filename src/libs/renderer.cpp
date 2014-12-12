@@ -36,7 +36,7 @@ Renderer::~Renderer() {
  * @return            index/ID of the created RenderConfig (i.e. position in renderConfigs vector)
  */
 int Renderer::addRenderable(
-  Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical) {
+  Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical, bool useBiLinear) {
   RenderConfig rc(renderable, mode, vert, frag, spherical);
 
   rc.id = nextId++;
@@ -125,7 +125,7 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
   if (renderConfig.framebuffers.size() < stitchStep + 1) {
     int fboWidth, fboHeight;
     gEngine->getActiveViewportSize(fboWidth, fboHeight);
-    renderConfig.framebuffers.push_back(new FBO(fboWidth, fboHeight));
+    renderConfig.framebuffers.push_back(new FBO(fboWidth, fboHeight, renderConfig.useBilinear));
 
     // if we are attaching for the first time -> clear FBO
     renderConfig.framebuffers.at(stitchStep)->activate();

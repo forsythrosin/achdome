@@ -15,7 +15,7 @@ public:
   ~Renderer();
 
   // Renderables handling
-  int addRenderable(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical);
+  int addRenderable(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool spherical, bool useBiLinear = true);
   void removeRenderable(int configId);
 
   // Render methods

@@ -2,7 +2,7 @@
 
 class Texture2D{
 public:
-  Texture2D(GLuint w, GLuint h, bool multisample = false){
+  Texture2D(GLuint w, GLuint h, bool multisample = false, bool bilinear = true){
     this->w = w;
     this->h = h;
     this->multisample = multisample;
@@ -13,6 +13,10 @@ public:
       glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
     } else {
       glBindTexture(GL_TEXTURE_2D, textureID);
+    }
+    if (!bilinear) {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     data = new GLfloat[h*w*d];

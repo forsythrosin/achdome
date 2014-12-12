@@ -11,12 +11,13 @@
 
 class RenderConfig {
 private:
-  RenderConfig(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool sphericalCoords) {
+  RenderConfig(Renderable *renderable, GLenum mode, std::string vert, std::string frag, bool sphericalCoords, bool useBilinear = true) {
     this->renderable = renderable;
     this->mode = mode;
     this->vertShader = vert;
     this->fragShader = frag;
     this->sphericalCoords = sphericalCoords;
+    this->useBilinear = useBilinear;
   };
 
   Renderable *renderable;
@@ -24,6 +25,7 @@ private:
   std::string vertShader;
   std::string fragShader;
   bool sphericalCoords;
+  bool useBilinear;
 
   int id;
 

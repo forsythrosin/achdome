@@ -5,7 +5,7 @@
 
 class FBO {
 public:
-  FBO(GLuint w, GLuint h) {
+  FBO(GLuint w, GLuint h, bool useBilinear) {
     this->w = w;
     this->h = h;
 
@@ -14,7 +14,7 @@ public:
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
 
     // create texture
-    texture = new Texture2D(w, h, true);
+    texture = new Texture2D(w, h, true, useBilinear);
 
     // init config
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, *texture, 0);
