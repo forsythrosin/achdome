@@ -41,7 +41,7 @@ int Renderer::addRenderable(
 
   rc.id = nextId++;
   init(rc);
-  std::cout << "add renderable with id = " << rc.id << std::endl;
+  //std::cout << "add renderable with id = " << rc.id << std::endl;
   renderConfigs.emplace(rc.id, rc);
   return rc.id;
 };
@@ -49,7 +49,7 @@ int Renderer::addRenderable(
 void Renderer::removeRenderable(int configId) {
   auto rcIt = renderConfigs.find(configId);
   if (rcIt == renderConfigs.end()) {
-    std::cout << "Could not find renderable" << std::endl;
+    //std::cout << "Could not find renderable" << std::endl;
     return;
   }
 
@@ -94,7 +94,7 @@ void Renderer::init(RenderConfig &renderConfig) {
 void Renderer::setUniform(int configId, AbstractUniform *uniform) {
   auto rcIt = renderConfigs.find(configId);
   if (rcIt == renderConfigs.end()) {
-    std::cout << "Trying to add uniform to non-existing RenderConfig" << std::endl;
+    //std::cout << "Trying to add uniform to non-existing RenderConfig" << std::endl;
     return;
   }
   RenderConfig &rc = rcIt->second;
@@ -146,7 +146,7 @@ void Renderer::renderToFBO(int configId, int stitchStep) {
 void Renderer::resetFBO(int configId) {
   auto rcIt = renderConfigs.find(configId);
   if (rcIt == renderConfigs.end()) {
-    std::cout << "Could not find renderable when resetting FBO." << std::endl;
+    //std::cout << "Could not find renderable when resetting FBO." << std::endl;
     return;
   }
   RenderConfig &rc = rcIt->second;
@@ -172,15 +172,15 @@ void Renderer::render(int configId, int configWithFBOId, int stitchStep) {
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // FXAA
-  glEnable(GL_MULTISAMPLE);
-  glEnable(GL_LINE_SMOOTH);
+  //glEnable(GL_MULTISAMPLE);
+  //glEnable(GL_LINE_SMOOTH);
   // glEnable(GL_POLYGON_SMOOTH);
-  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+  //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
   // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-  sgct::SGCTSettings *settings = sgct::SGCTSettings::instance();
-  settings->setDefaultFXAAState(true);
-  settings->setDefaultNumberOfAASamples(8);
+  //sgct::SGCTSettings *settings = sgct::SGCTSettings::instance();
+  //settings->setDefaultFXAAState(true);
+  //settings->setDefaultNumberOfAASamples(8);
 
   RenderConfig renderConfig = renderConfigs.at(configId);
   Renderable *renderable = renderConfig.renderable;
