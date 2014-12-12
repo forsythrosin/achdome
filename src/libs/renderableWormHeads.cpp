@@ -71,7 +71,7 @@ void RenderableWormHeads::createVertices() {
     glm::vec3 domeNormal = glm::normalize(headPos);
 
     for (int i = 0; i < VERTS_PER_HEAD; ++i) {
-      glm::vec3 quadPoint = headPos + glm::rotate(headDirection, i*360.0f/VERTS_PER_HEAD, domeNormal);
+      glm::vec3 quadPoint = headPos + glm::rotate(headDirection * 0.1f, i*360.0f/VERTS_PER_HEAD, domeNormal);
 
       cartesianVertexData.push_back(quadPoint.x);
       cartesianVertexData.push_back(quadPoint.y);

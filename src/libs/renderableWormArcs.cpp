@@ -71,7 +71,7 @@ void RenderableWormArcs::createVertices() {
     GLfloat arcWidth = wa.getWidth();
 
     for (int i = 0; i < VERTS_PER_ARC; ++i) {
-      glm::vec3 quadPoint = midPos + glm::rotate(arcDirection, i*360.0f/VERTS_PER_ARC, domeNormal);
+      glm::vec3 quadPoint = midPos + glm::rotate(arcDirection * 0.05f, i*360.0f/VERTS_PER_ARC, domeNormal);
 
       cartesianVertexData.push_back(quadPoint.x);
       cartesianVertexData.push_back(quadPoint.y);
