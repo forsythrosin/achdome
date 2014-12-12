@@ -28,36 +28,36 @@ void main() {
   float t = mix(inTime, smoothstep(0, 1 + maxAngle, inTime) * (1 + maxAngle), step(0, inTime));
   t = mix(t, smoothstep(1 + maxAngle, 2 + maxAngle, inTime) + 1 + maxAngle, step(1 + maxAngle, inTime));
   t = mix(t, inTime, step(2 + maxAngle, inTime));
-  
+
 
   //  t = smoothstep(-20, 1 + maxAngle, t) * (21 + maxAngle) - 20;
-  
+
   //float t = time * 5 - 20;
 
 
   // for increasing t:
   // 0 < t < 1: draw only vertical line from nothing
   // 1 < t < 1 + maxAngle: draw a logo from only vertical line
-  
+
   // logo formed at t = 1 + maxAngle.
-  
+
   // 1 + maxAngle < t < 2 + maxAngle: remove vertical line to form spinner
   // maxAngle + 2 < t < maxAngle + 2 + 2*pi: rotate cw.
   // then reverse!
-  
 
-  
 
-  
-  vec3 planeNormal = normalize(vec3(0.0, -1.0, -1.0));
+
+
+
+  vec3 planeNormal = normalize(vec3(0.0, 0.0, -1.0));
   vec3 yAxis = cross(planeNormal, vec3(1.0, 0.0, 0.0));
   vec3 xAxis = cross(yAxis, planeNormal);
-  
+
   vec2 texCoord = vec2(dot(cartesianPos*7.5, xAxis),
                        dot(cartesianPos*7.5, yAxis));
 
 
-  float logoRadius = 3;
+  float logoRadius = 1.8;
   float wormWidth = logoRadius * 0.28;
 
 
@@ -66,8 +66,8 @@ void main() {
 
   float verticalTopRatio = max(0.0, min(t, 1));
   float verticalBottomRatio = max(0.0, min(t - maxAngle - 1, 1));
-  float arcAngle = max(0.0, min(t - 1, maxAngle));  
-  
+  float arcAngle = max(0.0, min(t - 1, maxAngle));
+
   float thetaStart = mod(max(0.0, t - maxAngle - 2), pi*2);
   float theta = mod(atan(texCoord.y, texCoord.x), pi*2);
   float thetaStartDiff = mod(theta - thetaStart, pi*2);
@@ -79,11 +79,11 @@ void main() {
   vec2 c3Pos = c0Pos + logoRadius*vec2(1.0, -1.0*(1.0 - verticalTopRatio));
   vec2 c4Pos = c0Pos + logoRadius*vec2(1.0, -1.0*(1.0 - verticalBottomRatio));
 
-  float insideVerticalShape = min(min(step(texCoord.y, c3Pos.y), 
+  float insideVerticalShape = min(min(step(texCoord.y, c3Pos.y),
                                       step(c4Pos.y, texCoord.y)),
                                   min(step(texCoord.x, c3Pos.x + wormWidth*0.5),
                                       step(c3Pos.x - wormWidth*0.5, texCoord.x)));
-  
+
   float distFromC0 = distance(c0Pos, texCoord);
   float distFromC1 = distance(c1Pos, texCoord);
   float distFromC2 = distance(c2Pos, texCoord);
@@ -97,7 +97,7 @@ void main() {
 
   float visibleC1 = step(1, t); // visible when t exceeds 1
   float visibleC2 = step(1, t); // visible when t exceeds 1
-  float visibleC3 = fadeIn * step(t, maxAngle + 2); // fade in between -1 and 0, 
+  float visibleC3 = fadeIn * step(t, maxAngle + 2); // fade in between -1 and 0,
   float visibleC4 = step(0, t) * step(t, maxAngle + 2);
 
   float insideC1 = visibleC1 * step(distFromC1, wormWidth*0.5);
@@ -110,6 +110,6 @@ void main() {
   float insideArc = min(insideAngle, insideCircleContour);
 
   float inside = max(max(max(max(max(insideArc, insideC1), insideC2), insideC3), insideC4), insideVerticalShape);
-  
+
   color = vec4(1.0, 0.0, 0.4, inside);
 }

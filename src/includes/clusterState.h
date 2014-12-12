@@ -15,6 +15,10 @@ class ClusterState {
     delete renderer;
   };
 
+  void resetTime() {
+    startTime = sgct::Engine::instance()->getTime();
+  };
+
   void attach(GameEngine::State state){
     if(substateMap.count(state) > 0){
       currentSubState = substateMap[state];
@@ -53,6 +57,7 @@ class ClusterState {
   Renderer *renderer;
   sgct::Engine *gEngine;
   GameConfig *gameConfig;
+  double startTime;
 
   std::map<GameEngine::State, SubState*> substateMap;
   SubState *currentSubState = nullptr;

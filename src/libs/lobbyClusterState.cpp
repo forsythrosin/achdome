@@ -61,7 +61,7 @@ void LobbyClusterState::draw() {
 
 
   // render grid lines
-  // renderer->render(domeLogo);
+  renderer->render(domeLogo);
 
   auto players = sharedPlayers->getVal();
   int totalPlayers = players.size();
@@ -109,7 +109,9 @@ void LobbyClusterState::preSync() {
     }
     sharedPlayers->setVal(connectedPlayers);
 
-    timer.setVal(timer.getVal() + 1);
+    double now = sgct::Engine::instance()->getTime();
+    double diff = now - startTime;
+    timer.setVal(diff*60);
   }
 }
 

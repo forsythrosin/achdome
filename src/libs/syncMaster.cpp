@@ -55,6 +55,7 @@ void SyncMaster::attachState(ClusterState *cs) {
   if (!cs->isAttached()) {
     detachAll();
     cs->attach(gameState);
+    cs->resetTime();
 
     if(auto subState = cs->getActiveSubState()){
       subState->attach();
