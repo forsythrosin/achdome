@@ -52,6 +52,7 @@ void SyncMaster::detachAll() {
 
 void SyncMaster::attachState(ClusterState *cs) {
   GameEngine::State gameState = static_cast<GameEngine::State>(state.getVal());
+  cs->setSubState(gameState);
   if (!cs->isAttached()) {
     detachAll();
     cs->attach(gameState);

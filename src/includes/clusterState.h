@@ -19,10 +19,14 @@ class ClusterState {
     startTime = sgct::Engine::instance()->getTime();
   };
 
-  void attach(GameEngine::State state){
-    if(substateMap.count(state) > 0){
+  void setSubState(GameEngine::State state) {
+    if (substateMap.count(state) > 0){
       currentSubState = substateMap[state];
     }
+  }
+
+  void attach(GameEngine::State state){
+    setSubState(state);
     attach();
   }
 
