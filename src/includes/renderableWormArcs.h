@@ -14,6 +14,8 @@ public:
   void setWormArcs(std::vector<WormArcSyncData> wormArcs);
   void setWormColors(std::vector<glm::vec3> wormColors);
   void setWormColors(std::vector<glm::vec4> wormColors);
+  void setPlayerIds(std::vector<float> playerIds);
+  void setArcTimeData(std::vector<float> arcTimeData);
 
   GLuint getVertsPerElement() const;
 
@@ -34,11 +36,15 @@ private:
   std::vector<GLfloat> arcFrontData;
   std::vector<GLfloat> arcBackData;
   std::vector<GLfloat> arcWidthData;
+  std::vector<GLfloat> playerIds;
+  std::vector<GLfloat> arcTimeData;
 
   // additional GL handles
   GLuint arcFrontBuffer;
   GLuint arcBackBuffer;
   GLuint arcWidthBuffer;
+  GLuint playerIdBuffer;
+  GLuint arcTimeBuffer;
 
   const GLuint VERTS_PER_ELEMENT = 3;
   const GLuint ELEMENTS_PER_ARC = 2;

@@ -45,7 +45,7 @@ class GameClusterState : public ClusterState, public WormEventListener {
   RenderableWormHeads *renderableHeads;
 
   // render handles
-  int domeGrid, domeWorms, wormLines, wormDots, collision;
+  int domeGrid, domeWorms, wormLines, wormDots, collision, playerIds;
 
   int stitchStep = 0;
   ClusterRenderSpace *renderSpace;
@@ -68,6 +68,9 @@ class GameClusterState : public ClusterState, public WormEventListener {
   sgct::SharedFloat countdownSecondsLeft;
   sgct::SharedFloat gameSecondsPassed;
   //  sgct::SharedInt timer;
+
+  class GameSubState : public SubState {};
+  class GameOverSubState : public SubState {};
 
   const float COLLISION_DURATION = 1.2; // seconds
 };

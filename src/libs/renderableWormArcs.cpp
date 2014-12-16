@@ -27,10 +27,16 @@ RenderableWormArcs::~RenderableWormArcs() {};
 void RenderableWormArcs::setWormArcs(std::vector<WormArcSyncData> wormArcs) {
   this->wormArcs = wormArcs;
   std::vector<glm::vec4> colors;
+  std::vector<float> ids;
+  std::vector<float> timeData;
   for (WormArcSyncData wa : wormArcs) {
     colors.push_back(wa.getColor());
+    ids.push_back(wa.getId());
+    timeData.push_back(wa.getTime());
   }
   setWormColors(colors);
+  setPlayerIds(ids);
+  setArcTimeData(timeData);
   createVertices();
   createElements();
   update = true;
@@ -50,6 +56,16 @@ void RenderableWormArcs::setWormColors(std::vector<glm::vec4> wormColors) {
     }
   }
 
+  update = true;
+};
+
+void RenderableWormArcs::setPlayerIds(std::vector<float> playerIds) {
+  this->playerIds = playerIds;
+  update = true;
+};
+
+void RenderableWormArcs::setArcTimeData(std::vector<float> arcTimeData) {
+  this->arcTimeData = arcTimeData;
   update = true;
 };
 
@@ -120,6 +136,8 @@ void RenderableWormArcs::loadToGPU(bool sphericalCoords) {
 
   GLuint vertexDim = 3;
   GLuint widthDim = 1;
+  GLuint idDim = 1;
+  GLuint timeDim = 1;
 
   glBindBuffer(GL_ARRAY_BUFFER, arcFrontBuffer);
   glBufferData(
@@ -151,10 +169,32 @@ void RenderableWormArcs::loadToGPU(bool sphericalCoords) {
   glEnableVertexAttribArray(4);
   glVertexAttribPointer(4, widthDim, GL_FLOAT, GL_FALSE, 0, 0);
 
+  glBindBuffer(GL_ARRAY_BUFFER, playerIdBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    playerIds.size()*sizeof(GLfloat),
+    playerIds.data(),
+    GL_STATIC_DRAW
+    );
+  glEnableVertexAttribArray(5);
+  glVertexAttribPointer(5, idDim, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, arcTimeBuffer);
+  glBufferData(
+    GL_ARRAY_BUFFER,
+    arcTimeData.size()*sizeof(GLfloat),
+    arcTimeData.data(),
+    GL_STATIC_DRAW
+    );
+  glEnableVertexAttribArray(6);
+  glVertexAttribPointer(6, timeDim, GL_FLOAT, GL_FALSE, 0, 0);
+
   // Unbind
   glDisableVertexAttribArray(2);
   glDisableVertexAttribArray(3);
   glDisableVertexAttribArray(4);
+  glDisableVertexAttribArray(5);
+  glDisableVertexAttribArray(6);
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -165,9 +205,13 @@ void RenderableWormArcs::attach() {
   glGenBuffers(1, &arcFrontBuffer);
   glGenBuffers(1, &arcBackBuffer);
   glGenBuffers(1, &arcWidthBuffer);
+  glGenBuffers(1, &playerIdBuffer);
+  glGenBuffers(1, &arcTimeBuffer);
 }
 
 void RenderableWormArcs::detach() {
+  glDeleteBuffers(1, &arcTimeBuffer);
+  glDeleteBuffers(1, &playerIdBuffer);
   glDeleteBuffers(1, &arcWidthBuffer);
   glDeleteBuffers(1, &arcBackBuffer);
   glDeleteBuffers(1, &arcFrontBuffer);
@@ -179,9 +223,13 @@ void RenderableWormArcs::enableAttributes() {
   glEnableVertexAttribArray(2);
   glEnableVertexAttribArray(3);
   glEnableVertexAttribArray(4);
+  glEnableVertexAttribArray(5);
+  glEnableVertexAttribArray(6);
 }
 
 void RenderableWormArcs::disableAttributes() {
+  glDisableVertexAttribArray(6);
+  glDisableVertexAttribArray(5);
   glDisableVertexAttribArray(4);
   glDisableVertexAttribArray(3);
   glDisableVertexAttribArray(2);

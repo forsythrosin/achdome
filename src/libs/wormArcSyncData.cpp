@@ -7,6 +7,7 @@ WormArcSyncData::WormArcSyncData(WormArc wa, glm::vec4 color) {
   this->secondQuat = wa.getSecondQuat();
   this->time = wa.getTime();
   this->width = wa.getWidth();
+  this->playerId = wa.getWormId();
 }
 
 glm::vec4 WormArcSyncData::getColor() {
@@ -20,4 +21,12 @@ glm::dvec3 WormArcSyncData::getCartesianLerp(double t) {
 
 float WormArcSyncData::getWidth() {
   return width;
+}
+
+float WormArcSyncData::getTime() {
+  return time;
+}
+
+int WormArcSyncData::getId() {
+  return playerId;
 }

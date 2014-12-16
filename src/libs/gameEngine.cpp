@@ -220,7 +220,7 @@ void GameEngine::startGameOver() {
   state = State::GAME_OVER;
   std::cout << "Start game over state." << std::endl;
 
-  printGameStatistics();
+  //printGameStatistics();
   
   gameOverSecondsLeft = duration;
   Tween gameOverTween(gameOverSecondsLeft, [this, duration](double t) {

@@ -37,6 +37,12 @@ GameClusterState::GameClusterState(sgct::Engine *gEngine, GameConfig *gameConfig
   gameEngine = ge;
   wormTracker = wt;
 
+  SubState *gameSubState = new GameSubState();
+
+  substateMap[GameEngine::COUNTDOWN] = gameSubState;
+  substateMap[GameEngine::GAME] = gameSubState;
+  substateMap[GameEngine::GAME_OVER] = new GameOverSubState();
+
   if (wormTracker != nullptr) {
     wormTracker->addEventListener(this);
   }
@@ -77,6 +83,8 @@ void GameClusterState::attach() {
   renderableHeads->setWormHeads(wormHeads->getVal());
   wormDots = renderer->addRenderable(renderableHeads, GL_TRIANGLES, "wormHeadShader.vert", "wormHeadShader.frag", false);
 
+  playerIds = renderer->addRenderable(/*something else than*/renderableArcs, GL_TRIANGLES, "gameOverShader.vert", "gameOverShader.frag", false, false);
+
   timeUni = new Uniform<float>("gameTime");
 
   gridColorUni = new Uniform<glm::vec4>("gridColor");
@@ -93,6 +101,7 @@ void GameClusterState::attach() {
 
 void GameClusterState::reset() {
   renderer->resetFBO(wormLines);
+  renderer->resetFBO(playerIds);
   // detach();
   // attach();
 }
@@ -103,6 +112,7 @@ void GameClusterState::detach() {
   renderer->removeRenderable(collision);
   renderer->removeRenderable(wormLines);
   renderer->removeRenderable(wormDots);
+  renderer->removeRenderable(playerIds);
   delete renderableDome;
 
   renderableDome = nullptr;
@@ -233,15 +243,21 @@ void GameClusterState::postSyncPreDraw() {
 }
 
 void GameClusterState::draw() {
-  // render wormLines to FBO
-  renderer->renderToFBO(wormLines, stitchStep);
   // render grid lines
   renderer->render(domeGrid);
-  // render FBO as texture on dome
-  renderer->render(domeWorms, wormLines, stitchStep);
+  // render wormLines to FBO
+  renderer->renderToFBO(wormLines, stitchStep);
+  renderer->renderToFBO(playerIds, stitchStep);
 
-  renderer->render(wormDots);
-  renderer->render(collision);
+  if (currentSubState == substateMap[GameEngine::GAME_OVER]) {
+    renderer->render(domeWorms, playerIds, stitchStep);
+  } else {
+    // render FBO as texture on dome
+    renderer->render(domeWorms, wormLines, stitchStep);
+
+    renderer->render(wormDots);
+    renderer->render(collision);
+  }
 
   ++stitchStep;
 }
