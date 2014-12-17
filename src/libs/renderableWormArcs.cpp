@@ -17,6 +17,9 @@ RenderableWormArcs::RenderableWormArcs(int wormCount, int segsPerWorm) {
   arcBackData.reserve(vertexCount*3);
   arcWidthData.reserve(vertexCount);
 
+  playerIds.reserve(vertexCount);
+  arcTimeData.reserve(vertexCount);
+
   arcFrontBuffer = -1;
   arcBackBuffer = -1;
   arcWidthBuffer = -1;
@@ -60,12 +63,24 @@ void RenderableWormArcs::setWormColors(std::vector<glm::vec4> wormColors) {
 };
 
 void RenderableWormArcs::setPlayerIds(std::vector<float> playerIds) {
-  this->playerIds = playerIds;
+  this->playerIds.clear();
+  for (int i = 0; i < playerIds.size(); ++i) {
+    float id = playerIds[i];
+    for (int j = 0; j < VERTS_PER_ARC; ++j) {
+      this->playerIds.push_back(id);
+    }
+  }
   update = true;
 };
 
 void RenderableWormArcs::setArcTimeData(std::vector<float> arcTimeData) {
-  this->arcTimeData = arcTimeData;
+  this->arcTimeData.clear();
+  for (int i = 0; i < arcTimeData.size(); ++i) {
+    float td = arcTimeData[i];
+    for (int j = 0; j < VERTS_PER_ARC; ++j) {
+      this->arcTimeData.push_back(td);
+    }
+  }
   update = true;
 };
 
